@@ -82,7 +82,7 @@ const Home = () => {
     // Product Categories
     React.createElement(
       'div',
-      { className: 'bg-gray-200 rounded-lg md:rounded-xl shadow-lg p-4 md:p-6 mt-4' },
+      { className: 'bg-white rounded-lg md:rounded-xl shadow-lg p-4 md:p-6 mt-4' },
       React.createElement('h2', { className: 'text-slate-900 text-xl md:text-2xl font-bold leading-tight tracking-[-0.015em] px-2 md:px-4 pb-3 pt-3 md:pt-5' }, 'PRODUCT CATEGORIES'),
       React.createElement(
         'div',
@@ -108,7 +108,7 @@ const Home = () => {
       React.createElement('h2', { className: 'text-slate-900 text-xl md:text-2xl font-bold leading-tight tracking-[-0.015em] px-2 md:px-4 pb-3 pt-3 md:pt-5' }, 'PARTNER'),
       React.createElement(
         'div',
-        { className: 'bg-gray-200 rounded-lg md:rounded-xl shadow-lg p-4 md:p-6 mt-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-6' },
+        { className: 'bg-white rounded-lg md:rounded-xl shadow-lg p-4 md:p-6 mt-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-6' },
         React.createElement(
           'div',
           { className: 'flex items-center gap-4 md:gap-6' },
