@@ -314,10 +314,13 @@ switch ($method) {
         }
         break;
     case 'DELETE':
-        if (isset($path[0]) && is_numeric($path[0])) {
-            $controller->deleteCategory($path[0]);
+        $data = json_decode(file_get_contents('php://input'), true);
+        if (isset($data['id']) && is_numeric($data['id'])) {
+            $controller->deleteCategory($data['id']);
         } elseif ($path[0] === 'items' && isset($path[1])) {
             $controller->deleteCategoryItem($path[1]);
+        } else {
+            Response::error('Invalid delete request. Category ID is required.', 400);
         }
         break;
 }

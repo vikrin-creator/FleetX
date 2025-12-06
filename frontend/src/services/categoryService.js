@@ -57,10 +57,21 @@ export const categoryAPI = {
   },
 
   deleteCategory: async (id) => {
-    const response = await fetch(`${API_BASE_URL}/categories/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/categories`, {
       method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ id: id })
     });
-    return response.json();
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      return result;
+    } else {
+      throw new Error(result.message || 'Failed to delete category');
+    }
   },
 
   // Category Items
