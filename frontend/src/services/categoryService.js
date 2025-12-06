@@ -3,12 +3,12 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://sandybrown-sq
 export const categoryAPI = {
   // Categories
   getCategories: async () => {
-    const response = await fetch(`${API_BASE_URL}/v1/categories`);
+    const response = await fetch(`${API_BASE_URL}/categories`);
     return response.json();
   },
 
   createCategory: async (categoryData) => {
-    const response = await fetch(`${API_BASE_URL}/v1/categories`, {
+    const response = await fetch(`${API_BASE_URL}/categories`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -19,7 +19,7 @@ export const categoryAPI = {
   },
 
   updateCategory: async (id, categoryData) => {
-    const response = await fetch(`${API_BASE_URL}/v1/categories/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/categories/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -30,7 +30,7 @@ export const categoryAPI = {
   },
 
   deleteCategory: async (id) => {
-    const response = await fetch(`${API_BASE_URL}/v1/categories/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/categories/${id}`, {
       method: 'DELETE',
     });
     return response.json();
@@ -38,12 +38,12 @@ export const categoryAPI = {
 
   // Category Items
   getCategoryItems: async (categoryId) => {
-    const response = await fetch(`${API_BASE_URL}/v1/categories/items/${categoryId}`);
+    const response = await fetch(`${API_BASE_URL}/categories/items/${categoryId}`);
     return response.json();
   },
 
   createCategoryItem: async (itemData) => {
-    const response = await fetch(`${API_BASE_URL}/v1/categories/items`, {
+    const response = await fetch(`${API_BASE_URL}/categories/items`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -54,7 +54,7 @@ export const categoryAPI = {
   },
 
   updateCategoryItem: async (id, itemData) => {
-    const response = await fetch(`${API_BASE_URL}/v1/categories/items/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/categories/items/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -65,7 +65,7 @@ export const categoryAPI = {
   },
 
   deleteCategoryItem: async (id) => {
-    const response = await fetch(`${API_BASE_URL}/v1/categories/items/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/categories/items/${id}`, {
       method: 'DELETE',
     });
     return response.json();

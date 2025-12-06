@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Layout from './components/layout/Layout.js';
 import Home from './pages/Home.js';
+import Products from './pages/Products.js';
 import ProductCategories from './pages/ProductCategories.js';
 import Admin from './pages/Admin.js';
 
@@ -18,7 +19,11 @@ function App() {
       }),
       React.createElement(Route, { 
         path: '/products', 
-        element: React.createElement(Layout, null, React.createElement(ProductCategories)) 
+        element: React.createElement(Layout, null, React.createElement(Products)) 
+      }),
+      React.createElement(Route, { 
+        path: '/admin/categories', 
+        element: React.createElement(ProductCategories) 
       }),
       React.createElement(Route, { 
         path: '/admin', 
