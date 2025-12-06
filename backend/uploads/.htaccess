@@ -1,0 +1,9 @@
+# Allow image access
+<Files ~ "\.(jpg|jpeg|png|gif|webp)$">
+    Allow from all
+</Files>
+
+# Security - deny access to sensitive files
+<Files ~ "\.(php|inc|conf|sql)$">
+    Deny from all
+</Files>

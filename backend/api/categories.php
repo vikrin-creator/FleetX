@@ -4,10 +4,18 @@ require_once '../utils/Response.php';
 
 class CategoryController {
     private $db;
+    private $uploadDir;
 
     public function __construct() {
         $database = new Database();
         $this->db = $database->getConnection();
+        $this->uploadDir = '../uploads/categories/';
+        
+        // Create upload directory if it doesn't exist
+        if (!is_dir($this->uploadDir)) {
+            mkdir($this->uploadDir, 0755, true);
+        }
+        
         $this->createTablesIfNotExist();
     }
 
@@ -67,7 +75,7 @@ class CategoryController {
 
     public function getCategories() {
         try {
-            $stmt = $this->db->prepare("SELECT * FROM categories ORDER BY name ASC");
+            $stmt = $this->db->prepare("SELECT * FROM categories WHERE status = 'active' ORDER BY name ASC");
             $stmt->execute();
             $categories = $stmt->fetchAll();
 
@@ -78,7 +86,7 @@ class CategoryController {
                 $category['item_count'] = $countStmt->fetch()['count'];
             }
 
-            Response::json($categories);
+            Response::success($categories, 'Categories retrieved successfully');
         } catch (Exception $e) {
             Response::error('Failed to fetch categories', 500);
         }
@@ -96,49 +104,119 @@ class CategoryController {
         }
     }
 
+    private function handleFileUpload($fileKey) {
+        if (!isset($_FILES[$fileKey]) || $_FILES[$fileKey]['error'] !== UPLOAD_ERR_OK) {
+            return null;
+        }
+
+        $file = $_FILES[$fileKey];
+        $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        
+        if (!in_array($file['type'], $allowedTypes)) {
+            throw new Exception('Invalid file type. Only JPEG, PNG, GIF and WebP are allowed.');
+        }
+
+        $maxSize = 5 * 1024 * 1024; // 5MB
+        if ($file['size'] > $maxSize) {
+            throw new Exception('File size too large. Maximum 5MB allowed.');
+        }
+
+        $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+        $filename = uniqid('category_') . '.' . $extension;
+        $filepath = $this->uploadDir . $filename;
+
+        if (!move_uploaded_file($file['tmp_name'], $filepath)) {
+            throw new Exception('Failed to upload file.');
+        }
+
+        return 'uploads/categories/' . $filename;
+    }
+
     public function createCategory() {
         try {
-            $data = json_decode(file_get_contents('php://input'), true);
+            $name = $_POST['name'] ?? null;
+            $description = $_POST['description'] ?? '';
+            $image_url = $_POST['image_url'] ?? null;
 
-            if (!isset($data['name'])) {
+            if (!$name) {
                 Response::error('Category name is required', 400);
                 return;
             }
 
+            // Handle file upload if image is provided
+            if (isset($_FILES['image'])) {
+                $image_url = $this->handleFileUpload('image');
+            }
+
             $stmt = $this->db->prepare("INSERT INTO categories (name, description, image_url) VALUES (?, ?, ?)");
-            $stmt->execute([
-                $data['name'],
-                $data['description'] ?? '',
-                $data['image_url'] ?? ''
-            ]);
+            $stmt->execute([$name, $description, $image_url]);
 
             $categoryId = $this->db->lastInsertId();
             Response::json(['id' => $categoryId, 'message' => 'Category created successfully'], 201);
         } catch (Exception $e) {
-            Response::error('Failed to create category', 500);
+            Response::error($e->getMessage(), 500);
         }
     }
 
     public function updateCategory($id) {
         try {
-            $data = json_decode(file_get_contents('php://input'), true);
+            $name = $_POST['name'] ?? null;
+            $description = $_POST['description'] ?? '';
+            $image_url = $_POST['image_url'] ?? null;
+
+            if (!$name) {
+                Response::error('Category name is required', 400);
+                return;
+            }
+
+            // Get current image URL
+            $stmt = $this->db->prepare("SELECT image_url FROM categories WHERE id = ?");
+            $stmt->execute([$id]);
+            $currentCategory = $stmt->fetch();
+
+            if (!$currentCategory) {
+                Response::error('Category not found', 404);
+                return;
+            }
+
+            // Handle file upload if new image is provided
+            if (isset($_FILES['image'])) {
+                // Delete old image if it exists and is a local file
+                if ($currentCategory['image_url'] && strpos($currentCategory['image_url'], 'uploads/') === 0) {
+                    $oldImagePath = '../' . $currentCategory['image_url'];
+                    if (file_exists($oldImagePath)) {
+                        unlink($oldImagePath);
+                    }
+                }
+                $image_url = $this->handleFileUpload('image');
+            } else {
+                // Keep existing image if no new image is uploaded
+                $image_url = $currentCategory['image_url'];
+            }
 
             $stmt = $this->db->prepare("UPDATE categories SET name = ?, description = ?, image_url = ? WHERE id = ?");
-            $stmt->execute([
-                $data['name'],
-                $data['description'] ?? '',
-                $data['image_url'] ?? '',
-                $id
-            ]);
+            $stmt->execute([$name, $description, $image_url, $id]);
 
             Response::json(['message' => 'Category updated successfully']);
         } catch (Exception $e) {
-            Response::error('Failed to update category', 500);
+            Response::error($e->getMessage(), 500);
         }
     }
 
     public function deleteCategory($id) {
         try {
+            // Get category info before deletion to delete associated image
+            $stmt = $this->db->prepare("SELECT image_url FROM categories WHERE id = ?");
+            $stmt->execute([$id]);
+            $category = $stmt->fetch();
+
+            if ($category && $category['image_url'] && strpos($category['image_url'], 'uploads/') === 0) {
+                $imagePath = '../' . $category['image_url'];
+                if (file_exists($imagePath)) {
+                    unlink($imagePath);
+                }
+            }
+
             $stmt = $this->db->prepare("DELETE FROM categories WHERE id = ?");
             $stmt->execute([$id]);
 

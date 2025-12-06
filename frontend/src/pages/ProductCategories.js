@@ -4,14 +4,15 @@ import { categoryAPI } from '../services/categoryService.js';
 const ProductCategories = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [categories, setCategories] = useState([]);
-  const [showAddModal, setShowAddModal] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
   const [loading, setLoading] = useState(true);
 
   const [categoryForm, setCategoryForm] = useState({
     name: '',
     description: '',
-    image_url: ''
+    image_url: '',
+    image_file: null
   });
 
   useEffect(() => {
@@ -21,7 +22,17 @@ const ProductCategories = () => {
   const fetchCategories = async () => {
     try {
       setLoading(true);
-      const data = await categoryAPI.getCategories();
+      const response = await categoryAPI.getCategories();
+      
+      let data = [];
+      if (Array.isArray(response)) {
+        data = response;
+      } else if (response && response.success && Array.isArray(response.data)) {
+        data = response.data;
+      } else if (response && response.data && Array.isArray(response.data)) {
+        data = response.data;
+      }
+      
       setCategories(data);
     } catch (error) {
       console.error('Failed to fetch categories:', error);
@@ -30,40 +41,63 @@ const ProductCategories = () => {
     }
   };
 
-  const handleAddCategory = async () => {
-    try {
-      await categoryAPI.createCategory(categoryForm);
-      fetchCategories();
-      setShowAddModal(false);
-      setCategoryForm({ name: '', description: '', image_url: '' });
-    } catch (error) {
-      console.error('Failed to create category:', error);
-    }
+  const handleAdd = () => {
+    setEditingCategory(null);
+    setCategoryForm({ name: '', description: '', image_url: '', image_file: null });
+    setShowModal(true);
   };
 
-  const handleEditCategory = (category) => {
+  const handleEdit = (category) => {
     setEditingCategory(category);
     setCategoryForm({
       name: category.name,
       description: category.description,
-      image_url: category.image_url
+      image_url: category.image_url,
+      image_file: null
     });
-    setShowAddModal(true);
+    setShowModal(true);
   };
 
-  const handleUpdateCategory = async () => {
+  const handleSave = async () => {
     try {
-      await categoryAPI.updateCategory(editingCategory.id, categoryForm);
+      // Create FormData for file upload
+      const formData = new FormData();
+      formData.append('name', categoryForm.name);
+      formData.append('description', categoryForm.description);
+      
+      if (categoryForm.image_file) {
+        formData.append('image', categoryForm.image_file);
+      } else if (categoryForm.image_url) {
+        formData.append('image_url', categoryForm.image_url);
+      }
+
+      if (editingCategory) {
+        await categoryAPI.updateCategory(editingCategory.id, formData);
+      } else {
+        await categoryAPI.createCategory(formData);
+      }
+      
       fetchCategories();
-      setShowAddModal(false);
+      setShowModal(false);
+      setCategoryForm({ name: '', description: '', image_url: '', image_file: null });
       setEditingCategory(null);
-      setCategoryForm({ name: '', description: '', image_url: '' });
     } catch (error) {
-      console.error('Failed to update category:', error);
+      console.error('Failed to save category:', error);
     }
   };
 
-  const handleDeleteCategory = async (id) => {
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setCategoryForm({ 
+        ...categoryForm, 
+        image_file: file,
+        image_url: URL.createObjectURL(file) // For preview
+      });
+    }
+  };
+
+  const handleDelete = async (id) => {
     if (confirm('Are you sure you want to delete this category?')) {
       try {
         await categoryAPI.deleteCategory(id);
@@ -74,258 +108,173 @@ const ProductCategories = () => {
     }
   };
 
-  const sidebarCategories = [
-    'All Categories',
-    'Brakes & Wheel End',
-    'Engine Components',
-    'Lighting & Electrical',
-    'Suspension',
-    'Exhaust Systems',
-    'Filters & Fluids',
-    'Cabin & Interior',
-    'Tires & Wheels',
-    'New Arrivals'
-  ];
+  const filteredCategories = categories.filter(category =>
+    category.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return React.createElement(
     'div',
-    { className: 'p-8' },
+    { className: 'p-6' },
     React.createElement(
       'div',
-      { className: 'mb-6' },
-      React.createElement('h1', { className: 'text-3xl font-bold text-slate-900 dark:text-slate-50 mb-2' }, 'Product Categories'),
-      React.createElement('p', { className: 'text-slate-600 dark:text-slate-400' }, 'Manage your product categories and inventory')
+      { className: 'mb-8' },
+      React.createElement('h1', { className: 'text-3xl font-bold text-gray-900 mb-2' }, 'Product Categories'),
+      React.createElement('p', { className: 'text-gray-600' }, 'Manage your product categories and inventory')
     ),
+    
     React.createElement(
       'div',
-      null,
+      { className: 'flex justify-end mb-8' },
+      React.createElement(
+        'button',
+        {
+          onClick: handleAdd,
+          className: 'px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium flex items-center gap-2'
+        },
+        React.createElement('span', { className: 'material-symbols-outlined text-sm' }, 'add'),
+        'Add Category'
+      )
+    ),
+    
+    loading ? 
+      React.createElement('div', { className: 'text-center py-12' }, 'Loading categories...') :
       React.createElement(
         'div',
-        { className: 'flex flex-col lg:flex-row gap-6' },
-        // Category Filter Sidebar
-        React.createElement(
-          'aside',
-          { className: 'w-full lg:w-64 flex-shrink-0' },
+        { className: 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' },
+        categories.map(category => 
           React.createElement(
             'div',
-            { className: 'bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4' },
-            React.createElement(
-              'h3',
-              { className: 'text-lg font-bold text-slate-900 dark:text-slate-50 mb-4' },
-              'Filter Categories'
-            ),
-            React.createElement(
-              'nav',
-              { className: 'space-y-2' },
-              sidebarCategories.map(function(category, index) {
-                return React.createElement(
-                  'button',
-                  {
-                    key: index,
-                    className: 'w-full text-left flex items-center px-3 py-2 rounded-lg font-medium transition-colors ' + (
-                      index === 0
-                        ? 'bg-primary/10 text-primary dark:bg-primary/20 font-semibold'
-                        : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300'
-                    )
-                  },
-                  category
-                );
-              })
-            )
-          )
-        ),
-        // Main Content
-        React.createElement(
-          'div',
-          { className: 'flex-1' },
-          // Search and Add Button
-          React.createElement(
-            'section',
-            { className: 'mb-6' },
+            { 
+              key: category.id, 
+              className: 'bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow'
+            },
             React.createElement(
               'div',
-              { className: 'flex flex-col sm:flex-row items-center gap-4' },
+              { className: 'relative' },
+              React.createElement('img', {
+                src: category.image_url || 'https://via.placeholder.com/300x200',
+                alt: category.name,
+                className: 'w-full h-48 object-cover'
+              }),
               React.createElement(
                 'div',
-                { className: 'w-full flex-1' },
-                React.createElement(
-                  'div',
-                  { className: 'flex w-full flex-1 items-stretch rounded-lg h-12 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800' },
-                  React.createElement(
-                    'div',
-                    { className: 'text-slate-500 dark:text-slate-400 flex items-center justify-center pl-4' },
-                    React.createElement('span', { className: 'material-symbols-outlined' }, 'search')
-                  ),
-                  React.createElement('input', {
-                    type: 'text',
-                    className: 'form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-r-lg text-slate-900 dark:text-slate-50 focus:outline-0 focus:ring-2 focus:ring-primary/50 border-none bg-transparent h-full placeholder:text-slate-500 dark:placeholder:text-slate-400 pl-2 text-base font-normal',
-                    placeholder: 'Search categories...',
-                    value: searchQuery,
-                    onChange: function(e) { setSearchQuery(e.target.value); }
-                  })
-                )
-              ),
-              React.createElement(
-                'div',
-                { className: 'flex items-center gap-3' },
+                { className: 'absolute top-3 right-3 flex gap-2' },
                 React.createElement(
                   'button',
-                  { 
-                    className: 'flex h-12 items-center gap-2 px-6 rounded-lg bg-primary hover:bg-primary/90 text-white font-medium transition-colors',
-                    onClick: function() { setShowAddModal(true); }
+                  {
+                    onClick: () => handleEdit(category),
+                    className: 'p-2 bg-white rounded-full shadow-md hover:bg-gray-50 transition-colors'
                   },
-                  React.createElement('span', { className: 'material-symbols-outlined text-xl' }, 'add'),
-                  React.createElement('span', { className: 'hidden sm:inline' }, 'Add Category')
+                  React.createElement('span', { className: 'material-symbols-outlined text-gray-600 text-lg' }, 'edit')
+                ),
+                React.createElement(
+                  'button',
+                  {
+                    onClick: () => handleDelete(category.id),
+                    className: 'p-2 bg-white rounded-full shadow-md hover:bg-red-50 transition-colors'
+                  },
+                  React.createElement('span', { className: 'material-symbols-outlined text-red-600 text-lg' }, 'delete')
                 )
               )
-            )
-          ),
-          // Category Grid
-          React.createElement(
-            'section',
-            { className: 'w-full' },
-            loading ? React.createElement('div', { className: 'text-center py-8' }, 'Loading...') :
+            ),
             React.createElement(
               'div',
-              { className: 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6' },
-              categories.map(function(category) {
-                return React.createElement(
-                  'div',
-                  {
-                    key: category.id,
-                    className: 'group flex flex-col bg-white dark:bg-slate-900 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 hover:border-primary dark:hover:border-primary transition-all hover:shadow-lg cursor-pointer'
-                  },
-                  React.createElement(
-                    'div',
-                    { className: 'relative' },
-                    React.createElement('div', {
-                      className: 'w-full bg-center bg-no-repeat aspect-video bg-cover',
-                      style: { backgroundImage: 'url("' + (category.image_url || 'https://via.placeholder.com/300x200') + '")' }
-                    }),
-                    React.createElement(
-                      'div',
-                      { className: 'absolute top-2 right-2 flex gap-2' },
-                      React.createElement(
-                        'button',
-                        { 
-                          className: 'flex h-8 w-8 items-center justify-center rounded-lg bg-white dark:bg-slate-800 shadow-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300',
-                          onClick: function(e) {
-                            e.stopPropagation();
-                            handleEditCategory(category);
-                          }
-                        },
-                        React.createElement('span', { className: 'material-symbols-outlined text-lg' }, 'edit')
-                      ),
-                      React.createElement(
-                        'button',
-                        { 
-                          className: 'flex h-8 w-8 items-center justify-center rounded-lg bg-white dark:bg-slate-800 shadow-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-slate-700 dark:text-slate-300 hover:text-red-600 dark:hover:text-red-400',
-                          onClick: function(e) {
-                            e.stopPropagation();
-                            handleDeleteCategory(category.id);
-                          }
-                        },
-                        React.createElement('span', { className: 'material-symbols-outlined text-lg' }, 'delete')
-                      )
-                    )
-                  ),
-                  React.createElement(
-                    'div',
-                    { className: 'p-4' },
-                    React.createElement(
-                      'p',
-                      { className: 'text-slate-900 dark:text-slate-50 text-base font-bold leading-normal mb-1' },
-                      category.name
-                    ),
-                    React.createElement(
-                      'p',
-                      { className: 'text-slate-500 dark:text-slate-400 text-sm font-normal leading-normal mb-3' },
-                      category.description
-                    ),
-                    React.createElement(
-                      'div',
-                      { className: 'flex items-center justify-between pt-3 border-t border-slate-200 dark:border-slate-800' },
-                      React.createElement(
-                        'span',
-                        { className: 'text-xs text-slate-500 dark:text-slate-400' },
-                        'Items: ',
-                        React.createElement('span', { className: 'font-semibold text-slate-900 dark:text-slate-50' }, category.item_count || 0)
-                      ),
-                      React.createElement(
-                        'span',
-                        { className: 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' },
-                        'Active'
-                      )
-                    )
-                  )
-                );
-              })
+              { className: 'p-5' },
+              React.createElement('h3', { className: 'text-lg font-bold text-gray-900 mb-2' }, category.name),
+              React.createElement('p', { className: 'text-sm text-gray-600 mb-4 line-clamp-2' }, category.description),
+              React.createElement(
+                'div',
+                { className: 'flex justify-between items-center' },
+                React.createElement(
+                  'span',
+                  { className: 'text-sm text-gray-500' },
+                  `Items: ${category.item_count || 0}`
+                ),
+                React.createElement(
+                  'span',
+                  { className: 'px-3 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full' },
+                  'Active'
+                )
+              )
             )
           )
         )
       ),
-      // Add Category Modal
-      showAddModal && React.createElement(
+    
+    showModal && React.createElement(
+      'div',
+      { className: 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50' },
+      React.createElement(
         'div',
-        { className: 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50' },
+        { className: 'bg-white rounded-lg p-6 w-full max-w-md mx-4' },
+        React.createElement('h2', { className: 'text-lg font-bold text-gray-900 mb-4' }, 
+          editingCategory ? 'Edit Category' : 'Add New Category'
+        ),
         React.createElement(
-          'div',
-          { className: 'bg-white dark:bg-slate-800 rounded-lg p-6 w-full max-w-md mx-4' },
-          React.createElement('h2', { className: 'text-lg font-bold text-slate-900 dark:text-slate-50 mb-4' }, editingCategory ? 'Edit Category' : 'Add New Category'),
+          'form',
+          { 
+            onSubmit: (e) => {
+              e.preventDefault();
+              handleSave();
+            }
+          },
+          React.createElement('input', {
+            type: 'text',
+            placeholder: 'Category Name',
+            value: categoryForm.name,
+            onChange: (e) => setCategoryForm({ ...categoryForm, name: e.target.value }),
+            className: 'w-full p-3 border border-gray-300 rounded-lg mb-4',
+            required: true
+          }),
+          React.createElement('textarea', {
+            placeholder: 'Category Description',
+            value: categoryForm.description,
+            onChange: (e) => setCategoryForm({ ...categoryForm, description: e.target.value }),
+            className: 'w-full p-3 border border-gray-300 rounded-lg mb-4 h-24',
+            required: true
+          }),
           React.createElement(
-            'form',
-            { 
-              onSubmit: function(e) {
-                e.preventDefault();
-                editingCategory ? handleUpdateCategory() : handleAddCategory();
-              }
-            },
+            'div',
+            { className: 'mb-4' },
+            React.createElement('label', { 
+              className: 'block text-sm font-medium text-gray-700 mb-2' 
+            }, 'Category Image'),
             React.createElement('input', {
-              type: 'text',
-              placeholder: 'Category Name',
-              value: categoryForm.name,
-              onChange: function(e) { setCategoryForm(Object.assign({}, categoryForm, {name: e.target.value})); },
-              className: 'w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg mb-3 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-50',
-              required: true
+              type: 'file',
+              accept: 'image/*',
+              onChange: handleImageChange,
+              className: 'w-full p-3 border border-gray-300 rounded-lg',
+              required: !editingCategory
             }),
-            React.createElement('textarea', {
-              placeholder: 'Description',
-              value: categoryForm.description,
-              onChange: function(e) { setCategoryForm(Object.assign({}, categoryForm, {description: e.target.value})); },
-              className: 'w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg mb-3 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-50',
-              rows: 3
-            }),
-            React.createElement('input', {
-              type: 'url',
-              placeholder: 'Image URL',
-              value: categoryForm.image_url,
-              onChange: function(e) { setCategoryForm(Object.assign({}, categoryForm, {image_url: e.target.value})); },
-              className: 'w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg mb-4 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-50'
-            }),
-            React.createElement(
+            categoryForm.image_url && React.createElement(
               'div',
-              { className: 'flex gap-3' },
-              React.createElement(
-                'button',
-                {
-                  type: 'button',
-                  onClick: function() {
-                    setShowAddModal(false);
-                    setEditingCategory(null);
-                    setCategoryForm({ name: '', description: '', image_url: '' });
-                  },
-                  className: 'flex-1 px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700'
-                },
-                'Cancel'
-              ),
-              React.createElement(
-                'button',
-                {
-                  type: 'submit',
-                  className: 'flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90'
-                },
-                editingCategory ? 'Update' : 'Create'
-              )
+              { className: 'mt-3' },
+              React.createElement('img', {
+                src: categoryForm.image_url,
+                alt: 'Preview',
+                className: 'w-32 h-32 object-cover rounded-lg border'
+              })
+            )
+          ),
+          React.createElement(
+            'div',
+            { className: 'flex gap-3' },
+            React.createElement(
+              'button',
+              {
+                type: 'button',
+                onClick: () => setShowModal(false),
+                className: 'flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50'
+              },
+              'Cancel'
+            ),
+            React.createElement(
+              'button',
+              {
+                type: 'submit',
+                className: 'flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700'
+              },
+              editingCategory ? 'Update' : 'Add Category'
             )
           )
         )

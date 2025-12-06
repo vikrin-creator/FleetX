@@ -1,10 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from '../components/layout/Sidebar.js';
 import ProductCategories from './ProductCategories.js';
 
 const Admin = () => {
   const [activeTab, setActiveTab] = useState('products');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    // Add some basic initialization
+    try {
+      console.log('Admin component mounted');
+      setIsLoading(false);
+    } catch (err) {
+      console.error('Admin initialization error:', err);
+      setError(err.message);
+      setIsLoading(false);
+    }
+  }, []);
+
+  if (isLoading) {
+    return React.createElement(
+      'div', 
+      { className: 'flex items-center justify-center min-h-screen' },
+      React.createElement('div', { className: 'text-lg' }, 'Loading Admin...')
+    );
+  }
+
+  if (error) {
+    return React.createElement(
+      'div', 
+      { className: 'flex items-center justify-center min-h-screen' },
+      React.createElement('div', { className: 'text-red-600' }, 'Error: ' + error)
+    );
+  }
 
   const renderContent = function() {
     switch(activeTab) {

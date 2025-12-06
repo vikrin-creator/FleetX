@@ -10,10 +10,7 @@ export const categoryAPI = {
   createCategory: async (categoryData) => {
     const response = await fetch(`${API_BASE_URL}/categories`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(categoryData),
+      body: categoryData, // FormData for file upload
     });
     return response.json();
   },
@@ -21,10 +18,7 @@ export const categoryAPI = {
   updateCategory: async (id, categoryData) => {
     const response = await fetch(`${API_BASE_URL}/categories/${id}`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(categoryData),
+      body: categoryData, // FormData for file upload
     });
     return response.json();
   },
