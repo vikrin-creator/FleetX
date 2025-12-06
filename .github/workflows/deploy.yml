@@ -40,12 +40,13 @@ jobs:
         
     - name: Prepare deployment structure
       run: |
-        # Copy frontend build to root
-        cp -r frontend/dist/* ./
-        # Create backend directory
-        mkdir -p backend
-        cp -r backend/* backend/
-        ls -la ./
+        # Create staging directory
+        mkdir -p staging
+        # Copy frontend build to staging root
+        cp -r frontend/dist/* staging/
+        # Copy backend to staging/backend
+        cp -r backend staging/
+        ls -la staging/
         
     - name: Deploy Complete Site to Hostinger
       uses: SamKirkland/FTP-Deploy-Action@v4.3.5
@@ -53,7 +54,7 @@ jobs:
         server: ${{ secrets.HOSTINGER_FTP_SERVER }}
         username: ${{ secrets.HOSTINGER_FTP_USERNAME }}
         password: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
-        local-dir: ./
+        local-dir: ./staging/
         server-dir: /public_html/
         protocol: ftp
         port: 21
