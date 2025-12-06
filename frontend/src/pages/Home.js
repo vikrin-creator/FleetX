@@ -1,32 +1,60 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { categoryAPI } from '../services/categoryService.js';
 
 const Home = () => {
-  const categories = [
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  
+  // Fallback categories in case API fails
+  const fallbackCategories = [
     {
-      title: 'Cooling System',
-      image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDhhf2s7bFASkvetkwpg5b0bxEHsT_Dy9KmpopFXJqffZrFteIjse1BAcKeEVE5gKERSV1lvvyJBcfk8ewfaEUKfU8XPkeoLSiBzLHkqBZ4YSvnv-Vlj2jLBA8b0hSxV0pxnBcIn9Mp1WMegNuiaeF2WzOrAXq7UhUQLLWyeH9HttKsmkKw5wcoYeAk3AJAka_HazwQezaMWCz0V7q6pLQ3_GRlkimhXauQd7SagNOxMNg7zlXgpkQI-Eetb8uaXlHXqIWjnqswPTIk'
+      name: 'Cooling System',
+      image_url: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDhhf2s7bFASkvetkwpg5b0bxEHsT_Dy9KmpopFXJqffZrFteIjse1BAcKeEVE5gKERSV1lvvyJBcfk8ewfaEUKfU8XPkeoLSiBzLHkqBZ4YSvnv-Vlj2jLBA8b0hSxV0pxnBcIn9Mp1WMegNuiaeF2WzOrAXq7UhUQLLWyeH9HttKsmkKw5wcoYeAk3AJAka_HazwQezaMWCz0V7q6pLQ3_GRlkimhXauQd7SagNOxMNg7zlXgpkQI-Eetb8uaXlHXqIWjnqswPTIk'
     },
     {
-      title: 'Steering System',
-      image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCBQpQ4MSL238L6KtWxBZvt51_2Tjn8g3hgrBC-w9JUnKm-M5_R2TcojCwHnt45szjw8i8usmj-ZEfu5tQ1vsdxhgbxabcTwHwf6pWyKHEtnlmxNB7RUTYBTxlCH_saYHN0HPsmjoIC5EV_wq5OZvxcd3I103OhGqIWVebsh9vlaZYrYeKeUeETtTIlew6Q8JBabFuU34tnBwt9HxmQlFDQn39M8ghwIeYcGDaKDTrdDjKjKaNo-YeAIRB2i0374QyzwP5Ct1b5w162'
+      name: 'Steering System',
+      image_url: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCBQpQ4MSL238L6KtWxBZvt51_2Tjn8g3hgrBC-w9JUnKm-M5_R2TcojCwHnt45szjw8i8usmj-ZEfu5tQ1vsdxhgbxabcTwHwf6pWyKHEtnlmxNB7RUTYBTxlCH_saYHN0HPsmjoIC5EV_wq5OZvxcd3I103OhGqIWVebsh9vlaZYrYeKeUeETtTIlew6Q8JBabFuU34tnBwt9HxmQlFDQn39M8ghwIeYcGDaKDTrdDjKjKaNo-YeAIRB2i0374QyzwP5Ct1b5w162'
     },
     {
-      title: 'Body and Cabin',
-      image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuB909jqOrfPyCOzNwqOwY_gOus6qfYPRWS0SMuIeh1EGTIifsWulwozmNtxYJnuCf8KvK4ivbemaC_6KTJL194TBZb1Q9oicpKc7Bs19eVmhtAIZFJD_8zCFL9-gAMfKTk0Toq9z4Ah7E8WKwMXSKaX4_U2IlgCGE3oFIQ15pu6pNXCdetfguEYceKILnIDRNmEYHAlVj2MoKOq06Mc3s2Jf8tzRAgyDvLiqKMjhyo_7GXK6AP1AqfkKp_YCGh9GJrobFHs_D3B13uW'
+      name: 'Body and Cabin',
+      image_url: 'https://lh3.googleusercontent.com/aida-public/AB6AXuB909jqOrfPyCOzNwqOwY_gOus6qfYPRWS0SMuIeh1EGTIifsWulwozmNtxYJnuCf8KvK4ivbemaC_6KTJL194TBZb1Q9oicpKc7Bs19eVmhtAIZFJD_8zCFL9-gAMfKTk0Toq9z4Ah7E8WKwMXSKaX4_U2IlgCGE3oFIQ15pu6pNXCdetfguEYceKILnIDRNmEYHAlVj2MoKOq06Mc3s2Jf8tzRAgyDvLiqKMjhyo_7GXK6AP1AqfkKp_YCGh9GJrobFHs_D3B13uW'
     },
     {
-      title: 'Air Spring & Shocks',
-      image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDYVtzDLGiyu7MgUwJCaIZu1HTNz733ftKGMtL9kphQIIxoTy8cvcvHWT1r5c6cUkx5MWUHCXdqPCc4Wl7p06kKSPHIoaMm_D76B5Bh_8gptNFhbRuSurjI0KE7HTBupadAm4Pcgltmo11yBJjz8sOyDrovZPUgNa95jVa4DrIIz9kBDtZPs7fXiTQsqWw1NIZDHhzqCXLvx5W2G95Hazwu_bjTmT32WwjATIs5mFwetnGFy8vco2q0BH_OqXrI54sG-vJd_zN7li3R'
+      name: 'Air Spring & Shocks',
+      image_url: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDYVtzDLGiyu7MgUwJCaIZu1HTNz733ftKGMtL9kphQIIxoTy8cvcvHWT1r5c6cUkx5MWUHCXdqPCc4Wl7p06kKSPHIoaMm_D76B5Bh_8gptNFhbRuSurjI0KE7HTBupadAm4Pcgltmo11yBJjz8sOyDrovZPUgNa95jVa4DrIIz9kBDtZPs7fXiTQsqWw1NIZDHhzqCXLvx5W2G95Hazwu_bjTmT32WwjATIs5mFwetnGFy8vco2q0BH_OqXrI54sG-vJd_zN7li3R'
     },
     {
-      title: 'Air Brake & Wheel',
-      image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBviyaeWwi0hfOqgPhpV2-TE1PF8BNPXzwbV2f9rz-F-YJqBTJW9TZ_6IbAL5z_HigcQACqdegD38e_TVFfZQRDP1QaGo1yJnzP-ifgEjEMhoaEhpdtzdxb3Obmp69cao-89MmaEUnEY6MFtoel-ZDtL0Vhew3CVGggZCJkxEoMT-QbCFCPgp5H7FcEBZj6cD84resiGoJleN5rlRTf-rMOQokDYSEtGSu1Kq9EWjgOqLDaR4s3nthf2nEBieAgutlPcR2t-Buy1gvZ'
+      name: 'Air Brake & Wheel',
+      image_url: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBviyaeWwi0hfOqgPhpV2-TE1PF8BNPXzwbV2f9rz-F-YJqBTJW9TZ_6IbAL5z_HigcQACqdegD38e_TVFfZQRDP1QaGo1yJnzP-ifgEjEMhoaEhpdtzdxb3Obmp69cao-89MmaEUnEY6MFtoel-ZDtL0Vhew3CVGggZCJkxEoMT-QbCFCPgp5H7FcEBZj6cD84resiGoJleN5rlRTf-rMOQokDYSEtGSu1Kq9EWjgOqLDaR4s3nthf2nEBieAgutlPcR2t-Buy1gvZ'
     },
     {
-      title: 'Chrome & Stainless',
-      image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA1wWzLBUmQPj0Ephcv1dVyv9KYEE2PQFWCXUMNu_047cbXEy8ik8GRdV3_3RSY8Rthc8WZzhvAueLmlzty3UqXtesvQj4zKFxWKqW-FRtaBJD_fA0vMQNa9X83OI6uFVGYJemCp7_0olKz7cG2igVgkGpLrUoXNOVdrpGhPVnxWTuUuRzRlKpGKNkHw_dG9TfV3yoIrMdnppza3fIIOS36PukpP9m7ml8-vRRji3VoB0sb8S7dIAhGF76HjNbR-oo3G-KAH7SfPicY'
+      name: 'Chrome & Stainless',
+      image_url: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA1wWzLBUmQPj0Ephcv1dVyv9KYEE2PQFWCXUMNu_047cbXEy8ik8GRdV3_3RSY8Rthc8WZzhvAueLmlzty3UqXtesvQj4zKFxWKqW-FRtaBJD_fA0vMQNa9X83OI6uFVGYJemCp7_0olKz7cG2igVgkGpLrUoXNOVdrpGhPVnxWTuUuRzRlKpGKNkHw_dG9TfV3yoIrMdnppza3fIIOS36PukpP9m7ml8-vRRji3VoB0sb8S7dIAhGF76HjNbR-oo3G-KAH7SfPicY'
     }
   ];
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const fetchCategories = async () => {
+    try {
+      setLoading(true);
+      const response = await categoryAPI.getCategories();
+      if (response.success && response.data && response.data.length > 0) {
+        setCategories(response.data);
+      } else {
+        // Use fallback categories if API returns empty data
+        setCategories(fallbackCategories);
+      }
+    } catch (error) {
+      console.error('Failed to fetch categories, using fallback:', error);
+      // Use fallback categories if API fails
+      setCategories(fallbackCategories);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return React.createElement(
     'div',
@@ -84,21 +112,27 @@ const Home = () => {
       'div',
       { className: 'bg-white rounded-lg md:rounded-xl shadow-lg p-4 md:p-6 mt-4' },
       React.createElement('h2', { className: 'text-slate-900 text-xl md:text-2xl font-bold leading-tight tracking-[-0.015em] px-2 md:px-4 pb-3 pt-3 md:pt-5' }, 'PRODUCT CATEGORIES'),
-      React.createElement(
-        'div',
-        { className: 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 p-2 md:p-4' },
-        categories.map((category, index) =>
-          React.createElement(
-            'div',
-            { key: index, className: 'flex flex-col gap-2 md:gap-3 pb-3 group cursor-pointer' },
-            React.createElement('div', {
-              className: 'w-full bg-center bg-no-repeat aspect-video bg-cover rounded-lg overflow-hidden transform group-hover:scale-95 transition-transform duration-300',
-              style: { backgroundImage: `url('${category.image}')` }
-            }),
-            React.createElement('p', { className: 'text-slate-900 text-sm md:text-base font-medium leading-normal pt-1 md:pt-2' }, category.title)
+      loading 
+        ? React.createElement(
+            'div', 
+            { className: 'flex justify-center items-center p-8' },
+            React.createElement('div', { className: 'text-slate-500' }, 'Loading categories...')
           )
-        )
-      )
+        : React.createElement(
+            'div',
+            { className: 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 p-2 md:p-4' },
+            categories.map((category, index) =>
+              React.createElement(
+                'div',
+                { key: index, className: 'flex flex-col gap-2 md:gap-3 pb-3 group cursor-pointer' },
+                React.createElement('div', {
+                  className: 'w-full bg-center bg-no-repeat aspect-video bg-cover rounded-lg overflow-hidden transform group-hover:scale-95 transition-transform duration-300',
+                  style: { backgroundImage: `url('${category.image_url}')` }
+                }),
+                React.createElement('p', { className: 'text-slate-900 text-sm md:text-base font-medium leading-normal pt-1 md:pt-2' }, category.name)
+              )
+            )
+          )
     ),
 
     // Partner Section
