@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { categoryAPI } from '../services/categoryService.js';
 
 const Products = () => {
+  const location = useLocation();
   const [categories, setCategories] = useState([]);
   const [categoryItems, setCategoryItems] = useState({});
   const [loading, setLoading] = useState(true);
@@ -18,6 +20,27 @@ const Products = () => {
     // Test direct API call for Air Brake & Wheel items
     testFetchItems();
   }, []);
+
+  // Handle navigation from search results
+  useEffect(() => {
+    if (location.state) {
+      const { selectedCategoryId, selectedCategoryName, selectedItem } = location.state;
+      
+      if (selectedCategoryId) {
+        setSelectedCategoryId(selectedCategoryId);
+        setSelectedCategory(selectedCategoryName);
+        setViewMode('items');
+        
+        if (selectedItem) {
+          setSelectedItem(selectedItem);
+          setShowItemModal(true);
+        }
+      }
+      
+      // Clear navigation state
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   const testFetchItems = async () => {
     try {
