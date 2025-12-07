@@ -5,11 +5,11 @@ const Sidebar = ({ activeTab, onTabChange }) => {
 
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
-    { id: 'products', label: 'Product Categories', icon: 'inventory_2' },
+    { id: 'products', label: 'Product Categories', icon: 'category' },
+    { id: 'inventory', label: 'Product Management', icon: 'inventory_2' },
     { id: 'vehicles', label: 'Vehicles', icon: 'local_shipping' },
     { id: 'orders', label: 'Orders', icon: 'shopping_bag' },
     { id: 'customers', label: 'Customers', icon: 'people' },
-    { id: 'inventory', label: 'Inventory', icon: 'warehouse' },
     { id: 'reports', label: 'Reports', icon: 'assessment' },
     { id: 'settings', label: 'Settings', icon: 'settings' }
   ];

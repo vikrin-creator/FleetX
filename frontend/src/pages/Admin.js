@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from '../components/layout/Sidebar.js';
 import ProductCategories from './ProductCategories.js';
+import ProductManagement from './ProductManagement.js';
 
 const Admin = () => {
   const [activeTab, setActiveTab] = useState('products');
@@ -47,6 +48,8 @@ const Admin = () => {
         );
       case 'products':
         return React.createElement(ProductCategories, null);
+      case 'inventory':
+        return React.createElement(ProductManagement, null);
       case 'vehicles':
         return React.createElement(
           'div',
@@ -67,13 +70,6 @@ const Admin = () => {
           { className: 'p-8' },
           React.createElement('h1', { className: 'text-3xl font-bold text-slate-900 dark:text-slate-50 mb-4' }, 'Customers'),
           React.createElement('p', { className: 'text-slate-600 dark:text-slate-400' }, 'Customer management coming soon...')
-        );
-      case 'inventory':
-        return React.createElement(
-          'div',
-          { className: 'p-8' },
-          React.createElement('h1', { className: 'text-3xl font-bold text-slate-900 dark:text-slate-50 mb-4' }, 'Inventory'),
-          React.createElement('p', { className: 'text-slate-600 dark:text-slate-400' }, 'Inventory management coming soon...')
         );
       case 'reports':
         return React.createElement(
