@@ -96,11 +96,15 @@ const Products = () => {
     return matchesSearch;
   });
 
-  const handleCategoryClick = (categoryName) => {
+  const handleCategoryClick = (categoryName, categoryId = null) => {
     setSelectedCategory(categoryName);
     if (categoryName === 'All Categories') {
       setViewMode('categories');
       setSelectedCategoryId(null);
+    } else if (categoryId) {
+      // When clicking on a specific category in sidebar, show its items
+      setSelectedCategoryId(categoryId);
+      setViewMode('items');
     }
   };
 
@@ -131,16 +135,7 @@ const Products = () => {
     { className: 'container mx-auto px-4 py-8 md:py-16' },
     
     // Test display for direct API call
-    testItems.length > 0 && React.createElement(
-      'div',
-      { className: 'mb-8 p-4 bg-green-100 rounded-lg' },
-      React.createElement('h3', { className: 'font-bold text-green-800 mb-2' }, 'SUCCESS: Items found via direct API call:'),
-      testItems.map((item, index) => 
-        React.createElement('div', { key: index, className: 'text-green-700' }, 
-          `✓ ${item.name} (ID: ${item.id}, Category ID: ${item.category_id})`
-        )
-      )
-    ),
+    // Removed green debug box
     
     React.createElement(
       'div',
@@ -156,7 +151,49 @@ const Products = () => {
           React.createElement(
             'div',
             null,
-            React.createElement('h3', { className: 'text-lg font-bold text-slate-900 dark:text-slate-50 mb-4' }, 'Categories'),
+            viewMode === 'categories' ?
+            React.createElement('h3', { className: 'text-lg font-bold text-slate-900 dark:text-slate-50 mb-4' }, 'Categories') :
+            selectedItem ?
+            React.createElement(
+              'div',
+              { className: 'mb-4 flex items-center gap-1 flex-wrap' },
+              React.createElement(
+                'button',
+                {
+                  onClick: handleBackToCategories,
+                  className: 'text-sm font-bold text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 transition-colors'
+                },
+                'Categories'
+              ),
+              React.createElement('span', { className: 'text-sm font-bold text-slate-500 dark:text-slate-400' }, ' > '),
+              React.createElement(
+                'button',
+                {
+                  onClick: () => {
+                    setSelectedItem(null);
+                    setShowItemModal(false);
+                  },
+                  className: 'text-sm font-bold text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 transition-colors'
+                },
+                selectedCategory
+              ),
+              React.createElement('span', { className: 'text-sm font-bold text-slate-500 dark:text-slate-400' }, ' > '),
+              React.createElement('span', { className: 'text-sm font-bold text-slate-900 dark:text-slate-50' }, selectedItem.name)
+            ) :
+            React.createElement(
+              'div',
+              { className: 'mb-4 flex items-center gap-1' },
+              React.createElement(
+                'button',
+                {
+                  onClick: handleBackToCategories,
+                  className: 'text-lg font-bold text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100 transition-colors'
+                },
+                'Categories'
+              ),
+              React.createElement('span', { className: 'text-lg font-bold text-slate-500 dark:text-slate-400' }, ' > '),
+              React.createElement('span', { className: 'text-lg font-bold text-slate-900 dark:text-slate-50' }, selectedCategory)
+            ),
             React.createElement(
               'nav',
               { className: 'space-y-2' },
@@ -178,7 +215,7 @@ const Products = () => {
                   React.createElement(
                     'button',
                     {
-                      onClick: () => handleCategoryClick(category.name),
+                      onClick: () => handleCategoryClick(category.name, category.id),
                       className: selectedCategory === category.name
                         ? 'flex items-center w-full text-left px-4 py-2 rounded-lg bg-primary/10 text-primary dark:bg-primary/20 font-semibold text-sm'
                         : 'flex items-center w-full text-left px-4 py-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 font-medium transition-colors text-sm'
@@ -199,34 +236,26 @@ const Products = () => {
                   React.createElement(
                     'div',
                     { className: 'ml-4 space-y-1' },
-                    React.createElement(
-                      'div',
-                      { className: 'text-xs text-yellow-600 px-3 py-1' },
-                      `Debug: Items array length: ${(categoryItems[category.id] || []).length}`
-                    ),
                     (categoryItems[category.id] || []).length > 0 ?
-                    (categoryItems[category.id] || []).slice(0, 5).map((item) =>
+                    [
+                      ...(categoryItems[category.id] || []).slice(0, 5).map((item) =>
+                        React.createElement(
+                          'button',
+                          {
+                            key: item.id,
+                            onClick: () => handleItemClick(item),
+                            className: 'block w-full text-left px-3 py-2 text-sm text-slate-600 dark:text-slate-300 hover:text-slate-800 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 rounded transition-colors font-medium'
+                          },
+                          item.name
+                        )
+                      ),
+                      (categoryItems[category.id] || []).length > 5 &&
                       React.createElement(
-                        'button',
-                        {
-                          key: item.id,
-                          onClick: () => handleItemClick(item),
-                          className: 'block w-full text-left px-3 py-1 text-xs text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded transition-colors'
-                        },
-                        `ITEM: ${item.name}`
+                        'div',
+                        { className: 'text-xs text-slate-400 px-3 py-1' },
+                        `+${(categoryItems[category.id] || []).length - 5} more`
                       )
-                    ) :
-                    React.createElement(
-                      'div',
-                      { className: 'text-xs text-red-500 px-3 py-1' },
-                      'No items found - API call failed or returned empty'
-                    ),
-                    (categoryItems[category.id] || []).length > 5 &&
-                    React.createElement(
-                      'div',
-                      { className: 'text-xs text-slate-400 px-3 py-1' },
-                      `+${(categoryItems[category.id] || []).length - 5} more`
-                    )
+                    ].filter(Boolean) : null
                   )
                 )
               )
@@ -240,76 +269,16 @@ const Products = () => {
         'div',
         { className: 'flex-1' },
         
-        // Search and Filters Section
-        React.createElement(
-          'section',
-          { className: 'mb-8' },
-          React.createElement(
-            'div',
-            { className: 'flex flex-col md:flex-row items-center gap-4' },
-            React.createElement(
-              'div',
-              { className: 'w-full flex-1' },
-              React.createElement(
-                'label',
-                { className: 'flex flex-col min-w-40 h-12 w-full' },
-                React.createElement(
-                  'div',
-                  { className: 'flex w-full flex-1 items-stretch rounded-lg h-full bg-slate-200 dark:bg-slate-800' },
-                  React.createElement(
-                    'div',
-                    { className: 'text-slate-500 dark:text-slate-400 flex items-center justify-center pl-4' },
-                    React.createElement('span', { className: 'material-symbols-outlined' }, 'search')
-                  ),
-                  React.createElement('input', {
-                    className: 'form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-r-lg text-slate-900 dark:text-slate-50 focus:outline-0 focus:ring-0 border-none bg-transparent h-full placeholder:text-slate-500 dark:placeholder:text-slate-400 pl-2 text-base font-normal',
-                    placeholder: 'Search for a category...',
-                    value: searchQuery,
-                    onChange: (e) => setSearchQuery(e.target.value)
-                  })
-                )
-              )
-            ),
-            React.createElement(
-              'div',
-              { className: 'w-full md:w-auto overflow-x-auto' },
-              React.createElement(
-                'div',
-                { className: 'flex gap-3 whitespace-nowrap' },
-                ['Popular', 'New Arrivals', 'On Sale'].map((filter, index) =>
-                  React.createElement(
-                    'div',
-                    {
-                      key: index,
-                      className: 'flex h-10 shrink-0 cursor-pointer items-center justify-center gap-x-2 rounded-lg bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 pl-4 pr-4'
-                    },
-                    React.createElement('p', { className: 'text-sm font-medium' }, filter)
-                  )
-                )
-              )
-            )
-          )
-        ),
-
         // Products Grid
         React.createElement(
           'section',
           { className: 'w-full' },
-          // Back button when viewing items
+          // Category title when viewing items
           viewMode === 'items' &&
           React.createElement(
             'div',
             { className: 'mb-6' },
-            React.createElement(
-              'button',
-              {
-                onClick: handleBackToCategories,
-                className: 'flex items-center gap-2 px-4 py-2 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100'
-              },
-              React.createElement('span', { className: 'material-symbols-outlined' }, 'arrow_back'),
-              'Back to Categories'
-            ),
-            React.createElement('h2', { className: 'text-2xl font-bold text-slate-900 dark:text-slate-50 mt-2' }, selectedCategory)
+            React.createElement('h2', { className: 'text-2xl font-bold text-slate-900 dark:text-slate-50' }, selectedCategory)
           ),
           loading ? 
             React.createElement(
@@ -438,7 +407,7 @@ const Products = () => {
             React.createElement(
               'div',
               null,
-              React.createElement('h4', { className: 'font-semibold text-slate-900 dark:text-slate-50' }, 'Stock:'),
+              React.createElement('h3', { className: 'text-lg font-bold text-slate-900 dark:text-slate-50 mb-4' }, 'Categories'),
               React.createElement('p', { className: 'text-slate-600 dark:text-slate-400' }, `${selectedItem.stock_quantity || 0} units`)
             ),
             React.createElement(
