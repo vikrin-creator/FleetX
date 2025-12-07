@@ -94,11 +94,11 @@ class CategoryController {
 
     public function getCategoryItems($categoryId) {
         try {
-            $stmt = $this->db->prepare("SELECT * FROM category_items WHERE category_id = ? ORDER BY name ASC");
+            $stmt = $this->db->prepare("SELECT * FROM category_items WHERE category_id = ? AND status = 'active' ORDER BY name ASC");
             $stmt->execute([$categoryId]);
             $items = $stmt->fetchAll();
 
-            Response::json($items);
+            Response::success($items, 'Category items retrieved successfully');
         } catch (Exception $e) {
             Response::error('Failed to fetch category items', 500);
         }
