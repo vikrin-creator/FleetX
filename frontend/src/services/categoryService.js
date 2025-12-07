@@ -78,7 +78,9 @@ export const categoryAPI = {
   getCategoryItems: async (categoryId) => {
     try {
       console.log(`Fetching items for category ID: ${categoryId}`);
-      const response = await fetch(`${API_BASE_URL}/categories/items/${categoryId}`);
+      
+      // Use working endpoint with category_id parameter
+      const response = await fetch(`${BASE_URL}/get-category-items.php?category_id=${categoryId}`);
       
       if (!response.ok) {
         console.error(`API Error: ${response.status} - ${response.statusText}`);
@@ -86,15 +88,9 @@ export const categoryAPI = {
       }
       
       const data = await response.json();
-      console.log(`Items data received:`, data);
+      console.log(`Items data received for category ${categoryId}:`, data);
       
-      // Process image URLs for items
-      if (data && Array.isArray(data)) {
-        return data.map(item => ({
-          ...item,
-          image_url: processImageUrl(item.image_url)
-        }));
-      } else if (data.success && data.data) {
+      if (data.success && data.data) {
         return data.data.map(item => ({
           ...item,
           image_url: processImageUrl(item.image_url)
