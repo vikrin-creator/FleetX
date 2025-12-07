@@ -76,8 +76,37 @@ export const categoryAPI = {
 
   // Category Items
   getCategoryItems: async (categoryId) => {
-    const response = await fetch(`${API_BASE_URL}/categories/items/${categoryId}`);
-    return response.json();
+    try {
+      console.log(`Fetching items for category ID: ${categoryId}`);
+      const response = await fetch(`${API_BASE_URL}/categories/items/${categoryId}`);
+      
+      if (!response.ok) {
+        console.error(`API Error: ${response.status} - ${response.statusText}`);
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log(`Items data received:`, data);
+      
+      // Process image URLs for items
+      if (data && Array.isArray(data)) {
+        return data.map(item => ({
+          ...item,
+          image_url: processImageUrl(item.image_url)
+        }));
+      } else if (data.success && data.data) {
+        return data.data.map(item => ({
+          ...item,
+          image_url: processImageUrl(item.image_url)
+        }));
+      } else {
+        console.warn('Unexpected data format:', data);
+        return [];
+      }
+    } catch (error) {
+      console.error('Error fetching category items:', error);
+      return [];
+    }
   },
 
   createCategoryItem: async (itemData) => {

@@ -11,10 +11,46 @@ const Products = () => {
   const [selectedItem, setSelectedItem] = useState(null);
   const [showItemModal, setShowItemModal] = useState(false);
   const [viewMode, setViewMode] = useState('categories'); // 'categories' or 'items'
+  const [testItems, setTestItems] = useState([]); // For testing direct API call
 
   useEffect(() => {
     fetchCategories();
+    // Test direct API call for Air Brake & Wheel items
+    testFetchItems();
   }, []);
+
+  const testFetchItems = async () => {
+    try {
+      console.log('=== DIRECT API TEST ===');
+      
+      // Test 1: Original API endpoint
+      console.log('Testing original API...');
+      const response1 = await fetch('https://sandybrown-squirrel-472536.hostingersite.com/backend/api/categories/items/5');
+      console.log('Original API Response status:', response1.status);
+      
+      if (response1.ok) {
+        const data1 = await response1.json();
+        console.log('Original API response:', data1);
+      }
+      
+      // Test 2: Direct test endpoint
+      console.log('Testing direct endpoint...');
+      const response2 = await fetch('https://sandybrown-squirrel-472536.hostingersite.com/backend/test-category-items.php');
+      console.log('Direct test Response status:', response2.status);
+      
+      if (response2.ok) {
+        const data2 = await response2.json();
+        console.log('Direct test response:', data2);
+        
+        // Store items for display
+        const items = data2.success ? (data2.data || []) : (Array.isArray(data2) ? data2 : []);
+        setTestItems(items);
+      }
+      
+    } catch (error) {
+      console.error('Fetch error:', error);
+    }
+  };
 
   const fetchCategories = async () => {
     try {
@@ -34,7 +70,10 @@ const Products = () => {
       const itemsMap = {};
       for (const category of data) {
         try {
+          console.log(`Fetching items for category: ${category.name} (ID: ${category.id})`);
           const items = await categoryAPI.getCategoryItems(category.id);
+          console.log(`Items for ${category.name}:`, items);
+          console.log(`Items array check:`, Array.isArray(items), items?.length || 0);
           itemsMap[category.id] = Array.isArray(items) ? items : [];
         } catch (error) {
           console.error(`Failed to fetch items for category ${category.id}:`, error);
@@ -42,6 +81,8 @@ const Products = () => {
         }
       }
       setCategoryItems(itemsMap);
+      console.log('All category items:', itemsMap);
+      console.log('Category items for Air Brake & Wheel (ID 5):', itemsMap[5]);
     } catch (error) {
       console.error('Failed to fetch categories:', error);
     } finally {
@@ -88,6 +129,19 @@ const Products = () => {
   return React.createElement(
     'div',
     { className: 'container mx-auto px-4 py-8 md:py-16' },
+    
+    // Test display for direct API call
+    testItems.length > 0 && React.createElement(
+      'div',
+      { className: 'mb-8 p-4 bg-green-100 rounded-lg' },
+      React.createElement('h3', { className: 'font-bold text-green-800 mb-2' }, 'SUCCESS: Items found via direct API call:'),
+      testItems.map((item, index) => 
+        React.createElement('div', { key: index, className: 'text-green-700' }, 
+          `✓ ${item.name} (ID: ${item.id}, Category ID: ${item.category_id})`
+        )
+      )
+    ),
+    
     React.createElement(
       'div',
       { className: 'flex flex-col md:flex-row gap-8' },
@@ -141,10 +195,16 @@ const Products = () => {
                     )
                   ),
                   // Show items under category if expanded
-                  selectedCategory === category.name && (categoryItems[category.id] || []).length > 0 &&
+                  selectedCategory === category.name &&
                   React.createElement(
                     'div',
                     { className: 'ml-4 space-y-1' },
+                    React.createElement(
+                      'div',
+                      { className: 'text-xs text-yellow-600 px-3 py-1' },
+                      `Debug: Items array length: ${(categoryItems[category.id] || []).length}`
+                    ),
+                    (categoryItems[category.id] || []).length > 0 ?
                     (categoryItems[category.id] || []).slice(0, 5).map((item) =>
                       React.createElement(
                         'button',
@@ -153,8 +213,13 @@ const Products = () => {
                           onClick: () => handleItemClick(item),
                           className: 'block w-full text-left px-3 py-1 text-xs text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded transition-colors'
                         },
-                        item.name
+                        `ITEM: ${item.name}`
                       )
+                    ) :
+                    React.createElement(
+                      'div',
+                      { className: 'text-xs text-red-500 px-3 py-1' },
+                      'No items found - API call failed or returned empty'
                     ),
                     (categoryItems[category.id] || []).length > 5 &&
                     React.createElement(

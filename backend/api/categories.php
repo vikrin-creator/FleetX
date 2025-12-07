@@ -291,12 +291,23 @@ $controller = new CategoryController();
 $method = $_SERVER['REQUEST_METHOD'];
 $path = explode('/', trim($_SERVER['PATH_INFO'] ?? '', '/'));
 
+// Debug logging
+error_log("API Request: " . $method . " " . $_SERVER['REQUEST_URI']);
+error_log("PATH_INFO: " . ($_SERVER['PATH_INFO'] ?? 'not set'));
+error_log("Path array: " . json_encode($path));
+
 switch ($method) {
     case 'GET':
+        error_log("GET request - path[0]: " . ($path[0] ?? 'empty') . ", path[1]: " . ($path[1] ?? 'empty'));
         if (empty($path[0])) {
+            error_log("Calling getCategories()");
             $controller->getCategories();
         } elseif ($path[0] === 'items' && isset($path[1])) {
+            error_log("Calling getCategoryItems({$path[1]})");
             $controller->getCategoryItems($path[1]);
+        } else {
+            error_log("No matching route found");
+            Response::error('Invalid request path', 404);
         }
         break;
     case 'POST':
