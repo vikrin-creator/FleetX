@@ -108,10 +108,7 @@ export const categoryAPI = {
   createCategoryItem: async (itemData) => {
     const response = await fetch(`${API_BASE_URL}/categories/items`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(itemData),
+      body: itemData, // FormData for file upload
     });
     return response.json();
   },
@@ -119,16 +116,69 @@ export const categoryAPI = {
   updateCategoryItem: async (id, itemData) => {
     const response = await fetch(`${API_BASE_URL}/categories/items/${id}`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(itemData),
+      body: itemData, // FormData for file upload
     });
     return response.json();
   },
 
   deleteCategoryItem: async (id) => {
     const response = await fetch(`${API_BASE_URL}/categories/items/${id}`, {
+      method: 'DELETE',
+    });
+    return response.json();
+  },
+
+  // Sub-Items Operations
+  getSubItems: async (itemId) => {
+    try {
+      console.log(`Fetching sub-items for item ID: ${itemId}`);
+      
+      const response = await fetch(`${API_BASE_URL}/categories/items/${itemId}/sub-items`);
+      
+      if (!response.ok) {
+        console.error(`API Error: ${response.status} - ${response.statusText}`);
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log(`Sub-items data received for item ${itemId}:`, data);
+      
+      if (data.success && data.data) {
+        return data.data.map(subItem => ({
+          ...subItem,
+          image_url: processImageUrl(subItem.image_url),
+          specifications: typeof subItem.specifications === 'string' 
+            ? JSON.parse(subItem.specifications) 
+            : subItem.specifications || {}
+        }));
+      } else {
+        console.warn('Unexpected data format:', data);
+        return [];
+      }
+    } catch (error) {
+      console.error('Error fetching sub-items:', error);
+      return [];
+    }
+  },
+
+  createSubItem: async (subItemData) => {
+    const response = await fetch(`${API_BASE_URL}/categories/sub-items`, {
+      method: 'POST',
+      body: subItemData, // FormData for file upload
+    });
+    return response.json();
+  },
+
+  updateSubItem: async (id, subItemData) => {
+    const response = await fetch(`${API_BASE_URL}/categories/sub-items/${id}`, {
+      method: 'PUT',
+      body: subItemData, // FormData for file upload
+    });
+    return response.json();
+  },
+
+  deleteSubItem: async (id) => {
+    const response = await fetch(`${API_BASE_URL}/categories/sub-items/${id}`, {
       method: 'DELETE',
     });
     return response.json();

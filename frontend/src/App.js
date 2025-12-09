@@ -4,6 +4,7 @@ import Layout from './components/layout/Layout.js';
 import Home from './pages/Home.js';
 import Products from './pages/Products.js';
 import ProductCategories from './pages/ProductCategories.js';
+import SubItems from './pages/SubItems.js';
 import Admin from './pages/Admin.js';
 
 function App() {
@@ -20,6 +21,10 @@ function App() {
       React.createElement(Route, { 
         path: '/products', 
         element: React.createElement(Layout, null, React.createElement(Products)) 
+      }),
+      React.createElement(Route, { 
+        path: '/items/:itemId/sub-items', 
+        element: React.createElement(SubItems) 
       }),
       React.createElement(Route, { 
         path: '/admin/categories', 

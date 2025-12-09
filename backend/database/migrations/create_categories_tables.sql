@@ -23,6 +23,22 @@ CREATE TABLE category_items (
     FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE
 );
 
+CREATE TABLE item_sub_items (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    item_id INT NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    part_number VARCHAR(100),
+    price DECIMAL(10, 2),
+    stock_quantity INT DEFAULT 0,
+    image_url TEXT,
+    specifications JSON,
+    status ENUM('active', 'inactive', 'out_of_stock') DEFAULT 'active',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (item_id) REFERENCES category_items(id) ON DELETE CASCADE
+);
+
 -- Insert sample categories
 INSERT INTO categories (name, description, image_url) VALUES 
 ('Brakes & Wheel End', 'Rotors, pads, calipers, and more.', 'https://lh3.googleusercontent.com/aida-public/AB6AXuAlQl6ysDSDr_q6PiNOLamiX8tNHHJ3X6kHTgpnxj7E5ebbTqX1N20aAPky7AgvEEBMH37opKm9zbTR_tXA6OQOuskNSXoERv0fGd9pXNanaJdgfIYXvD9O5XFeIyuk1V6Xpi4WrsLTlQ3z9O3gqy3kG-qhf6dMboyi9_a_95kkMmi4ZTmPgOlQUjXU9tceIik0erYTR1uXoQNNRwOmSSyCq45qdcwdiQrOuRmkPynUGr2GuRW7DrerlhOiXJk1MUjQHbG9fJJud7vM'),

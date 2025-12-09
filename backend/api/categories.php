@@ -16,6 +16,16 @@ class CategoryController {
             mkdir($this->uploadDir, 0755, true);
         }
         
+        // Create items upload directory
+        if (!is_dir('../uploads/items/')) {
+            mkdir('../uploads/items/', 0755, true);
+        }
+        
+        // Create sub-items upload directory
+        if (!is_dir('../uploads/sub-items/')) {
+            mkdir('../uploads/sub-items/', 0755, true);
+        }
+        
         $this->createTablesIfNotExist();
     }
 
@@ -104,7 +114,7 @@ class CategoryController {
         }
     }
 
-    private function handleFileUpload($fileKey) {
+    private function handleFileUpload($fileKey, $uploadType = 'categories') {
         if (!isset($_FILES[$fileKey]) || $_FILES[$fileKey]['error'] !== UPLOAD_ERR_OK) {
             return null;
         }
@@ -122,14 +132,21 @@ class CategoryController {
         }
 
         $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
-        $filename = uniqid('category_') . '.' . $extension;
-        $filepath = $this->uploadDir . $filename;
+        $filename = uniqid($uploadType . '_') . '.' . $extension;
+        $uploadDir = '../uploads/' . $uploadType . '/';
+        
+        // Create directory if it doesn't exist
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+        
+        $filepath = $uploadDir . $filename;
 
         if (!move_uploaded_file($file['tmp_name'], $filepath)) {
             throw new Exception('Failed to upload file.');
         }
 
-        return 'uploads/categories/' . $filename;
+        return 'uploads/' . $uploadType . '/' . $filename;
     }
 
     public function createCategory() {
@@ -228,60 +245,234 @@ class CategoryController {
 
     public function createCategoryItem() {
         try {
-            $data = json_decode(file_get_contents('php://input'), true);
+            $category_id = $_POST['category_id'] ?? null;
+            $name = $_POST['name'] ?? null;
+            $description = $_POST['description'] ?? '';
+            $part_number = $_POST['part_number'] ?? '';
+            $price = $_POST['price'] ?? 0;
+            $stock_quantity = $_POST['stock_quantity'] ?? 0;
+            $image_url = $_POST['image_url'] ?? null;
 
-            if (!isset($data['category_id']) || !isset($data['name'])) {
+            if (!$category_id || !$name) {
                 Response::error('Category ID and item name are required', 400);
                 return;
             }
 
+            // Handle file upload if image is provided
+            if (isset($_FILES['image'])) {
+                $image_url = $this->handleFileUpload('image', 'items');
+            }
+
             $stmt = $this->db->prepare("INSERT INTO category_items (category_id, name, description, part_number, price, stock_quantity, image_url) VALUES (?, ?, ?, ?, ?, ?, ?)");
             $stmt->execute([
-                $data['category_id'],
-                $data['name'],
-                $data['description'] ?? '',
-                $data['part_number'] ?? '',
-                $data['price'] ?? 0,
-                $data['stock_quantity'] ?? 0,
-                $data['image_url'] ?? ''
+                $category_id,
+                $name,
+                $description,
+                $part_number,
+                $price,
+                $stock_quantity,
+                $image_url
             ]);
 
             $itemId = $this->db->lastInsertId();
             Response::json(['id' => $itemId, 'message' => 'Item created successfully'], 201);
         } catch (Exception $e) {
-            Response::error('Failed to create item', 500);
+            Response::error('Failed to create item: ' . $e->getMessage(), 500);
         }
     }
 
     public function updateCategoryItem($id) {
         try {
-            $data = json_decode(file_get_contents('php://input'), true);
+            $name = $_POST['name'] ?? null;
+            $description = $_POST['description'] ?? '';
+            $part_number = $_POST['part_number'] ?? '';
+            $price = $_POST['price'] ?? 0;
+            $stock_quantity = $_POST['stock_quantity'] ?? 0;
+            $image_url = $_POST['image_url'] ?? null;
+
+            if (!$name) {
+                Response::error('Item name is required', 400);
+                return;
+            }
+
+            // Get current item info
+            $stmt = $this->db->prepare("SELECT image_url FROM category_items WHERE id = ?");
+            $stmt->execute([$id]);
+            $currentItem = $stmt->fetch();
+
+            if (!$currentItem) {
+                Response::error('Item not found', 404);
+                return;
+            }
+
+            // Handle file upload if new image is provided
+            if (isset($_FILES['image'])) {
+                // Delete old image if it exists and is a local file
+                if ($currentItem['image_url'] && strpos($currentItem['image_url'], 'uploads/') === 0) {
+                    $oldImagePath = '../' . $currentItem['image_url'];
+                    if (file_exists($oldImagePath)) {
+                        unlink($oldImagePath);
+                    }
+                }
+                $image_url = $this->handleFileUpload('image', 'items');
+            } else if (!$image_url) {
+                // Keep existing image if no new image is uploaded and no URL provided
+                $image_url = $currentItem['image_url'];
+            }
 
             $stmt = $this->db->prepare("UPDATE category_items SET name = ?, description = ?, part_number = ?, price = ?, stock_quantity = ?, image_url = ? WHERE id = ?");
             $stmt->execute([
-                $data['name'],
-                $data['description'] ?? '',
-                $data['part_number'] ?? '',
-                $data['price'] ?? 0,
-                $data['stock_quantity'] ?? 0,
-                $data['image_url'] ?? '',
+                $name,
+                $description,
+                $part_number,
+                $price,
+                $stock_quantity,
+                $image_url,
                 $id
             ]);
 
             Response::json(['message' => 'Item updated successfully']);
         } catch (Exception $e) {
-            Response::error('Failed to update item', 500);
+            Response::error('Failed to update item: ' . $e->getMessage(), 500);
         }
     }
 
     public function deleteCategoryItem($id) {
         try {
+            // Get item info before deletion to delete associated image
+            $stmt = $this->db->prepare("SELECT image_url FROM category_items WHERE id = ?");
+            $stmt->execute([$id]);
+            $item = $stmt->fetch();
+
+            if ($item && $item['image_url'] && strpos($item['image_url'], 'uploads/') === 0) {
+                $imagePath = '../' . $item['image_url'];
+                if (file_exists($imagePath)) {
+                    unlink($imagePath);
+                }
+            }
+
             $stmt = $this->db->prepare("DELETE FROM category_items WHERE id = ?");
             $stmt->execute([$id]);
 
             Response::json(['message' => 'Item deleted successfully']);
         } catch (Exception $e) {
             Response::error('Failed to delete item', 500);
+        }
+    }
+
+    // Sub-Items CRUD Operations
+    public function getSubItems($itemId) {
+        try {
+            $stmt = $this->db->prepare("SELECT * FROM item_sub_items WHERE item_id = ? AND status = 'active' ORDER BY name ASC");
+            $stmt->execute([$itemId]);
+            $subItems = $stmt->fetchAll();
+
+            Response::success($subItems, 'Sub-items retrieved successfully');
+        } catch (Exception $e) {
+            Response::error('Failed to fetch sub-items', 500);
+        }
+    }
+
+    public function createSubItem() {
+        try {
+            $item_id = $_POST['item_id'] ?? null;
+            $name = $_POST['name'] ?? null;
+
+            if (!$item_id || !$name) {
+                Response::error('Item ID and sub-item name are required', 400);
+                return;
+            }
+
+            // Handle file upload if image is provided
+            $image_url = null;
+            if (isset($_FILES['image'])) {
+                $image_url = $this->handleFileUpload('image', 'sub-items');
+            }
+
+            $stmt = $this->db->prepare("INSERT INTO item_sub_items (item_id, name, description, part_number, price, stock_quantity, image_url, specifications) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt->execute([
+                $item_id,
+                $name,
+                $_POST['description'] ?? '',
+                $_POST['part_number'] ?? '',
+                $_POST['price'] ?? 0,
+                $_POST['stock_quantity'] ?? 0,
+                $image_url ?? '',
+                $_POST['specifications'] ?? '[]'
+            ]);
+
+            $subItemId = $this->db->lastInsertId();
+            Response::json(['id' => $subItemId, 'message' => 'Sub-item created successfully'], 201);
+        } catch (Exception $e) {
+            Response::error('Failed to create sub-item: ' . $e->getMessage(), 500);
+        }
+    }
+
+    public function updateSubItem($id) {
+        try {
+            $name = $_POST['name'] ?? null;
+
+            if (!$name) {
+                Response::error('Sub-item name is required', 400);
+                return;
+            }
+
+            // Get current sub-item data
+            $stmt = $this->db->prepare("SELECT image_url FROM item_sub_items WHERE id = ?");
+            $stmt->execute([$id]);
+            $currentSubItem = $stmt->fetch();
+
+            // Handle file upload if new image is provided
+            $image_url = $currentSubItem['image_url'] ?? '';
+            if (isset($_FILES['image'])) {
+                // Delete old image if it exists
+                if ($currentSubItem && $currentSubItem['image_url'] && strpos($currentSubItem['image_url'], 'uploads/') === 0) {
+                    $oldImagePath = '../' . $currentSubItem['image_url'];
+                    if (file_exists($oldImagePath)) {
+                        unlink($oldImagePath);
+                    }
+                }
+                $image_url = $this->handleFileUpload('image', 'sub-items');
+            }
+
+            $stmt = $this->db->prepare("UPDATE item_sub_items SET name = ?, description = ?, part_number = ?, price = ?, stock_quantity = ?, image_url = ?, specifications = ? WHERE id = ?");
+            $stmt->execute([
+                $name,
+                $_POST['description'] ?? '',
+                $_POST['part_number'] ?? '',
+                $_POST['price'] ?? 0,
+                $_POST['stock_quantity'] ?? 0,
+                $image_url,
+                $_POST['specifications'] ?? '[]',
+                $id
+            ]);
+
+            Response::json(['message' => 'Sub-item updated successfully']);
+        } catch (Exception $e) {
+            Response::error('Failed to update sub-item: ' . $e->getMessage(), 500);
+        }
+    }
+
+    public function deleteSubItem($id) {
+        try {
+            // Get sub-item info before deletion to delete associated image
+            $stmt = $this->db->prepare("SELECT image_url FROM item_sub_items WHERE id = ?");
+            $stmt->execute([$id]);
+            $subItem = $stmt->fetch();
+
+            if ($subItem && $subItem['image_url'] && strpos($subItem['image_url'], 'uploads/') === 0) {
+                $imagePath = '../' . $subItem['image_url'];
+                if (file_exists($imagePath)) {
+                    unlink($imagePath);
+                }
+            }
+
+            $stmt = $this->db->prepare("DELETE FROM item_sub_items WHERE id = ?");
+            $stmt->execute([$id]);
+
+            Response::json(['message' => 'Sub-item deleted successfully']);
+        } catch (Exception $e) {
+            Response::error('Failed to delete sub-item', 500);
         }
     }
 }
@@ -298,13 +489,16 @@ error_log("Path array: " . json_encode($path));
 
 switch ($method) {
     case 'GET':
-        error_log("GET request - path[0]: " . ($path[0] ?? 'empty') . ", path[1]: " . ($path[1] ?? 'empty'));
+        error_log("GET request - path[0]: " . ($path[0] ?? 'empty') . ", path[1]: " . ($path[1] ?? 'empty') . ", path[2]: " . ($path[2] ?? 'empty'));
         if (empty($path[0])) {
             error_log("Calling getCategories()");
             $controller->getCategories();
-        } elseif ($path[0] === 'items' && isset($path[1])) {
+        } elseif ($path[0] === 'items' && isset($path[1]) && !isset($path[2])) {
             error_log("Calling getCategoryItems({$path[1]})");
             $controller->getCategoryItems($path[1]);
+        } elseif ($path[0] === 'items' && isset($path[1]) && $path[2] === 'sub-items') {
+            error_log("Calling getSubItems({$path[1]})");
+            $controller->getSubItems($path[1]);
         } else {
             error_log("No matching route found");
             Response::error('Invalid request path', 404);
@@ -313,8 +507,10 @@ switch ($method) {
     case 'POST':
         if (empty($path[0])) {
             $controller->createCategory();
-        } elseif ($path[0] === 'items') {
+        } elseif ($path[0] === 'items' && empty($path[1])) {
             $controller->createCategoryItem();
+        } elseif ($path[0] === 'sub-items') {
+            $controller->createSubItem();
         }
         break;
     case 'PUT':
@@ -322,6 +518,8 @@ switch ($method) {
             $controller->updateCategory($path[0]);
         } elseif ($path[0] === 'items' && isset($path[1])) {
             $controller->updateCategoryItem($path[1]);
+        } elseif ($path[0] === 'sub-items' && isset($path[1])) {
+            $controller->updateSubItem($path[1]);
         }
         break;
     case 'DELETE':
@@ -330,8 +528,10 @@ switch ($method) {
             $controller->deleteCategory($data['id']);
         } elseif ($path[0] === 'items' && isset($path[1])) {
             $controller->deleteCategoryItem($path[1]);
+        } elseif ($path[0] === 'sub-items' && isset($path[1])) {
+            $controller->deleteSubItem($path[1]);
         } else {
-            Response::error('Invalid delete request. Category ID is required.', 400);
+            Response::error('Invalid delete request. ID is required.', 400);
         }
         break;
 }

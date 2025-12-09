@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { categoryAPI } from '../services/categoryService.js';
 
 const Products = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [categories, setCategories] = useState([]);
   const [categoryItems, setCategoryItems] = useState({});
   const [loading, setLoading] = useState(true);
@@ -462,6 +463,16 @@ const Products = () => {
               className: 'px-6 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800'
             },
             'Close'
+          ),
+          React.createElement(
+            'button',
+            {
+              onClick: () => {
+                navigate(`/items/${selectedItem.id}/sub-items`);
+              },
+              className: 'px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700'
+            },
+            'View Sub-Items'
           ),
           selectedItem.status === 'active' &&
           React.createElement(
