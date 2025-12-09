@@ -126,20 +126,6 @@ const ProductCategories = () => {
     setShowSubItemForm(true);
   };
 
-  const handleEditSubItem = (subItem) => {
-    setEditingSubItem(subItem);
-    setSubItemForm({
-      name: subItem.name || '',
-      description: subItem.description || '',
-      part_number: subItem.part_number || '',
-      price: subItem.price || '',
-      stock_quantity: subItem.stock_quantity || '',
-      image_url: subItem.image_url || '',
-      image_file: null
-    });
-    setShowSubItemForm(true);
-  };
-
   const handleSubItemSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -566,24 +552,12 @@ const ProductCategories = () => {
                     { className: 'flex items-center justify-between mb-2' },
                     React.createElement('h4', { className: 'font-medium text-gray-900' }, subItem.name),
                     React.createElement(
-                      'div',
-                      { className: 'flex gap-2' },
-                      React.createElement(
-                        'button',
-                        {
-                          onClick: () => handleEditSubItem(subItem),
-                          className: 'text-blue-600 hover:text-blue-800 text-sm'
-                        },
-                        'Edit'
-                      ),
-                      React.createElement(
-                        'button',
-                        {
-                          onClick: () => handleDeleteSubItem(subItem.id),
-                          className: 'text-red-600 hover:text-red-800 text-sm'
-                        },
-                        'Delete'
-                      )
+                      'button',
+                      {
+                        onClick: () => handleDeleteSubItem(subItem.id),
+                        className: 'text-red-600 hover:text-red-800 text-sm'
+                      },
+                      'Delete'
                     )
                   ),
                   React.createElement('p', { className: 'text-sm text-gray-600 mb-2' }, subItem.description || 'No description'),
