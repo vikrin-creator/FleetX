@@ -114,18 +114,44 @@ export const categoryAPI = {
   },
 
   updateCategoryItem: async (id, itemData) => {
-    const response = await fetch(`${API_BASE_URL}/categories/items/${id}`, {
-      method: 'PUT',
-      body: itemData, // FormData for file upload
-    });
-    return response.json();
+    try {
+      console.log(`Updating item ID: ${id}`);
+      const response = await fetch(`${API_BASE_URL}/categories/items/${id}`, {
+        method: 'PUT',
+        body: itemData, // FormData for file upload
+      });
+      
+      if (!response.ok) {
+        console.error(`Update Item Error: ${response.status} - ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      console.log('Update item response:', data);
+      return data;
+    } catch (error) {
+      console.error('Error updating item:', error);
+      throw error;
+    }
   },
 
   deleteCategoryItem: async (id) => {
-    const response = await fetch(`${API_BASE_URL}/categories/items/${id}`, {
-      method: 'DELETE',
-    });
-    return response.json();
+    try {
+      console.log(`Deleting item ID: ${id}`);
+      const response = await fetch(`${API_BASE_URL}/categories/items/${id}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        console.error(`Delete Item Error: ${response.status} - ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      console.log('Delete item response:', data);
+      return data;
+    } catch (error) {
+      console.error('Error deleting item:', error);
+      throw error;
+    }
   },
 
   // Sub-Items Operations
@@ -162,25 +188,66 @@ export const categoryAPI = {
   },
 
   createSubItem: async (subItemData) => {
-    const response = await fetch(`${API_BASE_URL}/categories/sub-items`, {
-      method: 'POST',
-      body: subItemData, // FormData for file upload
-    });
-    return response.json();
+    try {
+      console.log('Creating sub-item with data:', subItemData);
+      const response = await fetch(`${API_BASE_URL}/categories/sub-items`, {
+        method: 'POST',
+        body: subItemData, // FormData for file upload
+      });
+      
+      if (!response.ok) {
+        console.error(`Create SubItem Error: ${response.status} - ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      console.log('Create sub-item response:', data);
+      return data;
+    } catch (error) {
+      console.error('Error creating sub-item:', error);
+      throw error;
+    }
   },
 
   updateSubItem: async (id, subItemData) => {
-    const response = await fetch(`${API_BASE_URL}/categories/sub-items/${id}`, {
-      method: 'PUT',
-      body: subItemData, // FormData for file upload
-    });
-    return response.json();
+    try {
+      console.log(`Updating sub-item ID: ${id}`);
+      const response = await fetch(`${API_BASE_URL}/categories/sub-items/${id}`, {
+        method: 'PUT',
+        body: subItemData, // FormData for file upload
+      });
+      
+      if (!response.ok) {
+        console.error(`Update SubItem Error: ${response.status} - ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      console.log('Update sub-item response:', data);
+      return data;
+    } catch (error) {
+      console.error('Error updating sub-item:', error);
+      throw error;
+    }
   },
 
   deleteSubItem: async (id) => {
-    const response = await fetch(`${API_BASE_URL}/categories/sub-items/${id}`, {
-      method: 'DELETE',
-    });
-    return response.json();
+    try {
+      console.log(`Deleting sub-item ID: ${id}`);
+      const response = await fetch(`${API_BASE_URL}/categories/sub-items/${id}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        console.error(`Delete SubItem Error: ${response.status} - ${response.statusText}`);
+        const text = await response.text();
+        console.error('Error response body:', text);
+      }
+      
+      const data = await response.json();
+      console.log('Delete sub-item response:', data);
+      return data;
+    } catch (error) {
+      console.error('Error deleting sub-item:', error);
+      throw error;
+    }
   },
 };

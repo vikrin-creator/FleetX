@@ -480,11 +480,23 @@ class CategoryController {
 // Handle routing
 $controller = new CategoryController();
 $method = $_SERVER['REQUEST_METHOD'];
-$path = explode('/', trim($_SERVER['PATH_INFO'] ?? '', '/'));
+
+// Parse path from PATH_INFO or REQUEST_URI
+$pathInfo = $_SERVER['PATH_INFO'] ?? '';
+if (empty($pathInfo) && isset($_SERVER['REQUEST_URI'])) {
+    // Extract path from REQUEST_URI if PATH_INFO is not available
+    $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+    $basePath = '/backend/api/categories';
+    if (strpos($uri, $basePath) === 0) {
+        $pathInfo = substr($uri, strlen($basePath));
+    }
+}
+$path = explode('/', trim($pathInfo, '/'));
 
 // Debug logging
 error_log("API Request: " . $method . " " . $_SERVER['REQUEST_URI']);
 error_log("PATH_INFO: " . ($_SERVER['PATH_INFO'] ?? 'not set'));
+error_log("Parsed pathInfo: " . $pathInfo);
 error_log("Path array: " . json_encode($path));
 
 switch ($method) {
@@ -525,16 +537,22 @@ switch ($method) {
         }
         break;
     case 'DELETE':
+        error_log("DELETE request - path[0]: " . ($path[0] ?? 'empty') . ", path[1]: " . ($path[1] ?? 'empty'));
         if ($path[0] === 'items' && isset($path[1]) && is_numeric($path[1])) {
+            error_log("Calling deleteCategoryItem({$path[1]})");
             $controller->deleteCategoryItem($path[1]);
         } elseif ($path[0] === 'sub-items' && isset($path[1]) && is_numeric($path[1])) {
+            error_log("Calling deleteSubItem({$path[1]})");
             $controller->deleteSubItem($path[1]);
         } else {
+            error_log("DELETE - No path match, checking request body");
             // Category deletion expects ID in request body
             $data = json_decode(file_get_contents('php://input'), true);
             if (isset($data['id']) && is_numeric($data['id'])) {
+                error_log("Calling deleteCategory({$data['id']})");
                 $controller->deleteCategory($data['id']);
             } else {
+                error_log("DELETE - No valid ID found");
                 Response::error('Invalid delete request. ID is required.', 400);
             }
         }
