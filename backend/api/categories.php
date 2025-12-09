@@ -414,13 +414,17 @@ class CategoryController {
     public function updateSubItem($id) {
         try {
             error_log("updateSubItem called with ID: " . $id);
+            error_log("REQUEST_METHOD: " . $_SERVER['REQUEST_METHOD']);
             error_log("POST data: " . json_encode($_POST));
             error_log("FILES data: " . json_encode(array_keys($_FILES)));
             
+            // For PUT requests with FormData, PHP doesn't populate $_POST
+            // We need to handle this as a POST request instead
             $name = $_POST['name'] ?? null;
 
             if (!$name) {
                 error_log("ERROR: Sub-item name is missing");
+                error_log("All POST keys: " . json_encode(array_keys($_POST)));
                 Response::error('Sub-item name is required', 400);
                 return;
             }
@@ -438,7 +442,7 @@ class CategoryController {
 
             // Handle file upload if new image is provided
             $image_url = $currentSubItem['image_url'] ?? '';
-            if (isset($_FILES['image'])) {
+            if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
                 error_log("New image file detected for sub-item");
                 // Delete old image if it exists
                 if ($currentSubItem && $currentSubItem['image_url'] && strpos($currentSubItem['image_url'], 'uploads/') === 0) {
@@ -541,8 +545,14 @@ switch ($method) {
             $controller->createCategory();
         } elseif ($path[0] === 'items' && empty($path[1])) {
             $controller->createCategoryItem();
-        } elseif ($path[0] === 'sub-items') {
+        } elseif ($path[0] === 'items' && isset($path[1]) && is_numeric($path[1])) {
+            // Handle POST update for items (alternative to PUT)
+            $controller->updateCategoryItem($path[1]);
+        } elseif ($path[0] === 'sub-items' && empty($path[1])) {
             $controller->createSubItem();
+        } elseif ($path[0] === 'sub-items' && isset($path[1]) && is_numeric($path[1])) {
+            // Handle POST update for sub-items (alternative to PUT for FormData)
+            $controller->updateSubItem($path[1]);
         }
         break;
     case 'PUT':

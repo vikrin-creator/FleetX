@@ -221,8 +221,9 @@ export const categoryAPI = {
         }
       }
       
+      // Use POST instead of PUT for FormData uploads
       const response = await fetch(`${API_BASE_URL}/categories/sub-items/${id}`, {
-        method: 'PUT',
+        method: 'POST',
         body: subItemData, // FormData for file upload
       });
       
@@ -230,6 +231,7 @@ export const categoryAPI = {
         console.error(`Update SubItem Error: ${response.status} - ${response.statusText}`);
         const errorText = await response.text();
         console.error('Error response:', errorText);
+        throw new Error(`Failed to update sub-item: ${response.status} - ${errorText}`);
       }
       
       const data = await response.json();
