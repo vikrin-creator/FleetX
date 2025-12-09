@@ -468,7 +468,13 @@ const Products = () => {
             'button',
             {
               onClick: () => {
-                navigate(`/items/${selectedItem.id}/sub-items`);
+                navigate(`/items/${selectedItem.id}/sub-items`, {
+                  state: {
+                    itemName: selectedItem.name,
+                    categoryName: selectedCategory,
+                    categoryId: selectedCategoryId
+                  }
+                });
               },
               className: 'px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700'
             },

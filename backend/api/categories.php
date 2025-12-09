@@ -514,24 +514,29 @@ switch ($method) {
         }
         break;
     case 'PUT':
-        if (isset($path[0]) && is_numeric($path[0])) {
-            $controller->updateCategory($path[0]);
-        } elseif ($path[0] === 'items' && isset($path[1])) {
+        if ($path[0] === 'items' && isset($path[1]) && is_numeric($path[1])) {
             $controller->updateCategoryItem($path[1]);
-        } elseif ($path[0] === 'sub-items' && isset($path[1])) {
+        } elseif ($path[0] === 'sub-items' && isset($path[1]) && is_numeric($path[1])) {
             $controller->updateSubItem($path[1]);
+        } elseif (isset($path[0]) && is_numeric($path[0])) {
+            $controller->updateCategory($path[0]);
+        } else {
+            Response::error('Invalid update request', 400);
         }
         break;
     case 'DELETE':
-        $data = json_decode(file_get_contents('php://input'), true);
-        if (isset($data['id']) && is_numeric($data['id'])) {
-            $controller->deleteCategory($data['id']);
-        } elseif ($path[0] === 'items' && isset($path[1])) {
+        if ($path[0] === 'items' && isset($path[1]) && is_numeric($path[1])) {
             $controller->deleteCategoryItem($path[1]);
-        } elseif ($path[0] === 'sub-items' && isset($path[1])) {
+        } elseif ($path[0] === 'sub-items' && isset($path[1]) && is_numeric($path[1])) {
             $controller->deleteSubItem($path[1]);
         } else {
-            Response::error('Invalid delete request. ID is required.', 400);
+            // Category deletion expects ID in request body
+            $data = json_decode(file_get_contents('php://input'), true);
+            if (isset($data['id']) && is_numeric($data['id'])) {
+                $controller->deleteCategory($data['id']);
+            } else {
+                Response::error('Invalid delete request. ID is required.', 400);
+            }
         }
         break;
 }
