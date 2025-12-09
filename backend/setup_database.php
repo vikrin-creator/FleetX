@@ -2,8 +2,8 @@
 require_once 'config/database.php';
 
 try {
-    $database = new Database();
-    $db = $database->getConnection();
+    $database = Database::getInstance();
+    $conn = $database->getConnection();
     
     echo "Connected to database successfully!\n";
     

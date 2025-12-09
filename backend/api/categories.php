@@ -7,7 +7,7 @@ class CategoryController {
     private $uploadDir;
 
     public function __construct() {
-        $database = new Database();
+        $database = Database::getInstance();
         $this->db = $database->getConnection();
         $this->uploadDir = '../uploads/categories/';
         
