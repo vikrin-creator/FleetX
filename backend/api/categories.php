@@ -493,12 +493,12 @@ switch ($method) {
         if (empty($path[0])) {
             error_log("Calling getCategories()");
             $controller->getCategories();
-        } elseif ($path[0] === 'items' && isset($path[1]) && !isset($path[2])) {
-            error_log("Calling getCategoryItems({$path[1]})");
-            $controller->getCategoryItems($path[1]);
-        } elseif ($path[0] === 'items' && isset($path[1]) && $path[2] === 'sub-items') {
+        } elseif ($path[0] === 'items' && isset($path[1]) && isset($path[2]) && $path[2] === 'sub-items') {
             error_log("Calling getSubItems({$path[1]})");
             $controller->getSubItems($path[1]);
+        } elseif ($path[0] === 'items' && isset($path[1])) {
+            error_log("Calling getCategoryItems({$path[1]})");
+            $controller->getCategoryItems($path[1]);
         } else {
             error_log("No matching route found");
             Response::error('Invalid request path', 404);
