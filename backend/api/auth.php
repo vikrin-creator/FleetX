@@ -47,10 +47,16 @@ switch ($action) {
  * Handle user registration
  */
 function handleRegister() {
-    $data = json_decode(file_get_contents('php://input'), true);
+    $rawInput = file_get_contents('php://input');
+    error_log("Raw input: " . $rawInput);
+    
+    $data = json_decode($rawInput, true);
+    error_log("Decoded data: " . print_r($data, true));
     
     $email = filter_var($data['email'] ?? '', FILTER_VALIDATE_EMAIL);
     $password = $data['password'] ?? '';
+    
+    error_log("Email: " . $email . ", Password length: " . strlen($password));
     
     if (!$email || !$password) {
         Response::error('Email and password are required', 400);

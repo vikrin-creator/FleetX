@@ -1,17 +1,25 @@
 <?php
 
 class Database {
+    private static $instance = null;
     private $host;
     private $db_name;
     private $username;
     private $password;
     private $conn;
 
-    public function __construct() {
+    private function __construct() {
         $this->host = getenv('DB_HOST') ?: 'localhost';
         $this->db_name = getenv('DB_NAME') ?: 'u177524058_Fleetx';
         $this->username = getenv('DB_USER') ?: 'u177524058_Fleetx';
         $this->password = getenv('DB_PASSWORD') ?: 'Devima@0812';
+    }
+
+    public static function getInstance() {
+        if (self::$instance === null) {
+            self::$instance = new Database();
+        }
+        return self::$instance;
     }
 
     public function getConnection() {
