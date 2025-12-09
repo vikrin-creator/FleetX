@@ -211,6 +211,16 @@ export const categoryAPI = {
   updateSubItem: async (id, subItemData) => {
     try {
       console.log(`Updating sub-item ID: ${id}`);
+      console.log('FormData being sent:', subItemData);
+      
+      // Log FormData contents
+      if (subItemData instanceof FormData) {
+        console.log('FormData entries:');
+        for (let [key, value] of subItemData.entries()) {
+          console.log(`  ${key}:`, value);
+        }
+      }
+      
       const response = await fetch(`${API_BASE_URL}/categories/sub-items/${id}`, {
         method: 'PUT',
         body: subItemData, // FormData for file upload
@@ -218,6 +228,8 @@ export const categoryAPI = {
       
       if (!response.ok) {
         console.error(`Update SubItem Error: ${response.status} - ${response.statusText}`);
+        const errorText = await response.text();
+        console.error('Error response:', errorText);
       }
       
       const data = await response.json();

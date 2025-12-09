@@ -410,9 +410,14 @@ class CategoryController {
 
     public function updateSubItem($id) {
         try {
+            error_log("updateSubItem called with ID: " . $id);
+            error_log("POST data: " . json_encode($_POST));
+            error_log("FILES data: " . json_encode(array_keys($_FILES)));
+            
             $name = $_POST['name'] ?? null;
 
             if (!$name) {
+                error_log("ERROR: Sub-item name is missing");
                 Response::error('Sub-item name is required', 400);
                 return;
             }
@@ -422,9 +427,16 @@ class CategoryController {
             $stmt->execute([$id]);
             $currentSubItem = $stmt->fetch();
 
+            if (!$currentSubItem) {
+                error_log("ERROR: Sub-item not found with ID: " . $id);
+                Response::error('Sub-item not found', 404);
+                return;
+            }
+
             // Handle file upload if new image is provided
             $image_url = $currentSubItem['image_url'] ?? '';
             if (isset($_FILES['image'])) {
+                error_log("New image file detected for sub-item");
                 // Delete old image if it exists
                 if ($currentSubItem && $currentSubItem['image_url'] && strpos($currentSubItem['image_url'], 'uploads/') === 0) {
                     $oldImagePath = '../' . $currentSubItem['image_url'];
@@ -447,8 +459,10 @@ class CategoryController {
                 $id
             ]);
 
+            error_log("Sub-item updated successfully: " . $id);
             Response::json(['message' => 'Sub-item updated successfully']);
         } catch (Exception $e) {
+            error_log("ERROR updating sub-item: " . $e->getMessage());
             Response::error('Failed to update sub-item: ' . $e->getMessage(), 500);
         }
     }
