@@ -38,7 +38,7 @@ const Header = () => {
       { className: 'flex items-center gap-3 md:gap-4 text-white' },
       React.createElement(
         'div',
-        { className: 'w-32 h-12 md:w-40 md:h-14 overflow-hidden flex items-center justify-center' },
+        { className: 'w-32 h-12 md:w-40 md:h-14 overflow-hidden flex items-center justify-center cursor-pointer', onClick: () => navigate('/') },
         React.createElement('img', {
           src: '/fleet-x-logo.svg',
           alt: 'Fleet X Parts',

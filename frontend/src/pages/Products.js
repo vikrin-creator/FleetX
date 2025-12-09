@@ -15,6 +15,7 @@ const Products = () => {
   const [showItemModal, setShowItemModal] = useState(false);
   const [viewMode, setViewMode] = useState('categories'); // 'categories' or 'items'
   const [testItems, setTestItems] = useState([]); // For testing direct API call
+  const [isFilterOpen, setIsFilterOpen] = useState(false); // Mobile filter toggle
 
   useEffect(() => {
     fetchCategories();
@@ -164,6 +165,31 @@ const Products = () => {
     'div',
     { className: 'container mx-auto px-4 py-8 md:py-16' },
     
+    // Mobile Filter Toggle Button
+    React.createElement(
+      'button',
+      {
+        onClick: () => setIsFilterOpen(!isFilterOpen),
+        className: 'md:hidden fixed bottom-6 right-6 z-40 bg-primary text-white p-4 rounded-full shadow-lg hover:bg-primary/90 transition-colors flex items-center gap-2'
+      },
+      React.createElement(
+        'svg',
+        {
+          className: 'w-6 h-6',
+          fill: 'none',
+          stroke: 'currentColor',
+          viewBox: '0 0 24 24'
+        },
+        React.createElement('path', {
+          strokeLinecap: 'round',
+          strokeLinejoin: 'round',
+          strokeWidth: 2,
+          d: 'M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z'
+        })
+      ),
+      React.createElement('span', { className: 'font-semibold' }, 'Filters')
+    ),
+    
     // Test display for direct API call
     // Removed green debug box
     
@@ -171,13 +197,46 @@ const Products = () => {
       'div',
       { className: 'flex flex-col md:flex-row gap-8' },
       
-      // Sidebar
+      // Mobile overlay backdrop
+      isFilterOpen && React.createElement('div', {
+        onClick: () => setIsFilterOpen(false),
+        className: 'md:hidden fixed inset-0 bg-black/50 z-40'
+      }),
+      
+      // Sidebar with mobile overlay
       React.createElement(
         'aside',
-        { className: 'w-full md:w-64 lg:w-72 flex-shrink-0' },
+        { 
+          className: `w-full md:w-64 lg:w-72 flex-shrink-0 fixed md:sticky top-0 left-0 h-full md:h-auto z-50 md:z-auto bg-white dark:bg-slate-900 md:bg-transparent transition-transform duration-300 ${
+            isFilterOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+          } overflow-y-auto md:overflow-visible`
+        },
+        // Close button for mobile
+        React.createElement(
+          'button',
+          {
+            onClick: () => setIsFilterOpen(false),
+            className: 'md:hidden absolute top-4 right-4 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white z-10'
+          },
+          React.createElement(
+            'svg',
+            {
+              className: 'w-6 h-6',
+              fill: 'none',
+              stroke: 'currentColor',
+              viewBox: '0 0 24 24'
+            },
+            React.createElement('path', {
+              strokeLinecap: 'round',
+              strokeLinejoin: 'round',
+              strokeWidth: 2,
+              d: 'M6 18L18 6M6 6l12 12'
+            })
+          )
+        ),
         React.createElement(
           'div',
-          { className: 'sticky top-24 space-y-6' },
+          { className: 'sticky top-24 space-y-6 p-6 md:p-0' },
           React.createElement(
             'div',
             null,
