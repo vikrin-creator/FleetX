@@ -12,9 +12,9 @@ function sendOTPEmail($email, $otp_code) {
     // Email configuration - UPDATE THESE WITH YOUR SMTP DETAILS
     $smtp_host = 'smtp.gmail.com'; // or your SMTP host
     $smtp_port = 587;
-    $smtp_username = 'your-email@gmail.com'; // Your email
-    $smtp_password = 'your-app-password'; // Your app password
-    $from_email = 'noreply@fleetxparts.com';
+    $smtp_username = 'shivapavansrikanth@gmail.com'; // Your email
+    $smtp_password = 'pdnd epvt blsd mtiv'; // Your app password
+    $from_email = 'shivapavansrikanth@gmail.com';
     $from_name = 'Fleet X Parts';
     
     // Check if PHPMailer is available

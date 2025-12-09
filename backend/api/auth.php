@@ -1,4 +1,8 @@
 <?php
+// Enable error reporting for debugging
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
@@ -9,10 +13,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-require_once __DIR__ . '/../config/database.php';
-require_once __DIR__ . '/../utils/otp.php';
-require_once __DIR__ . '/../utils/email-smtp.php';
-require_once __DIR__ . '/../utils/Response.php';
+try {
+    require_once __DIR__ . '/../config/database.php';
+    require_once __DIR__ . '/../utils/otp.php';
+    require_once __DIR__ . '/../utils/email-smtp.php';
+    require_once __DIR__ . '/../utils/Response.php';
+} catch (Exception $e) {
+    http_response_code(500);
+    echo json_encode(['success' => false, 'message' => 'File loading error: ' . $e->getMessage()]);
+    exit();
+}
 
 $action = $_GET['action'] ?? '';
 
