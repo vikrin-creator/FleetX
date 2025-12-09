@@ -8,6 +8,8 @@ const SubItems = () => {
   const location = useLocation();
   const [subItems, setSubItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [expandedItem, setExpandedItem] = useState(null);
+  const [selectedFilters, setSelectedFilters] = useState([]);
   
   // Get item and category info from navigation state
   const itemName = location.state?.itemName || 'Item';
@@ -31,6 +33,61 @@ const SubItems = () => {
       setLoading(false);
     }
   };
+
+  const toggleExpand = (id) => {
+    setExpandedItem(expandedItem === id ? null : id);
+  };
+
+  // Get unique sub-item names with counts for Part Type filter
+  const getPartTypeCounts = () => {
+    const counts = {};
+    subItems.forEach(item => {
+      const name = item.name || 'Unknown';
+      counts[name] = (counts[name] || 0) + 1;
+    });
+    return Object.entries(counts).map(([name, count]) => ({ name, count }));
+  };
+
+  // Get unique brands with counts
+  const getBrandCounts = () => {
+    const counts = {};
+    subItems.forEach(item => {
+      const brand = item.brand || 'Unknown';
+      if (brand && brand !== '') {
+        counts[brand] = (counts[brand] || 0) + 1;
+      }
+    });
+    return Object.entries(counts).map(([name, count]) => ({ name, count }));
+  };
+
+  // Get unique manufacturers with counts
+  const getManufacturerCounts = () => {
+    const counts = {};
+    subItems.forEach(item => {
+      const manufacturer = item.manufacturer || 'Unknown';
+      if (manufacturer && manufacturer !== '') {
+        counts[manufacturer] = (counts[manufacturer] || 0) + 1;
+      }
+    });
+    return Object.entries(counts).map(([name, count]) => ({ name, count }));
+  };
+
+  // Get unique DTNA classifications with counts
+  const getDTNACounts = () => {
+    const counts = {};
+    subItems.forEach(item => {
+      const classification = item.dtna_classification;
+      if (classification && classification !== '') {
+        counts[classification] = (counts[classification] || 0) + 1;
+      }
+    });
+    return Object.entries(counts).map(([name, count]) => ({ name, count }));
+  };
+
+  const partTypes = getPartTypeCounts();
+  const brands = getBrandCounts();
+  const manufacturers = getManufacturerCounts();
+  const dtnaClassifications = getDTNACounts();
 
 
 
@@ -85,60 +142,374 @@ const SubItems = () => {
       )
     ),
 
-    // Header
+    // Main Layout with Sidebar and Content
     React.createElement(
       'div',
-      { className: 'mb-6' },
-      React.createElement('h1', { className: 'text-3xl font-bold text-gray-900' }, 'Sub-Items'),
-      React.createElement('p', { className: 'text-gray-600 mt-1' }, 'Browse available sub-items')
-    ),
-
-    // Sub-Items Grid
-    subItems.length === 0 ? React.createElement(
-      'div',
-      { className: 'text-center py-12' },
-      React.createElement('div', { className: 'text-gray-400 text-6xl mb-4' }, '📦'),
-      React.createElement('h3', { className: 'text-xl font-semibold text-gray-600 mb-2' }, 'No sub-items available'),
-      React.createElement('p', { className: 'text-gray-500' }, 'Check back later for new items')
-    ) : React.createElement(
-      'div',
-      { className: 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6' },
-      ...subItems.map(subItem =>
+      { className: 'flex gap-6' },
+      
+      // Sidebar - Filters
+      React.createElement(
+        'aside',
+        { className: 'w-80 flex-shrink-0' },
         React.createElement(
           'div',
-          {
-            key: subItem.id,
-            className: 'bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow'
-          },
-          subItem.image_url ? React.createElement('img', {
-            src: subItem.image_url,
-            alt: subItem.name,
-            className: 'w-full h-48 object-cover'
-          }) : React.createElement(
-            'div',
-            { className: 'w-full h-48 bg-gray-200 flex items-center justify-center' },
-            React.createElement('span', { className: 'text-gray-400 text-4xl' }, '📦')
-          ),
+          { className: 'bg-white rounded-lg shadow-sm border border-gray-200 p-4 sticky top-4' },
+          
+          // Applied Filters Header
           React.createElement(
             'div',
-            { className: 'p-4' },
-            React.createElement('h3', { className: 'text-lg font-semibold text-gray-900 mb-2' }, subItem.name),
-            subItem.description && React.createElement('p', { className: 'text-gray-600 text-sm mb-3 line-clamp-2' }, subItem.description),
+            { className: 'mb-4 pb-4 border-b border-gray-200' },
             React.createElement(
               'div',
-              { className: 'space-y-1 text-sm text-gray-500 mb-4' },
-              subItem.part_number && React.createElement('p', null, React.createElement('span', { className: 'font-medium' }, 'Part #: '), subItem.part_number),
-              subItem.price > 0 && React.createElement('p', null, React.createElement('span', { className: 'font-medium' }, 'Price: '), `$${subItem.price}`),
-              React.createElement('p', null, React.createElement('span', { className: 'font-medium' }, 'Stock: '), subItem.stock_quantity || 0)
+              { className: 'flex items-center justify-between' },
+              React.createElement(
+                'h3',
+                { className: 'text-lg font-semibold text-gray-900' },
+                React.createElement('span', null, 'Applied Filters '),
+                React.createElement('span', { className: 'text-gray-500' }, `(${selectedFilters.length})`)
+              ),
+              React.createElement(
+                'button',
+                { className: 'text-blue-600 hover:text-blue-700' },
+                React.createElement(
+                  'svg',
+                  { className: 'w-5 h-5', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' },
+                  React.createElement('path', { strokeLinecap: 'round', strokeLinejoin: 'round', strokeWidth: 2, d: 'M5 15l7-7 7 7' })
+                )
+              )
+            )
+          ),
+
+          // Expand/Collapse All
+          React.createElement(
+            'div',
+            { className: 'mb-4 flex justify-between text-sm' },
+            React.createElement(
+              'button',
+              { className: 'text-blue-600 hover:text-blue-700 font-medium' },
+              'Expand All'
             ),
             React.createElement(
-              'span',
+              'button',
+              { className: 'text-blue-600 hover:text-blue-700 font-medium' },
+              'Collapse All'
+            )
+          ),
+
+          // Filter Sections
+          React.createElement(
+            'div',
+            { className: 'space-y-4' },
+            
+            // Part Type Filter
+            React.createElement(
+              'div',
+              { className: 'border-b border-gray-200 pb-4' },
+              React.createElement(
+                'button',
+                { 
+                  className: 'w-full flex items-center justify-between text-left font-semibold text-gray-900 mb-3',
+                  onClick: () => {}
+                },
+                React.createElement('span', null, 'Part Type'),
+                React.createElement(
+                  'svg',
+                  { className: 'w-5 h-5 text-blue-600', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' },
+                  React.createElement('path', { strokeLinecap: 'round', strokeLinejoin: 'round', strokeWidth: 2, d: 'M19 9l-7 7-7-7' })
+                )
+              ),
+              React.createElement(
+                'div',
+                { className: 'space-y-2 ml-1' },
+                partTypes.length > 0 ? partTypes.map((type, index) =>
+                  React.createElement(
+                    'label',
+                    { 
+                      key: index,
+                      className: 'flex items-center text-sm text-gray-700 hover:text-gray-900 cursor-pointer' 
+                    },
+                    React.createElement('input', { type: 'checkbox', className: 'mr-3 w-4 h-4 text-blue-600 border-gray-300 rounded' }),
+                    React.createElement('span', null, type.name + ' '),
+                    React.createElement('span', { className: 'text-gray-500' }, `(${type.count})`)
+                  )
+                ) : React.createElement(
+                  'p',
+                  { className: 'text-sm text-gray-500' },
+                  'No parts available'
+                )
+              )
+            ),
+
+            // DTNA Parts Classification
+            React.createElement(
+              'div',
+              { className: 'border-b border-gray-200 pb-4' },
+              React.createElement(
+                'button',
+                { 
+                  className: 'w-full flex items-center justify-between text-left font-semibold text-gray-900 mb-3',
+                  onClick: () => {}
+                },
+                React.createElement('span', null, 'DTNA Parts Classification'),
+                React.createElement(
+                  'svg',
+                  { className: 'w-5 h-5 text-blue-600', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' },
+                  React.createElement('path', { strokeLinecap: 'round', strokeLinejoin: 'round', strokeWidth: 2, d: 'M19 9l-7 7-7-7' })
+                )
+              ),
+              React.createElement(
+                'div',
+                { className: 'space-y-2 ml-1' },
+                dtnaClassifications.length > 0 ? dtnaClassifications.map((classification, index) =>
+                  React.createElement(
+                    'label',
+                    { 
+                      key: index,
+                      className: 'flex items-center text-sm text-gray-700 hover:text-gray-900 cursor-pointer' 
+                    },
+                    React.createElement('input', { type: 'checkbox', className: 'mr-3 w-4 h-4 text-blue-600 border-gray-300 rounded' }),
+                    React.createElement(
+                      'span',
+                      { className: 'flex items-center' },
+                      React.createElement(
+                        'span',
+                        { className: `inline-flex items-center justify-center w-5 h-5 mr-1 border-2 ${classification.name === 'Genuine' ? 'border-gray-700' : 'border-blue-600 text-blue-600'} rounded-full text-xs font-bold` },
+                        classification.name === 'Genuine' ? '©' : 'P'
+                      ),
+                      classification.name + ' ',
+                      React.createElement('span', { className: 'text-gray-500' }, `(${classification.count})`)
+                    )
+                  )
+                ) : React.createElement(
+                  'p',
+                  { className: 'text-sm text-gray-500' },
+                  'No classifications available'
+                )
+              )
+            ),
+
+            // Brand Filter
+            React.createElement(
+              'div',
+              { className: 'border-b border-gray-200 pb-4' },
+              React.createElement(
+                'button',
+                { 
+                  className: 'w-full flex items-center justify-between text-left font-semibold text-gray-900 mb-3',
+                  onClick: () => {}
+                },
+                React.createElement('span', null, 'Brand'),
+                React.createElement(
+                  'svg',
+                  { className: 'w-5 h-5 text-blue-600', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' },
+                  React.createElement('path', { strokeLinecap: 'round', strokeLinejoin: 'round', strokeWidth: 2, d: 'M19 9l-7 7-7-7' })
+                )
+              ),
+              React.createElement(
+                'div',
+                { className: 'space-y-2 ml-1' },
+                brands.length > 0 ? brands.map((brand, index) =>
+                  React.createElement(
+                    'label',
+                    { 
+                      key: index,
+                      className: 'flex items-center text-sm text-gray-700 hover:text-gray-900 cursor-pointer' 
+                    },
+                    React.createElement('input', { type: 'checkbox', className: 'mr-3 w-4 h-4 text-blue-600 border-gray-300 rounded' }),
+                    React.createElement('span', null, brand.name + ' '),
+                    React.createElement('span', { className: 'text-gray-500' }, `(${brand.count})`)
+                  )
+                ) : React.createElement(
+                  'p',
+                  { className: 'text-sm text-gray-500' },
+                  'No brands available'
+                )
+              )
+            ),
+
+            // Manufacturer Filter
+            React.createElement(
+              'div',
+              { className: 'pb-4' },
+              React.createElement(
+                'button',
+                { 
+                  className: 'w-full flex items-center justify-between text-left font-semibold text-gray-900 mb-3',
+                  onClick: () => {}
+                },
+                React.createElement('span', null, 'Manufacturer'),
+                React.createElement(
+                  'svg',
+                  { className: 'w-5 h-5 text-blue-600', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' },
+                  React.createElement('path', { strokeLinecap: 'round', strokeLinejoin: 'round', strokeWidth: 2, d: 'M19 9l-7 7-7-7' })
+                )
+              ),
+              React.createElement(
+                'div',
+                { className: 'space-y-2 ml-1' },
+                manufacturers.length > 0 ? manufacturers.map((manufacturer, index) =>
+                  React.createElement(
+                    'label',
+                    { 
+                      key: index,
+                      className: 'flex items-center text-sm text-gray-700 hover:text-gray-900 cursor-pointer' 
+                    },
+                    React.createElement('input', { type: 'checkbox', className: 'mr-3 w-4 h-4 text-blue-600 border-gray-300 rounded' }),
+                    React.createElement('span', null, manufacturer.name + ' '),
+                    React.createElement('span', { className: 'text-gray-500' }, `(${manufacturer.count})`)
+                  )
+                ) : React.createElement(
+                  'p',
+                  { className: 'text-sm text-gray-500' },
+                  'No manufacturers available'
+                )
+              )
+            )
+          )
+        )
+      ),
+
+      // Main Content - Product Listing
+      React.createElement(
+        'main',
+        { className: 'flex-1' },
+        
+        subItems.length === 0 ? React.createElement(
+          'div',
+          { className: 'text-center py-12 bg-white rounded-lg shadow-sm' },
+          React.createElement('div', { className: 'text-gray-400 text-6xl mb-4' }, '📦'),
+          React.createElement('h3', { className: 'text-xl font-semibold text-gray-600 mb-2' }, 'No sub-items available'),
+          React.createElement('p', { className: 'text-gray-500' }, 'Check back later for new items')
+        ) : React.createElement(
+          'div',
+          { className: 'space-y-4' },
+          ...subItems.map(subItem =>
+            React.createElement(
+              'div',
               {
-                className: `px-2 py-1 rounded-full text-xs font-medium ${
-                  subItem.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                }`
+                key: subItem.id,
+                className: 'bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden'
               },
-              subItem.status
+              
+              // Product Row
+              React.createElement(
+                'div',
+                { className: 'p-6' },
+                React.createElement(
+                  'div',
+                  { className: 'flex gap-6' },
+                  
+                  // Product Image
+                  React.createElement(
+                    'div',
+                    { className: 'flex-shrink-0' },
+                    subItem.image_url ? React.createElement('img', {
+                      src: subItem.image_url,
+                      alt: subItem.name,
+                      className: 'w-32 h-32 object-contain border border-gray-200 rounded'
+                    }) : React.createElement(
+                      'div',
+                      { className: 'w-32 h-32 bg-gray-100 flex items-center justify-center border border-gray-200 rounded' },
+                      React.createElement('span', { className: 'text-gray-400 text-3xl' }, '📦')
+                    )
+                  ),
+
+                  // Product Info
+                  React.createElement(
+                    'div',
+                    { className: 'flex-1' },
+                    
+                    // Part Number & Badge
+                    React.createElement(
+                      'div',
+                      { className: 'flex items-start justify-between mb-2' },
+                      React.createElement(
+                        'div',
+                        null,
+                        React.createElement(
+                          'h3',
+                          { className: 'text-xl font-bold text-gray-900 mb-1' },
+                          subItem.part_number || subItem.name,
+                          React.createElement(
+                            'span',
+                            { className: 'inline-flex items-center justify-center w-6 h-6 ml-2 border-2 border-gray-700 rounded-full text-xs font-bold' },
+                            '©'
+                          )
+                        ),
+                        React.createElement('p', { className: 'text-gray-700 font-medium' }, subItem.name)
+                      ),
+                      React.createElement(
+                        'button',
+                        { className: 'text-gray-400 text-sm border border-gray-300 px-4 py-1 rounded hover:bg-gray-50' },
+                        'Compare'
+                      )
+                    ),
+
+                    // VMRS Info
+                    subItem.description && React.createElement(
+                      'p',
+                      { className: 'text-sm text-gray-600 mb-4' },
+                      'VMRS: ',
+                      subItem.description
+                    ),
+
+                    // Stock & Price Info
+                    React.createElement(
+                      'div',
+                      { className: 'flex items-center gap-4 text-sm mb-4' },
+                      React.createElement(
+                        'span',
+                        { 
+                          className: `px-3 py-1 rounded-full font-medium ${
+                            subItem.status === 'active' && subItem.stock_quantity > 0 
+                              ? 'bg-green-100 text-green-800' 
+                              : 'bg-red-100 text-red-800'
+                          }`
+                        },
+                        subItem.status === 'active' && subItem.stock_quantity > 0 ? 'In Stock' : 'Out of Stock'
+                      ),
+                      subItem.stock_quantity > 0 && React.createElement(
+                        'span',
+                        { className: 'text-gray-600' },
+                        `Qty: ${subItem.stock_quantity}`
+                      ),
+                      subItem.price > 0 && React.createElement(
+                        'span',
+                        { className: 'text-gray-900 font-bold text-lg' },
+                        `$${parseFloat(subItem.price).toFixed(2)}`
+                      )
+                    )
+                  )
+                ),
+
+                // Expand Button
+                React.createElement(
+                  'button',
+                  {
+                    onClick: () => toggleExpand(subItem.id),
+                    className: 'w-full px-6 py-2 border-t border-gray-200 flex items-center justify-center gap-2 text-sm text-gray-700 hover:bg-gray-50'
+                  },
+                  React.createElement(
+                    'span',
+                    { className: 'font-medium' },
+                    expandedItem === subItem.id ? '−' : '+'
+                  ),
+                  React.createElement('span', null, expandedItem === subItem.id ? 'Less Info' : 'Description')
+                )
+              ),
+
+              // Expanded Content - Description
+              expandedItem === subItem.id && React.createElement(
+                'div',
+                { className: 'border-t border-gray-200 p-6 bg-white' },
+                React.createElement(
+                  'div',
+                  { className: 'text-gray-700' },
+                  React.createElement('p', null, subItem.description || 'No description available'),
+                  subItem.part_number && React.createElement('p', { className: 'mt-2 text-sm' }, React.createElement('strong', null, 'Part Number: '), subItem.part_number),
+                  subItem.stock_quantity && React.createElement('p', { className: 'mt-1 text-sm' }, React.createElement('strong', null, 'Available Quantity: '), subItem.stock_quantity)
+                )
+              )
             )
           )
         )

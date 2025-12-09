@@ -38,7 +38,10 @@ const ProductManagement = () => {
     price: '',
     stock_quantity: '',
     image_url: '',
-    image_file: null
+    image_file: null,
+    brand: '',
+    manufacturer: '',
+    dtna_classification: ''
   });
 
   useEffect(() => {
@@ -201,7 +204,27 @@ const ProductManagement = () => {
       price: '',
       stock_quantity: '',
       image_url: '',
-      image_file: null
+      image_file: null,
+      brand: '',
+      manufacturer: '',
+      dtna_classification: ''
+    });
+    setShowSubItemForm(true);
+  };
+
+  const handleEditSubItem = (subItem) => {
+    setEditingSubItem(subItem);
+    setSubItemForm({
+      name: subItem.name || '',
+      description: subItem.description || '',
+      part_number: subItem.part_number || '',
+      price: subItem.price || '',
+      stock_quantity: subItem.stock_quantity || '',
+      image_url: subItem.image_url || '',
+      image_file: null,
+      brand: subItem.brand || '',
+      manufacturer: subItem.manufacturer || '',
+      dtna_classification: subItem.dtna_classification || ''
     });
     setShowSubItemForm(true);
   };
@@ -217,6 +240,9 @@ const ProductManagement = () => {
       formData.append('part_number', subItemForm.part_number || '');
       formData.append('price', subItemForm.price || '0');
       formData.append('stock_quantity', subItemForm.stock_quantity || '0');
+      formData.append('brand', subItemForm.brand || '');
+      formData.append('manufacturer', subItemForm.manufacturer || '');
+      formData.append('dtna_classification', subItemForm.dtna_classification || '');
       
       if (subItemForm.image_file) {
         formData.append('image', subItemForm.image_file);
@@ -685,12 +711,24 @@ const ProductManagement = () => {
                     { className: 'flex items-center justify-between mb-2' },
                     React.createElement('h4', { className: 'font-medium text-gray-900' }, subItem.name),
                     React.createElement(
-                      'button',
-                      {
-                        onClick: () => handleDeleteSubItem(subItem.id),
-                        className: 'text-red-600 hover:text-red-800 text-sm'
-                      },
-                      'Delete'
+                      'div',
+                      { className: 'flex gap-2' },
+                      React.createElement(
+                        'button',
+                        {
+                          onClick: () => handleEditSubItem(subItem),
+                          className: 'text-blue-600 hover:text-blue-800 text-sm'
+                        },
+                        'Edit'
+                      ),
+                      React.createElement(
+                        'button',
+                        {
+                          onClick: () => handleDeleteSubItem(subItem.id),
+                          className: 'text-red-600 hover:text-red-800 text-sm'
+                        },
+                        'Delete'
+                      )
                     )
                   ),
                   React.createElement('p', { className: 'text-sm text-gray-600 mb-2' }, subItem.description || 'No description'),
@@ -786,6 +824,42 @@ const ProductManagement = () => {
                 onChange: (e) => setSubItemForm({ ...subItemForm, stock_quantity: e.target.value }),
                 className: 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
               })
+            )
+          ),
+          React.createElement(
+            'div',
+            null,
+            React.createElement('label', { className: 'block text-sm font-medium text-gray-700 mb-1' }, 'Brand'),
+            React.createElement('input', {
+              type: 'text',
+              value: subItemForm.brand,
+              onChange: (e) => setSubItemForm({ ...subItemForm, brand: e.target.value }),
+              className: 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
+            })
+          ),
+          React.createElement(
+            'div',
+            null,
+            React.createElement('label', { className: 'block text-sm font-medium text-gray-700 mb-1' }, 'Manufacturer'),
+            React.createElement('input', {
+              type: 'text',
+              value: subItemForm.manufacturer,
+              onChange: (e) => setSubItemForm({ ...subItemForm, manufacturer: e.target.value }),
+              className: 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
+            })
+          ),
+          React.createElement(
+            'div',
+            null,
+            React.createElement('label', { className: 'block text-sm font-medium text-gray-700 mb-1' }, 'DTNA Parts Classification'),
+            React.createElement('select', {
+              value: subItemForm.dtna_classification,
+              onChange: (e) => setSubItemForm({ ...subItemForm, dtna_classification: e.target.value }),
+              className: 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
+            },
+              React.createElement('option', { value: '' }, 'Select Classification'),
+              React.createElement('option', { value: 'Genuine' }, 'Genuine'),
+              React.createElement('option', { value: 'Premier' }, 'Premier')
             )
           ),
           React.createElement(

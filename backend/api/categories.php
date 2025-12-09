@@ -389,7 +389,7 @@ class CategoryController {
                 $image_url = $this->handleFileUpload('image', 'sub-items');
             }
 
-            $stmt = $this->db->prepare("INSERT INTO item_sub_items (item_id, name, description, part_number, price, stock_quantity, image_url, specifications) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt = $this->db->prepare("INSERT INTO item_sub_items (item_id, name, description, part_number, price, stock_quantity, image_url, specifications, brand, manufacturer, dtna_classification) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             $stmt->execute([
                 $item_id,
                 $name,
@@ -398,7 +398,10 @@ class CategoryController {
                 $_POST['price'] ?? 0,
                 $_POST['stock_quantity'] ?? 0,
                 $image_url ?? '',
-                $_POST['specifications'] ?? '[]'
+                $_POST['specifications'] ?? '[]',
+                $_POST['brand'] ?? '',
+                $_POST['manufacturer'] ?? '',
+                $_POST['dtna_classification'] ?? ''
             ]);
 
             $subItemId = $this->db->lastInsertId();
@@ -447,7 +450,7 @@ class CategoryController {
                 $image_url = $this->handleFileUpload('image', 'sub-items');
             }
 
-            $stmt = $this->db->prepare("UPDATE item_sub_items SET name = ?, description = ?, part_number = ?, price = ?, stock_quantity = ?, image_url = ?, specifications = ? WHERE id = ?");
+            $stmt = $this->db->prepare("UPDATE item_sub_items SET name = ?, description = ?, part_number = ?, price = ?, stock_quantity = ?, image_url = ?, specifications = ?, brand = ?, manufacturer = ?, dtna_classification = ? WHERE id = ?");
             $stmt->execute([
                 $name,
                 $_POST['description'] ?? '',
@@ -456,6 +459,9 @@ class CategoryController {
                 $_POST['stock_quantity'] ?? 0,
                 $image_url,
                 $_POST['specifications'] ?? '[]',
+                $_POST['brand'] ?? '',
+                $_POST['manufacturer'] ?? '',
+                $_POST['dtna_classification'] ?? '',
                 $id
             ]);
 

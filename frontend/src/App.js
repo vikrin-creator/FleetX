@@ -23,8 +23,12 @@ function App() {
         element: React.createElement(Layout, null, React.createElement(Products)) 
       }),
       React.createElement(Route, { 
+        path: '/sub-items/:itemId', 
+        element: React.createElement(Layout, null, React.createElement(SubItems)) 
+      }),
+      React.createElement(Route, { 
         path: '/items/:itemId/sub-items', 
-        element: React.createElement(SubItems) 
+        element: React.createElement(Layout, null, React.createElement(SubItems)) 
       }),
       React.createElement(Route, { 
         path: '/admin/categories', 

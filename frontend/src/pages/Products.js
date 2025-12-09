@@ -145,8 +145,14 @@ const Products = () => {
   };
 
   const handleItemClick = (item) => {
-    setSelectedItem(item);
-    setShowItemModal(true);
+    // Navigate directly to sub-items page
+    navigate(`/sub-items/${item.id}`, {
+      state: {
+        itemName: item.name,
+        categoryName: selectedCategory,
+        categoryId: selectedCategoryId
+      }
+    });
   };
 
   const closeItemModal = () => {
