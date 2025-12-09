@@ -1,7 +1,15 @@
 import React, { useState } from 'react';
 
-const Sidebar = ({ activeTab, onTabChange }) => {
+const Sidebar = ({ activeTab, onTabChange, isMobileOpen, setIsMobileOpen, onCollapseChange }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
+
+  const handleToggleCollapse = () => {
+    const newCollapsedState = !isCollapsed;
+    setIsCollapsed(newCollapsedState);
+    if (onCollapseChange) {
+      onCollapseChange(newCollapsedState);
+    }
+  };
 
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
@@ -15,9 +23,20 @@ const Sidebar = ({ activeTab, onTabChange }) => {
   ];
 
   return React.createElement(
+    React.Fragment,
+    null,
+    // Mobile overlay
+    isMobileOpen && React.createElement('div', {
+      className: 'fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden',
+      onClick: () => setIsMobileOpen(false)
+    }),
+    // Sidebar
+    React.createElement(
     'aside',
     {
-      className: 'fixed left-0 top-0 h-screen bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 transition-all duration-300 z-40 ' + (isCollapsed ? 'w-20' : 'w-64')
+      className: 'fixed left-0 top-0 h-screen bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 transition-all duration-300 z-50 ' + 
+        (isCollapsed ? 'w-20' : 'w-64') + ' ' +
+        (isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0')
     },
     React.createElement(
       'div',
@@ -46,7 +65,7 @@ const Sidebar = ({ activeTab, onTabChange }) => {
         React.createElement(
           'button',
           {
-            onClick: function() { setIsCollapsed(!isCollapsed); },
+            onClick: handleToggleCollapse,
             className: 'flex h-8 w-8 items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300'
           },
           React.createElement('span', { className: 'material-symbols-outlined text-xl' }, isCollapsed ? 'menu' : 'menu_open')
@@ -64,7 +83,10 @@ const Sidebar = ({ activeTab, onTabChange }) => {
               'button',
               {
                 key: item.id,
-                onClick: function() { onTabChange(item.id); },
+                onClick: function() { 
+                  onTabChange(item.id);
+                  if (setIsMobileOpen) setIsMobileOpen(false);
+                },
                 className: 'w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ' + (
                   activeTab === item.id
                     ? 'bg-primary text-white'
@@ -92,6 +114,7 @@ const Sidebar = ({ activeTab, onTabChange }) => {
           !isCollapsed && React.createElement('span', { className: 'text-sm font-medium' }, 'Logout')
         )
       )
+    )
     )
   );
 };

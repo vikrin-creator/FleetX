@@ -359,7 +359,7 @@ const Products = () => {
                   {
                     key: item.id,
                     onClick: () => handleItemClick(item),
-                    className: 'group flex flex-col gap-3 pb-3 bg-white dark:bg-slate-900 rounded-xl overflow-hidden shadow-sm transition-all hover:shadow-lg hover:-translate-y-1 cursor-pointer'
+                    className: 'group flex flex-col bg-white dark:bg-slate-900 rounded-xl overflow-hidden shadow-sm transition-all hover:shadow-lg hover:-translate-y-1 cursor-pointer'
                   },
                   React.createElement('div', {
                     className: 'w-full bg-center bg-no-repeat aspect-video bg-cover',
@@ -369,15 +369,8 @@ const Products = () => {
                   }),
                   React.createElement(
                     'div',
-                    { className: 'p-4 pt-0' },
-                    React.createElement('p', { className: 'text-slate-900 dark:text-slate-50 text-base font-bold leading-normal' }, item.name),
-                    React.createElement('p', { className: 'text-slate-500 dark:text-slate-400 text-sm font-normal leading-normal' }, item.description || 'No description'),
-                    React.createElement(
-                      'div',
-                      { className: 'flex justify-between items-center mt-2' },
-                      item.price && React.createElement('p', { className: 'text-primary font-semibold' }, `$${parseFloat(item.price).toFixed(2)}`),
-                      item.part_number && React.createElement('p', { className: 'text-slate-500 text-xs' }, item.part_number)
-                    )
+                    { className: 'p-4 text-center' },
+                    React.createElement('p', { className: 'text-slate-900 dark:text-slate-50 text-base font-bold leading-normal' }, item.name)
                   )
                 )
               )
@@ -421,41 +414,10 @@ const Products = () => {
           React.createElement(
             'div',
             { className: 'space-y-4' },
-            React.createElement('p', { className: 'text-slate-600 dark:text-slate-400' }, selectedItem.description || 'No description available'),
-            selectedItem.part_number && React.createElement(
-              'div',
-              null,
-              React.createElement('h4', { className: 'font-semibold text-slate-900 dark:text-slate-50' }, 'Part Number:'),
-              React.createElement('p', { className: 'text-slate-600 dark:text-slate-400' }, selectedItem.part_number)
-            ),
-            selectedItem.price && React.createElement(
-              'div',
-              null,
-              React.createElement('h4', { className: 'font-semibold text-slate-900 dark:text-slate-50' }, 'Price:'),
-              React.createElement('p', { className: 'text-2xl font-bold text-primary' }, `$${parseFloat(selectedItem.price).toFixed(2)}`)
-            ),
             React.createElement(
-              'div',
-              null,
-              React.createElement('h3', { className: 'text-lg font-bold text-slate-900 dark:text-slate-50 mb-4' }, 'Categories'),
-              React.createElement('p', { className: 'text-slate-600 dark:text-slate-400' }, `${selectedItem.stock_quantity || 0} units`)
-            ),
-            React.createElement(
-              'div',
-              null,
-              React.createElement('h4', { className: 'font-semibold text-slate-900 dark:text-slate-50' }, 'Status:'),
-              React.createElement(
-                'span',
-                { 
-                  className: `px-3 py-1 rounded-full text-sm ${
-                    selectedItem.status === 'active' ? 'bg-green-100 text-green-800' :
-                    selectedItem.status === 'out_of_stock' ? 'bg-red-100 text-red-800' :
-                    'bg-gray-100 text-gray-800'
-                  }`
-                },
-                selectedItem.status === 'active' ? 'Available' :
-                selectedItem.status === 'out_of_stock' ? 'Out of Stock' : 'Unavailable'
-              )
+              'p',
+              { className: 'text-slate-600 dark:text-slate-400 text-lg' },
+              'Click on an item to view its sub-items'
             )
           )
         ),

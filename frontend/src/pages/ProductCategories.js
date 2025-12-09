@@ -263,12 +263,12 @@ const ProductCategories = () => {
 
   return React.createElement(
     'div',
-    { className: 'p-6' },
+    { className: 'p-4 sm:p-6 lg:p-8' },
     React.createElement(
       'div',
-      { className: 'mb-8' },
-      React.createElement('h1', { className: 'text-3xl font-bold text-gray-900 mb-2' }, 'Product Categories'),
-      React.createElement('p', { className: 'text-gray-600' }, 'Manage your product categories and inventory')
+      { className: 'mb-6 sm:mb-8' },
+      React.createElement('h1', { className: 'text-2xl sm:text-3xl font-bold text-gray-900 mb-2' }, 'Product Categories'),
+      React.createElement('p', { className: 'text-sm sm:text-base text-gray-600' }, 'Manage your product categories and inventory')
     ),
     
     React.createElement(
@@ -289,7 +289,7 @@ const ProductCategories = () => {
       React.createElement('div', { className: 'text-center py-12' }, 'Loading categories...') :
       React.createElement(
         'div',
-        { className: 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' },
+        { className: 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6' },
         categories.map(category => 
           React.createElement(
             'div',
@@ -475,7 +475,7 @@ const ProductCategories = () => {
             React.createElement('div', { className: 'text-gray-500' }, 'No items found in this category')
           ) : React.createElement(
             'div',
-            { className: 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4' },
+            { className: 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4' },
             ...categoryItems.map(item =>
               React.createElement(
                 'div',
@@ -631,7 +631,7 @@ const ProductCategories = () => {
         ),
         React.createElement(
           'div',
-          { className: 'p-6 space-y-4' },
+          { className: 'p-4 sm:p-6 space-y-4' },
           React.createElement(
             'div',
             null,
@@ -752,7 +752,7 @@ const ProductCategories = () => {
         ),
         React.createElement(
           'div',
-          { className: 'p-6 border-t border-gray-200 flex gap-3 sticky bottom-0 bg-white' },
+          { className: 'p-4 sm:p-6 border-t border-gray-200 flex flex-col sm:flex-row gap-3 sticky bottom-0 bg-white' },
           React.createElement(
             'button',
             {

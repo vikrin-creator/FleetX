@@ -320,12 +320,12 @@ const ProductManagement = () => {
 
   return React.createElement(
     'div',
-    { className: 'p-6' },
+    { className: 'p-4 sm:p-6 lg:p-8' },
     React.createElement(
       'div',
-      { className: 'mb-8' },
-      React.createElement('h1', { className: 'text-3xl font-bold text-gray-900 mb-2' }, 'Product Management'),
-      React.createElement('p', { className: 'text-gray-600' }, 'Manage products and items within categories')
+      { className: 'mb-6 sm:mb-8' },
+      React.createElement('h1', { className: 'text-2xl sm:text-3xl font-bold text-gray-900 mb-2' }, 'Product Management'),
+      React.createElement('p', { className: 'text-sm sm:text-base text-gray-600' }, 'Manage products and items within categories')
     ),
     
     // Filters and Actions
@@ -382,10 +382,6 @@ const ProductManagement = () => {
               null,
               React.createElement('th', { className: 'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider' }, 'Product'),
               React.createElement('th', { className: 'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider' }, 'Category'),
-              React.createElement('th', { className: 'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider' }, 'Part Number'),
-              React.createElement('th', { className: 'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider' }, 'Price'),
-              React.createElement('th', { className: 'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider' }, 'Stock'),
-              React.createElement('th', { className: 'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider' }, 'Status'),
               React.createElement('th', { className: 'px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider' }, 'Actions')
             )
           ),
@@ -407,42 +403,13 @@ const ProductManagement = () => {
                       alt: product.name,
                       className: 'h-12 w-12 rounded-lg object-cover mr-4'
                     }),
-                    React.createElement(
-                      'div',
-                      null,
-                      React.createElement('div', { className: 'text-sm font-medium text-gray-900' }, product.name),
-                      React.createElement('div', { className: 'text-sm text-gray-500' }, product.description ? product.description.substring(0, 50) + '...' : 'No description')
-                    )
+                    React.createElement('div', { className: 'text-sm font-medium text-gray-900' }, product.name)
                   )
                 ),
                 React.createElement(
                   'td',
                   { className: 'px-6 py-4 whitespace-nowrap text-sm text-gray-900' },
                   product.category_name || 'Unknown'
-                ),
-                React.createElement(
-                  'td',
-                  { className: 'px-6 py-4 whitespace-nowrap text-sm text-gray-900' },
-                  product.part_number || '-'
-                ),
-                React.createElement(
-                  'td',
-                  { className: 'px-6 py-4 whitespace-nowrap text-sm text-gray-900' },
-                  product.price ? `$${parseFloat(product.price).toFixed(2)}` : '-'
-                ),
-                React.createElement(
-                  'td',
-                  { className: 'px-6 py-4 whitespace-nowrap text-sm text-gray-900' },
-                  product.stock_quantity || 0
-                ),
-                React.createElement(
-                  'td',
-                  { className: 'px-6 py-4 whitespace-nowrap' },
-                  React.createElement(
-                    'span',
-                    { className: `px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(product.status)}` },
-                    getStatusLabel(product.status)
-                  )
                 ),
                 React.createElement(
                   'td',
@@ -525,7 +492,7 @@ const ProductManagement = () => {
             React.createElement(
               'div',
               null,
-              React.createElement('label', { className: 'block text-sm font-medium text-gray-700 mb-2' }, 'Product Name *'),
+              React.createElement('label', { className: 'block text-sm font-medium text-gray-700 mb-2' }, 'Sub-Category *'),
               React.createElement('input', {
                 type: 'text',
                 value: productForm.name,
@@ -535,80 +502,16 @@ const ProductManagement = () => {
               })
             )
           ),
-          React.createElement('textarea', {
-            placeholder: 'Product Description',
-            value: productForm.description,
-            onChange: (e) => setProductForm({ ...productForm, description: e.target.value }),
-            className: 'w-full p-3 border border-gray-300 rounded-lg mb-4 h-24'
-          }),
           React.createElement(
             'div',
-            { className: 'grid grid-cols-1 md:grid-cols-3 gap-4 mb-4' },
-            React.createElement(
-              'div',
-              null,
-              React.createElement('label', { className: 'block text-sm font-medium text-gray-700 mb-2' }, 'Part Number'),
-              React.createElement('input', {
-                type: 'text',
-                value: productForm.part_number,
-                onChange: (e) => setProductForm({ ...productForm, part_number: e.target.value }),
-                className: 'w-full p-3 border border-gray-300 rounded-lg'
-              })
-            ),
-            React.createElement(
-              'div',
-              null,
-              React.createElement('label', { className: 'block text-sm font-medium text-gray-700 mb-2' }, 'Price ($)'),
-              React.createElement('input', {
-                type: 'number',
-                step: '0.01',
-                value: productForm.price,
-                onChange: (e) => setProductForm({ ...productForm, price: e.target.value }),
-                className: 'w-full p-3 border border-gray-300 rounded-lg'
-              })
-            ),
-            React.createElement(
-              'div',
-              null,
-              React.createElement('label', { className: 'block text-sm font-medium text-gray-700 mb-2' }, 'Stock Quantity'),
-              React.createElement('input', {
-                type: 'number',
-                value: productForm.stock_quantity,
-                onChange: (e) => setProductForm({ ...productForm, stock_quantity: e.target.value }),
-                className: 'w-full p-3 border border-gray-300 rounded-lg'
-              })
-            )
-          ),
-          React.createElement(
-            'div',
-            { className: 'grid grid-cols-1 md:grid-cols-2 gap-4 mb-4' },
-            React.createElement(
-              'div',
-              null,
-              React.createElement('label', { className: 'block text-sm font-medium text-gray-700 mb-2' }, 'Status'),
-              React.createElement(
-                'select',
-                {
-                  value: productForm.status,
-                  onChange: (e) => setProductForm({ ...productForm, status: e.target.value }),
-                  className: 'w-full p-3 border border-gray-300 rounded-lg'
-                },
-                React.createElement('option', { value: 'active' }, 'Active'),
-                React.createElement('option', { value: 'inactive' }, 'Inactive'),
-                React.createElement('option', { value: 'out_of_stock' }, 'Out of Stock')
-              )
-            ),
-            React.createElement(
-              'div',
-              null,
-              React.createElement('label', { className: 'block text-sm font-medium text-gray-700 mb-2' }, 'Product Image'),
-              React.createElement('input', {
-                type: 'file',
-                accept: 'image/*',
-                onChange: handleImageChange,
-                className: 'w-full p-3 border border-gray-300 rounded-lg'
-              })
-            )
+            { className: 'mb-4' },
+            React.createElement('label', { className: 'block text-sm font-medium text-gray-700 mb-2' }, 'Product Image'),
+            React.createElement('input', {
+              type: 'file',
+              accept: 'image/*',
+              onChange: handleImageChange,
+              className: 'w-full p-3 border border-gray-300 rounded-lg'
+            })
           ),
           productForm.image_url && React.createElement(
             'div',
@@ -670,7 +573,7 @@ const ProductManagement = () => {
         ),
         React.createElement(
           'div',
-          { className: 'p-6 max-h-[70vh] overflow-y-auto' },
+          { className: 'p-4 sm:p-6 max-h-[70vh] overflow-y-auto' },
           loadingSubItems ? React.createElement(
             'div',
             { className: 'text-center py-8' },
@@ -759,12 +662,12 @@ const ProductManagement = () => {
         },
         React.createElement(
           'div',
-          { className: 'p-6 border-b border-gray-200 sticky top-0 bg-white' },
+          { className: 'p-4 sm:p-6 border-b border-gray-200 sticky top-0 bg-white' },
           React.createElement('h2', { className: 'text-xl font-bold text-gray-900' }, editingSubItem ? 'Edit Sub-Item' : 'Add Sub-Item')
         ),
         React.createElement(
           'div',
-          { className: 'p-6 space-y-4' },
+          { className: 'p-4 sm:p-6 space-y-4' },
           React.createElement(
             'div',
             null,
@@ -885,7 +788,7 @@ const ProductManagement = () => {
         ),
         React.createElement(
           'div',
-          { className: 'p-6 border-t border-gray-200 flex gap-3 sticky bottom-0 bg-white' },
+          { className: 'p-4 sm:p-6 border-t border-gray-200 flex flex-col sm:flex-row gap-3 sticky bottom-0 bg-white' },
           React.createElement(
             'button',
             {
