@@ -9,9 +9,9 @@ function generateOTP() {
 }
 
 /**
- * Store OTP in database
+ * Store OTP in database with optional password for registration
  */
-function storeOTP($email, $otp_code) {
+function storeOTP($email, $otp_code, $password_hash = null) {
     $db = Database::getInstance()->getConnection();
     
     // Delete any existing OTPs for this email
@@ -21,13 +21,21 @@ function storeOTP($email, $otp_code) {
     // Calculate expiration time (10 minutes from now)
     $expires_at = date('Y-m-d H:i:s', strtotime('+10 minutes'));
     
-    // Insert new OTP
-    $insertStmt = $db->prepare("
-        INSERT INTO otp_verification (email, otp_code, expires_at, verified, attempts) 
-        VALUES (?, ?, ?, 0, 0)
-    ");
-    
-    return $insertStmt->execute([$email, $otp_code, $expires_at]);
+    // Check if password_hash column exists, if not use old version
+    try {
+        $insertStmt = $db->prepare("
+            INSERT INTO otp_verification (email, otp_code, expires_at, verified, attempts, password_hash) 
+            VALUES (?, ?, ?, 0, 0, ?)
+        ");
+        return $insertStmt->execute([$email, $otp_code, $expires_at, $password_hash]);
+    } catch (PDOException $e) {
+        // Fallback for tables without password_hash column
+        $insertStmt = $db->prepare("
+            INSERT INTO otp_verification (email, otp_code, expires_at, verified, attempts) 
+            VALUES (?, ?, ?, 0, 0)
+        ");
+        return $insertStmt->execute([$email, $otp_code, $expires_at]);
+    }
 }
 
 /**
@@ -73,13 +81,29 @@ function verifyOTP($email, $otp_code) {
     ");
     $updateStmt->execute([$record['id']]);
     
-    // Mark email as verified in users table
-    $userStmt = $db->prepare("
-        UPDATE users 
-        SET email_verified = 1 
-        WHERE email = ?
-    ");
-    $userStmt->execute([$email]);
+    // If password_hash exists in OTP record, this is a new registration
+    if (isset($record['password_hash']) && !empty($record['password_hash'])) {
+        // Check if user already exists
+        $checkStmt = $db->prepare("SELECT id FROM users WHERE email = ?");
+        $checkStmt->execute([$email]);
+        
+        if (!$checkStmt->fetch()) {
+            // Create the user account
+            $createStmt = $db->prepare("
+                INSERT INTO users (email, password, email_verified) 
+                VALUES (?, ?, 1)
+            ");
+            $createStmt->execute([$email, $record['password_hash']]);
+        }
+    } else {
+        // Mark email as verified in existing users table
+        $userStmt = $db->prepare("
+            UPDATE users 
+            SET email_verified = 1 
+            WHERE email = ?
+        ");
+        $userStmt->execute([$email]);
+    }
     
     return ['success' => true, 'message' => 'Email verified successfully'];
 }

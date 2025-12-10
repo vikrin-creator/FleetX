@@ -71,30 +71,26 @@ function handleRegister() {
     try {
         $db = Database::getInstance()->getConnection();
         
-        // Check if email already exists
-        $stmt = $db->prepare("SELECT id FROM users WHERE email = ?");
+        // Check if email already exists and is verified
+        $stmt = $db->prepare("SELECT id, email_verified FROM users WHERE email = ?");
         $stmt->execute([$email]);
+        $existingUser = $stmt->fetch();
         
-        if ($stmt->fetch()) {
+        if ($existingUser && $existingUser['email_verified'] == 1) {
             Response::error('Email already registered', 400);
             return;
         }
         
-        // Create user account
+        // Hash password but don't create user yet
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-        $insertStmt = $db->prepare("
-            INSERT INTO users (email, password, email_verified) 
-            VALUES (?, ?, 0)
-        ");
-        $insertStmt->execute([$email, $hashedPassword]);
         
-        // Generate and send OTP
+        // Generate and send OTP (store password with it)
         $otp_code = generateOTP();
-        storeOTP($email, $otp_code);
+        storeOTP($email, $otp_code, $hashedPassword);
         $emailResult = sendOTPEmail($email, $otp_code);
         
         if (!$emailResult['success']) {
-            Response::error('Account created but failed to send verification email', 500);
+            Response::error('Failed to send verification email. Please try again.', 500);
             return;
         }
         
