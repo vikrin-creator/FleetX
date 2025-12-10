@@ -9,6 +9,12 @@ export const authAPI = {
       },
       body: JSON.stringify({ email, password })
     });
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ message: 'Failed to register' }));
+      throw new Error(errorData.message || 'Registration failed');
+    }
+    
     return response.json();
   },
 
@@ -20,6 +26,12 @@ export const authAPI = {
       },
       body: JSON.stringify({ email, password })
     });
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ message: 'Failed to login' }));
+      throw new Error(errorData.message || 'Login failed');
+    }
+    
     return response.json();
   },
 
@@ -31,6 +43,12 @@ export const authAPI = {
       },
       body: JSON.stringify({ email, otp_code })
     });
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ message: 'Failed to verify OTP' }));
+      throw new Error(errorData.message || 'Verification failed');
+    }
+    
     return response.json();
   },
 
@@ -42,6 +60,12 @@ export const authAPI = {
       },
       body: JSON.stringify({ email })
     });
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ message: 'Failed to resend OTP' }));
+      throw new Error(errorData.message || 'Resend failed');
+    }
+    
     return response.json();
   }
 };
