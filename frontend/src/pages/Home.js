@@ -380,7 +380,11 @@ const Home = () => {
             categories.slice(0, 6).map((category, index) =>
               React.createElement(
                 'div',
-                { key: index, className: 'flex flex-col gap-2 md:gap-3 pb-3 group cursor-pointer' },
+                { 
+                  key: index, 
+                  className: 'flex flex-col gap-2 md:gap-3 pb-3 group cursor-pointer',
+                  onClick: () => handleCategoryClick(category)
+                },
                 React.createElement('div', {
                   className: 'w-full bg-center bg-no-repeat aspect-video bg-cover rounded-lg overflow-hidden transform group-hover:scale-95 transition-transform duration-300',
                   style: { backgroundImage: `url('${category.image_url}')` }
