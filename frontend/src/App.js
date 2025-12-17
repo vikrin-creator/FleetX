@@ -10,6 +10,8 @@ import Login from './pages/Login.js';
 import SignUp from './pages/SignUp.js';
 import Cart from './pages/Cart.js';
 import Checkout from './pages/Checkout.js';
+import MyOrders from './pages/MyOrders.js';
+import MyAddresses from './pages/MyAddresses.js';
 
 function App() {
   return React.createElement(
@@ -41,6 +43,14 @@ function App() {
       React.createElement(Route, { 
         path: '/checkout', 
         element: React.createElement(Layout, null, React.createElement(Checkout)) 
+      }),
+      React.createElement(Route, { 
+        path: '/my-orders', 
+        element: React.createElement(Layout, null, React.createElement(MyOrders)) 
+      }),
+      React.createElement(Route, { 
+        path: '/my-addresses', 
+        element: React.createElement(Layout, null, React.createElement(MyAddresses)) 
       }),
       React.createElement(Route, { 
         path: '/login', 

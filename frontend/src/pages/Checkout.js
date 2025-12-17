@@ -101,31 +101,43 @@ const Checkout = () => {
 
       const addressResult = await addressResponse.json();
       
-      if (!addressResult.success) {
-        console.error('Failed to save address:', addressResult.message);
-        // Continue with order even if address save fails
+      let shippingAddressId = null;
+      if (addressResult.success && addressResult.addressId) {
+        shippingAddressId = addressResult.addressId;
       }
 
-      // Here you would typically send the order to your backend
-      const orderData = {
-        user: user,
-        items: cartItems,
-        shippingAddress: shippingAddress,
-        paymentMethod: paymentMethod,
-        subtotal: calculateSubtotal(),
-        shipping: calculateShipping(),
-        total: calculateTotal(),
-        orderDate: new Date().toISOString()
-      };
+      // Save order to database
+      const orderResponse = await fetch('https://sandybrown-squirrel-472536.hostingersite.com/backend/api/orders.php?action=save_order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user.id,
+          items: cartItems,
+          shippingAddress: shippingAddress,
+          shippingAddressId: shippingAddressId,
+          paymentMethod: paymentMethod,
+          subtotal: calculateSubtotal(),
+          shippingCost: calculateShipping(),
+          total: calculateTotal()
+        })
+      });
 
-      console.log('Order placed:', orderData);
+      const orderResult = await orderResponse.json();
+      
+      if (!orderResult.success) {
+        alert('Failed to place order: ' + orderResult.message);
+        return;
+      }
       
       // Clear cart
       localStorage.removeItem('cart');
+      window.dispatchEvent(new Event('storage'));
       
       // Show success message and redirect
-      alert('Order placed successfully! Thank you for your purchase.');
-      navigate('/');
+      alert(`Order placed successfully! Your order number is ${orderResult.orderNumber}`);
+      navigate('/my-orders');
     } catch (error) {
       console.error('Order placement error:', error);
       alert('Failed to place order. Please try again.');
