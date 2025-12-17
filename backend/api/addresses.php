@@ -28,7 +28,8 @@ switch ($action) {
         setDefaultAddress();
         break;
     default:
-        Response::error('Invalid action', 400);
+        echo json_encode(['success' => false, 'message' => 'Invalid action']);
+        break;
 }
 
 /**
@@ -49,7 +50,7 @@ function saveAddress() {
     $isDefault = $data['isDefault'] ?? false;
     
     if (!$userId || !$fullName || !$phone || !$addressLine1 || !$city || !$state || !$zipCode) {
-        Response::error('Required fields are missing', 400);
+        echo json_encode(['success' => false, 'message' => 'Required fields are missing']);
         return;
     }
     
@@ -64,7 +65,7 @@ function saveAddress() {
         $stmt->execute([$userId, $addressLine1, $city, $zipCode]);
         
         if ($stmt->fetch()) {
-            Response::success(['message' => 'Address already exists']);
+            echo json_encode(['success' => true, 'message' => 'Address already exists']);
             return;
         }
         
@@ -94,14 +95,15 @@ function saveAddress() {
             $isDefault ? 1 : 0
         ]);
         
-        Response::success([
+        echo json_encode([
+            'success' => true,
             'message' => 'Address saved successfully',
             'addressId' => $db->lastInsertId()
         ]);
         
     } catch (PDOException $e) {
         error_log("Save address error: " . $e->getMessage());
-        Response::error('Failed to save address', 500);
+        echo json_encode(['success' => false, 'message' => 'Failed to save address']);
     }
 }
 
@@ -112,7 +114,7 @@ function getUserAddresses() {
     $userId = $_GET['userId'] ?? null;
     
     if (!$userId) {
-        Response::error('User ID is required', 400);
+        echo json_encode(['success' => false, 'message' => 'User ID is required']);
         return;
     }
     
@@ -137,7 +139,7 @@ function getUserAddresses() {
         
     } catch (PDOException $e) {
         error_log("Get addresses error: " . $e->getMessage());
-        Response::error('Failed to fetch addresses', 500);
+        echo json_encode(['success' => false, 'message' => 'Failed to fetch addresses']);
     }
 }
 
@@ -149,7 +151,7 @@ function deleteAddress() {
     $addressId = $data['addressId'] ?? null;
     
     if (!$addressId) {
-        Response::error('Address ID is required', 400);
+        echo json_encode(['success' => false, 'message' => 'Address ID is required']);
         return;
     }
     
@@ -159,11 +161,11 @@ function deleteAddress() {
         $stmt = $db->prepare("DELETE FROM user_addresses WHERE id = ?");
         $stmt->execute([$addressId]);
         
-        Response::success(['message' => 'Address deleted successfully']);
+        echo json_encode(['success' => true, 'message' => 'Address deleted successfully']);
         
     } catch (PDOException $e) {
         error_log("Delete address error: " . $e->getMessage());
-        Response::error('Failed to delete address', 500);
+        echo json_encode(['success' => false, 'message' => 'Failed to delete address']);
     }
 }
 
@@ -176,7 +178,7 @@ function setDefaultAddress() {
     $userId = $data['userId'] ?? null;
     
     if (!$addressId || !$userId) {
-        Response::error('Address ID and User ID are required', 400);
+        echo json_encode(['success' => false, 'message' => 'Address ID and User ID are required']);
         return;
     }
     
@@ -191,11 +193,11 @@ function setDefaultAddress() {
         $stmt = $db->prepare("UPDATE user_addresses SET is_default = 1 WHERE id = ? AND user_id = ?");
         $stmt->execute([$addressId, $userId]);
         
-        Response::success(['message' => 'Default address updated']);
+        echo json_encode(['success' => true, 'message' => 'Default address updated']);
         
     } catch (PDOException $e) {
         error_log("Set default address error: " . $e->getMessage());
-        Response::error('Failed to set default address', 500);
+        echo json_encode(['success' => false, 'message' => 'Failed to set default address']);
     }
 }
 ?>
