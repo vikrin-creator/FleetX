@@ -26,7 +26,7 @@ const MyAddresses = () => {
       const data = await response.json();
       
       if (data.success) {
-        setAddresses(data.data || []);
+        setAddresses(data.addresses || []);
       } else {
         setError(data.message || 'Failed to fetch addresses');
       }
