@@ -133,7 +133,7 @@ function getUserAddresses() {
             $address['is_default'] = (bool)$address['is_default'];
         }
         
-        Response::success(['addresses' => $addresses]);
+        echo json_encode(['success' => true, 'addresses' => $addresses]);
         
     } catch (PDOException $e) {
         error_log("Get addresses error: " . $e->getMessage());
