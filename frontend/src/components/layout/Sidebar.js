@@ -15,11 +15,8 @@ const Sidebar = ({ activeTab, onTabChange, isMobileOpen, setIsMobileOpen, onColl
     { id: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
     { id: 'products', label: 'Product Categories', icon: 'category' },
     { id: 'inventory', label: 'Product Management', icon: 'inventory_2' },
-    { id: 'vehicles', label: 'Vehicles', icon: 'local_shipping' },
     { id: 'orders', label: 'Orders', icon: 'shopping_bag' },
-    { id: 'customers', label: 'Customers', icon: 'people' },
-    { id: 'reports', label: 'Reports', icon: 'assessment' },
-    { id: 'settings', label: 'Settings', icon: 'settings' }
+    { id: 'customers', label: 'Customers', icon: 'people' }
   ];
 
   return React.createElement(

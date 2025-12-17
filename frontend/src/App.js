@@ -8,6 +8,8 @@ import SubItems from './pages/SubItems.js';
 import Admin from './pages/Admin.js';
 import Login from './pages/Login.js';
 import SignUp from './pages/SignUp.js';
+import Cart from './pages/Cart.js';
+import Checkout from './pages/Checkout.js';
 
 function App() {
   return React.createElement(
@@ -31,6 +33,14 @@ function App() {
       React.createElement(Route, { 
         path: '/items/:itemId/sub-items', 
         element: React.createElement(Layout, null, React.createElement(SubItems)) 
+      }),
+      React.createElement(Route, { 
+        path: '/cart', 
+        element: React.createElement(Layout, null, React.createElement(Cart)) 
+      }),
+      React.createElement(Route, { 
+        path: '/checkout', 
+        element: React.createElement(Layout, null, React.createElement(Checkout)) 
       }),
       React.createElement(Route, { 
         path: '/login', 

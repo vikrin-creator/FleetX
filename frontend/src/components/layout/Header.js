@@ -6,13 +6,51 @@ const Header = () => {
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [user, setUser] = useState(null);
+  const [cartCount, setCartCount] = useState(0);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
 
   useEffect(() => {
     const userData = localStorage.getItem('user');
     if (userData) {
       setUser(JSON.parse(userData));
     }
+    updateCartCount();
   }, []);
+
+  useEffect(() => {
+    // Listen for storage changes to update cart count
+    const handleStorageChange = () => {
+      updateCartCount();
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    // Also check cart on location change
+    updateCartCount();
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, [location]);
+
+  useEffect(() => {
+    // Close profile menu when clicking outside
+    const handleClickOutside = (event) => {
+      if (isProfileMenuOpen && !event.target.closest('.profile-dropdown')) {
+        setIsProfileMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isProfileMenuOpen]);
+
+  const updateCartCount = () => {
+    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+    setCartCount(totalItems);
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('user');
@@ -75,22 +113,168 @@ const Header = () => {
       ),
       React.createElement(
         'div',
-        { className: 'flex gap-1.5' },
-        user ? React.createElement(
-          React.Fragment,
-          null,
+        { className: 'flex gap-1.5 items-center' },
+        // Cart Icon
+        React.createElement(
+          'button',
+          { 
+            onClick: () => navigate('/cart'),
+            className: 'flex items-center justify-center w-9 h-9 rounded-full hover:bg-gray-100 transition-colors relative'
+          },
           React.createElement(
-            'span',
-            { className: 'hidden sm:flex items-center text-xs text-gray-700 mr-2' },
-            user.email
+            'svg',
+            { className: 'w-6 h-6 text-gray-700', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' },
+            React.createElement('path', { 
+              strokeLinecap: 'round', 
+              strokeLinejoin: 'round', 
+              strokeWidth: 2, 
+              d: 'M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z'
+            })
           ),
+          // Cart count badge
+          cartCount > 0 && React.createElement(
+            'span',
+            { className: 'absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center' },
+            cartCount > 99 ? '99+' : cartCount
+          )
+        ),
+        // Profile Icon with Dropdown
+        user ? React.createElement(
+          'div',
+          { className: 'relative profile-dropdown' },
           React.createElement(
             'button',
             { 
-              onClick: handleLogout,
-              className: 'hidden sm:flex min-w-[50px] md:min-w-[60px] cursor-pointer items-center justify-center overflow-hidden rounded h-7 md:h-8 px-2 md:px-3 bg-[#5B5B5B] hover:bg-[#6B6B6B] text-white text-xs font-medium leading-normal transition-colors'
+              onClick: () => setIsProfileMenuOpen(!isProfileMenuOpen),
+              className: 'flex items-center justify-center w-9 h-9 rounded-full bg-blue-600 hover:bg-blue-700 text-white transition-colors'
             },
-            React.createElement('span', { className: 'truncate' }, 'Logout')
+            React.createElement(
+              'svg',
+              { className: 'w-5 h-5', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' },
+              React.createElement('path', { 
+                strokeLinecap: 'round', 
+                strokeLinejoin: 'round', 
+                strokeWidth: 2, 
+                d: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z'
+              })
+            )
+          ),
+          // Dropdown Menu
+          isProfileMenuOpen && React.createElement(
+            'div',
+            { className: 'absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50' },
+            React.createElement(
+              'div',
+              { className: 'px-4 py-3 border-b border-gray-200' },
+              React.createElement('p', { className: 'text-sm font-semibold text-gray-900 truncate' }, user.email),
+              React.createElement('p', { className: 'text-xs text-gray-500 mt-1' }, 'Manage your account')
+            ),
+            React.createElement(
+              'button',
+              { 
+                onClick: () => {
+                  setIsProfileMenuOpen(false);
+                  navigate('/profile');
+                },
+                className: 'w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-3'
+              },
+              React.createElement(
+                'svg',
+                { className: 'w-5 h-5 text-gray-500', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' },
+                React.createElement('path', { 
+                  strokeLinecap: 'round', 
+                  strokeLinejoin: 'round', 
+                  strokeWidth: 2, 
+                  d: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z'
+                })
+              ),
+              'Profile'
+            ),
+            React.createElement(
+              'button',
+              { 
+                onClick: () => {
+                  setIsProfileMenuOpen(false);
+                  navigate('/my-orders');
+                },
+                className: 'w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-3'
+              },
+              React.createElement(
+                'svg',
+                { className: 'w-5 h-5 text-gray-500', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' },
+                React.createElement('path', { 
+                  strokeLinecap: 'round', 
+                  strokeLinejoin: 'round', 
+                  strokeWidth: 2, 
+                  d: 'M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z'
+                })
+              ),
+              'My Orders'
+            ),
+            React.createElement(
+              'button',
+              { 
+                onClick: () => {
+                  setIsProfileMenuOpen(false);
+                  navigate('/my-addresses');
+                },
+                className: 'w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-3'
+              },
+              React.createElement(
+                'svg',
+                { className: 'w-5 h-5 text-gray-500', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' },
+                React.createElement('path', { 
+                  strokeLinecap: 'round', 
+                  strokeLinejoin: 'round', 
+                  strokeWidth: 2, 
+                  d: 'M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z'
+                })
+              ),
+              'My Addresses'
+            ),
+            React.createElement(
+              'button',
+              { 
+                onClick: () => {
+                  setIsProfileMenuOpen(false);
+                  navigate('/change-password');
+                },
+                className: 'w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-3'
+              },
+              React.createElement(
+                'svg',
+                { className: 'w-5 h-5 text-gray-500', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' },
+                React.createElement('path', { 
+                  strokeLinecap: 'round', 
+                  strokeLinejoin: 'round', 
+                  strokeWidth: 2, 
+                  d: 'M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z'
+                })
+              ),
+              'Change Password'
+            ),
+            React.createElement('div', { className: 'border-t border-gray-200 my-2' }),
+            React.createElement(
+              'button',
+              { 
+                onClick: () => {
+                  setIsProfileMenuOpen(false);
+                  handleLogout();
+                },
+                className: 'w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-3'
+              },
+              React.createElement(
+                'svg',
+                { className: 'w-5 h-5 text-red-600', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' },
+                React.createElement('path', { 
+                  strokeLinecap: 'round', 
+                  strokeLinejoin: 'round', 
+                  strokeWidth: 2, 
+                  d: 'M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1'
+                })
+              ),
+              'Logout'
+            )
           )
         ) : React.createElement(
           React.Fragment,

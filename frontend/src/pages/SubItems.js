@@ -17,6 +17,36 @@ const SubItems = () => {
   const categoryName = location.state?.categoryName || 'Category';
   const categoryId = location.state?.categoryId;
 
+  const addToCart = (subItem) => {
+    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    
+    // Check if item already exists in cart
+    const existingItemIndex = cart.findIndex(item => item.id === subItem.id);
+    
+    if (existingItemIndex >= 0) {
+      // Increment quantity if item exists
+      cart[existingItemIndex].quantity += 1;
+    } else {
+      // Add new item to cart
+      cart.push({
+        id: subItem.id,
+        name: subItem.name,
+        part_number: subItem.part_number,
+        price: parseFloat(subItem.price) || 0,
+        image: subItem.image_url,
+        quantity: 1
+      });
+    }
+    
+    localStorage.setItem('cart', JSON.stringify(cart));
+    
+    // Trigger storage event for other components to update
+    window.dispatchEvent(new Event('storage'));
+    
+    // Show success message
+    alert('Item added to cart!');
+  };
+
   useEffect(() => {
     if (itemId) {
       fetchSubItems();
@@ -109,7 +139,7 @@ const SubItems = () => {
       'button',
       {
         onClick: () => setIsFilterOpen(!isFilterOpen),
-        className: 'fixed bottom-6 right-6 z-50 bg-blue-600 text-white p-4 rounded-full shadow-xl hover:bg-blue-700 transition-colors flex items-center gap-2'
+        className: 'md:hidden fixed bottom-6 right-6 z-50 bg-blue-600 text-white p-4 rounded-full shadow-xl hover:bg-blue-700 transition-colors flex items-center gap-2'
       },
       React.createElement(
         'svg',
@@ -499,8 +529,11 @@ const SubItems = () => {
                       ),
                       React.createElement(
                         'button',
-                        { className: 'text-gray-400 text-sm border border-gray-300 px-4 py-1 rounded hover:bg-gray-50' },
-                        'Compare'
+                        { 
+                          onClick: () => addToCart(subItem),
+                          className: 'bg-blue-600 text-white text-sm px-4 py-2 rounded hover:bg-blue-700 transition-colors font-medium'
+                        },
+                        'Add to Cart'
                       )
                     ),
 
