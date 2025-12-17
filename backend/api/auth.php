@@ -42,6 +42,12 @@ switch ($action) {
     case 'forgot_password':
         handleForgotPassword();
         break;
+    case 'verify_reset_otp':
+        handleVerifyResetOTP();
+        break;
+    case 'reset_password':
+        handleResetPassword();
+        break;
     default:
         Response::error('Invalid action', 400);
 }
@@ -302,6 +308,121 @@ function handleForgotPassword() {
     } catch (Exception $e) {
         error_log("Forgot password error: " . $e->getMessage());
         echo json_encode(['success' => false, 'message' => 'Failed to process request']);
+    }
+}
+
+/**
+ * Handle password reset OTP verification
+ */
+function handleVerifyResetOTP() {
+    try {
+        $db = getDBConnection();
+        
+        $input = json_decode(file_get_contents('php://input'), true);
+        if (!$input) {
+            echo json_encode(['success' => false, 'message' => 'Invalid input']);
+            return;
+        }
+        
+        $email = trim($input['email'] ?? '');
+        $otp = trim($input['otp'] ?? '');
+        
+        if (empty($email) || empty($otp)) {
+            echo json_encode(['success' => false, 'message' => 'Email and OTP are required']);
+            return;
+        }
+        
+        // Verify user exists
+        $stmt = $db->prepare("SELECT id FROM users WHERE email = ?");
+        $stmt->execute([$email]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if (!$user) {
+            echo json_encode(['success' => false, 'message' => 'Invalid request']);
+            return;
+        }
+        
+        // Verify OTP
+        if (!verifyOTP($email, $otp)) {
+            echo json_encode(['success' => false, 'message' => 'Invalid or expired OTP']);
+            return;
+        }
+        
+        echo json_encode([
+            'success' => true,
+            'message' => 'OTP verified successfully'
+        ]);
+        
+    } catch (Exception $e) {
+        error_log("Verify reset OTP error: " . $e->getMessage());
+        echo json_encode(['success' => false, 'message' => 'Failed to verify OTP']);
+    }
+}
+
+/**
+ * Handle password reset
+ */
+function handleResetPassword() {
+    try {
+        $db = getDBConnection();
+        
+        $input = json_decode(file_get_contents('php://input'), true);
+        if (!$input) {
+            echo json_encode(['success' => false, 'message' => 'Invalid input']);
+            return;
+        }
+        
+        $email = trim($input['email'] ?? '');
+        $otp = trim($input['otp'] ?? '');
+        $newPassword = trim($input['new_password'] ?? '');
+        
+        if (empty($email) || empty($otp) || empty($newPassword)) {
+            echo json_encode(['success' => false, 'message' => 'All fields are required']);
+            return;
+        }
+        
+        if (strlen($newPassword) < 6) {
+            echo json_encode(['success' => false, 'message' => 'Password must be at least 6 characters long']);
+            return;
+        }
+        
+        // Verify user exists
+        $stmt = $db->prepare("SELECT id FROM users WHERE email = ?");
+        $stmt->execute([$email]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if (!$user) {
+            echo json_encode(['success' => false, 'message' => 'Invalid request']);
+            return;
+        }
+        
+        // Verify OTP one final time
+        if (!verifyOTP($email, $otp)) {
+            echo json_encode(['success' => false, 'message' => 'Invalid or expired OTP']);
+            return;
+        }
+        
+        // Hash new password
+        $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+        
+        // Update password
+        $stmt = $db->prepare("UPDATE users SET password = ? WHERE email = ?");
+        if (!$stmt->execute([$hashedPassword, $email])) {
+            echo json_encode(['success' => false, 'message' => 'Failed to update password']);
+            return;
+        }
+        
+        // Clear the OTP after successful password reset
+        clearOTP($email);
+        
+        echo json_encode([
+            'success' => true,
+            'message' => 'Password reset successfully'
+        ]);
+        
+    } catch (Exception $e) {
+        error_log("Reset password error: " . $e->getMessage());
+        echo json_encode(['success' => false, 'message' => 'Failed to reset password']);
     }
 }
 ?>

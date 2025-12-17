@@ -42,13 +42,36 @@ function sendOTPWithPHPMailer($email, $otp_code, $smtp_host, $smtp_port, $smtp_u
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port = $smtp_port;
         
+        // Anti-spam settings
+        $mail->SMTPOptions = array(
+            'ssl' => array(
+                'verify_peer' => false,
+                'verify_peer_name' => false,
+                'allow_self_signed' => true
+            )
+        );
+        
         // Recipients
         $mail->setFrom($from_email, $from_name);
         $mail->addAddress($email);
+        $mail->addReplyTo($from_email, $from_name);
+        
+        // Anti-spam headers
+        $mail->addCustomHeader('X-Mailer', 'Fleet X Parts System');
+        $mail->addCustomHeader('X-Priority', '3');
+        $mail->addCustomHeader('X-MSMail-Priority', 'Normal');
+        $mail->addCustomHeader('List-Unsubscribe', '<mailto:' . $from_email . '>');
+        $mail->addCustomHeader('Precedence', 'bulk');
+        $mail->Sender = $from_email;
+        $mail->addCustomHeader('X-Priority', '3');
+        $mail->addCustomHeader('X-MSMail-Priority', 'Normal');
+        $mail->addCustomHeader('List-Unsubscribe', '<mailto:' . $from_email . '>');
+        $mail->addCustomHeader('Precedence', 'bulk');
+        $mail->Sender = $from_email;
         
         // Content
         $mail->isHTML(true);
-        $mail->Subject = 'Your Fleet X Verification Code';
+        $mail->Subject = '[Fleet X Parts] Email Verification Code';
         $mail->Body = getOTPEmailTemplate($otp_code);
         $mail->AltBody = "Your Fleet X verification code is: $otp_code\n\nThis code will expire in 10 minutes.";
         
@@ -64,12 +87,18 @@ function sendOTPWithPHPMailer($email, $otp_code, $smtp_host, $smtp_port, $smtp_u
  * Send OTP using PHP mail() function (fallback)
  */
 function sendOTPWithMailFunction($email, $otp_code, $from_email, $from_name) {
-    $subject = 'Your Fleet X Verification Code';
+    $subject = '[Fleet X Parts] Email Verification Code';
     $message = getOTPEmailTemplate($otp_code);
     
     $headers = "MIME-Version: 1.0" . "\r\n";
     $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
     $headers .= "From: $from_name <$from_email>" . "\r\n";
+    $headers .= "Reply-To: $from_name <$from_email>" . "\r\n";
+    $headers .= "Return-Path: $from_email" . "\r\n";
+    $headers .= "X-Mailer: Fleet X Parts System" . "\r\n";
+    $headers .= "X-Priority: 3" . "\r\n";
+    $headers .= "List-Unsubscribe: <mailto:$from_email>" . "\r\n";
+    $headers .= "Precedence: bulk" . "\r\n";
     
     if (mail($email, $subject, $message, $headers)) {
         return ['success' => true, 'message' => 'OTP sent successfully'];
@@ -166,11 +195,29 @@ function sendPasswordResetWithPHPMailer($email, $otp_code, $smtp_host, $smtp_por
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port = $smtp_port;
         
+        // Anti-spam settings
+        $mail->SMTPOptions = array(
+            'ssl' => array(
+                'verify_peer' => false,
+                'verify_peer_name' => false,
+                'allow_self_signed' => true
+            )
+        );
+        
         $mail->setFrom($from_email, $from_name);
         $mail->addAddress($email);
+        $mail->addReplyTo($from_email, $from_name);
+        
+        // Anti-spam headers
+        $mail->addCustomHeader('X-Mailer', 'Fleet X Parts System');
+        $mail->addCustomHeader('X-Priority', '3');
+        $mail->addCustomHeader('X-MSMail-Priority', 'Normal');
+        $mail->addCustomHeader('List-Unsubscribe', '<mailto:' . $from_email . '>');
+        $mail->addCustomHeader('Precedence', 'bulk');
+        $mail->Sender = $from_email;
         
         $mail->isHTML(true);
-        $mail->Subject = 'Password Reset - Fleet X Parts';
+        $mail->Subject = '[Fleet X Parts] Password Reset Request';
         $mail->Body = getPasswordResetEmailTemplate($otp_code);
         $mail->AltBody = "Your Fleet X password reset code is: $otp_code\n\nThis code will expire in 10 minutes.\nIf you didn't request this, please ignore this email.";
         
@@ -186,12 +233,18 @@ function sendPasswordResetWithPHPMailer($email, $otp_code, $smtp_host, $smtp_por
  * Send password reset using PHP mail() function (fallback)
  */
 function sendPasswordResetWithMailFunction($email, $otp_code, $from_email, $from_name) {
-    $subject = 'Password Reset - Fleet X Parts';
+    $subject = '[Fleet X Parts] Password Reset Request';
     $message = getPasswordResetEmailTemplate($otp_code);
     
     $headers = "MIME-Version: 1.0" . "\r\n";
     $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
     $headers .= "From: $from_name <$from_email>" . "\r\n";
+    $headers .= "Reply-To: $from_name <$from_email>" . "\r\n";
+    $headers .= "Return-Path: $from_email" . "\r\n";
+    $headers .= "X-Mailer: Fleet X Parts System" . "\r\n";
+    $headers .= "X-Priority: 3" . "\r\n";
+    $headers .= "List-Unsubscribe: <mailto:$from_email>" . "\r\n";
+    $headers .= "Precedence: bulk" . "\r\n";
     
     if (mail($email, $subject, $message, $headers)) {
         return ['success' => true, 'message' => 'Reset email sent successfully'];

@@ -138,4 +138,14 @@ function cleanupExpiredOTPs() {
     
     return $stmt->execute();
 }
+
+/**
+ * Clear/Delete OTP for a specific email
+ */
+function clearOTP($email) {
+    $db = Database::getInstance()->getConnection();
+    
+    $stmt = $db->prepare("DELETE FROM otp_verification WHERE email = ?");
+    return $stmt->execute([$email]);
+}
 ?>
