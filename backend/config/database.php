@@ -42,3 +42,8 @@ class Database {
         return $this->conn;
     }
 }
+
+// Helper function for backward compatibility
+function getDBConnection() {
+    return Database::getInstance()->getConnection();
+}
