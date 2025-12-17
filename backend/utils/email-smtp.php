@@ -156,14 +156,14 @@ function sendPasswordResetEmail($email, $otp_code) {
  */
 function sendPasswordResetWithPHPMailer($email, $otp_code, $smtp_host, $smtp_port, $smtp_username, $smtp_password, $from_email, $from_name) {
     try {
-        $mail = new PHPMailer\PHPMailer\PHPMailer(true);
+        $mail = new PHPMailer(true);
         
         $mail->isSMTP();
         $mail->Host = $smtp_host;
         $mail->SMTPAuth = true;
         $mail->Username = $smtp_username;
         $mail->Password = $smtp_password;
-        $mail->SMTPSecure = PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port = $smtp_port;
         
         $mail->setFrom($from_email, $from_name);
@@ -179,6 +179,24 @@ function sendPasswordResetWithPHPMailer($email, $otp_code, $smtp_host, $smtp_por
     } catch (Exception $e) {
         error_log("Password reset email failed: " . $mail->ErrorInfo);
         return ['success' => false, 'message' => 'Failed to send email: ' . $mail->ErrorInfo];
+    }
+}
+
+/**
+ * Send password reset using PHP mail() function (fallback)
+ */
+function sendPasswordResetWithMailFunction($email, $otp_code, $from_email, $from_name) {
+    $subject = 'Password Reset - Fleet X Parts';
+    $message = getPasswordResetEmailTemplate($otp_code);
+    
+    $headers = "MIME-Version: 1.0" . "\r\n";
+    $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
+    $headers .= "From: $from_name <$from_email>" . "\r\n";
+    
+    if (mail($email, $subject, $message, $headers)) {
+        return ['success' => true, 'message' => 'Reset email sent successfully'];
+    } else {
+        return ['success' => false, 'message' => 'Failed to send email'];
     }
 }
 
