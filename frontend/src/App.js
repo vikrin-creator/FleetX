@@ -12,6 +12,9 @@ import Cart from './pages/Cart.js';
 import Checkout from './pages/Checkout.js';
 import MyOrders from './pages/MyOrders.js';
 import MyAddresses from './pages/MyAddresses.js';
+import Profile from './pages/Profile.js';
+import ChangePassword from './pages/ChangePassword.js';
+import ForgotPassword from './pages/ForgotPassword.js';
 
 function App() {
   return React.createElement(
@@ -53,8 +56,20 @@ function App() {
         element: React.createElement(Layout, null, React.createElement(MyAddresses)) 
       }),
       React.createElement(Route, { 
+        path: '/profile', 
+        element: React.createElement(Layout, null, React.createElement(Profile)) 
+      }),
+      React.createElement(Route, { 
+        path: '/change-password', 
+        element: React.createElement(Layout, null, React.createElement(ChangePassword)) 
+      }),
+      React.createElement(Route, { 
         path: '/login', 
         element: React.createElement(Login) 
+      }),
+      React.createElement(Route, { 
+        path: '/forgot-password', 
+        element: React.createElement(ForgotPassword) 
       }),
       React.createElement(Route, { 
         path: '/signup', 

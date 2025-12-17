@@ -132,7 +132,7 @@ const SubItems = () => {
 
   return React.createElement(
     'div',
-    { className: 'container mx-auto px-4 py-8' },
+    { className: 'container mx-auto px-3 md:px-4 py-4 md:py-8' },
     
     // Mobile Filter Toggle Button
     React.createElement(
@@ -201,7 +201,7 @@ const SubItems = () => {
     // Main Layout with Sidebar and Content
     React.createElement(
       'div',
-      { className: 'flex gap-6' },
+      { className: 'flex flex-col md:flex-row gap-4 md:gap-6' },
       
       // Mobile overlay backdrop
       isFilterOpen && React.createElement('div', {
@@ -213,9 +213,9 @@ const SubItems = () => {
       React.createElement(
         'aside',
         { 
-          className: `w-80 flex-shrink-0 fixed md:sticky top-0 left-0 h-full md:h-auto z-50 md:z-auto bg-white md:bg-transparent transition-transform duration-300 ${
+          className: `w-full md:w-80 flex-shrink-0 fixed md:sticky top-0 left-0 h-full md:h-auto z-50 md:z-auto bg-white md:bg-transparent transition-transform duration-300 ${
             isFilterOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
-          } overflow-y-auto md:overflow-visible`
+          } overflow-y-auto md:overflow-visible p-4 md:p-0`
         },
         // Close button for mobile
         React.createElement(
@@ -483,23 +483,23 @@ const SubItems = () => {
               // Product Row
               React.createElement(
                 'div',
-                { className: 'p-6' },
+                { className: 'p-4 md:p-6' },
                 React.createElement(
                   'div',
-                  { className: 'flex gap-6' },
+                  { className: 'flex flex-col md:flex-row gap-4 md:gap-6' },
                   
                   // Product Image
                   React.createElement(
                     'div',
-                    { className: 'flex-shrink-0' },
+                    { className: 'flex-shrink-0 mx-auto md:mx-0' },
                     subItem.image_url ? React.createElement('img', {
                       src: subItem.image_url,
                       alt: subItem.name,
-                      className: 'w-32 h-32 object-contain border border-gray-200 rounded'
+                      className: 'w-24 h-24 md:w-32 md:h-32 object-contain border border-gray-200 rounded'
                     }) : React.createElement(
                       'div',
-                      { className: 'w-32 h-32 bg-gray-100 flex items-center justify-center border border-gray-200 rounded' },
-                      React.createElement('span', { className: 'text-gray-400 text-3xl' }, '📦')
+                      { className: 'w-24 h-24 md:w-32 md:h-32 bg-gray-100 flex items-center justify-center border border-gray-200 rounded' },
+                      React.createElement('span', { className: 'text-gray-400 text-2xl md:text-3xl' }, '📦')
                     )
                   ),
 
@@ -511,36 +511,24 @@ const SubItems = () => {
                     // Part Number & Badge
                     React.createElement(
                       'div',
-                      { className: 'flex items-start justify-between mb-2' },
+                      { className: 'mb-2' },
                       React.createElement(
-                        'div',
-                        null,
+                        'h3',
+                        { className: 'text-lg md:text-xl font-bold text-gray-900 mb-1' },
+                        subItem.part_number || subItem.name,
                         React.createElement(
-                          'h3',
-                          { className: 'text-xl font-bold text-gray-900 mb-1' },
-                          subItem.part_number || subItem.name,
-                          React.createElement(
-                            'span',
-                            { className: 'inline-flex items-center justify-center w-6 h-6 ml-2 border-2 border-gray-700 rounded-full text-xs font-bold' },
-                            '©'
-                          )
-                        ),
-                        React.createElement('p', { className: 'text-gray-700 font-medium' }, subItem.name)
+                          'span',
+                          { className: 'inline-flex items-center justify-center w-5 h-5 md:w-6 md:h-6 ml-2 border-2 border-gray-700 rounded-full text-xs font-bold' },
+                          '©'
+                        )
                       ),
-                      React.createElement(
-                        'button',
-                        { 
-                          onClick: () => addToCart(subItem),
-                          className: 'bg-blue-600 text-white text-sm px-4 py-2 rounded hover:bg-blue-700 transition-colors font-medium'
-                        },
-                        'Add to Cart'
-                      )
+                      React.createElement('p', { className: 'text-sm md:text-base text-gray-700 font-medium' }, subItem.name)
                     ),
 
                     // VMRS Info
                     subItem.description && React.createElement(
                       'p',
-                      { className: 'text-sm text-gray-600 mb-4' },
+                      { className: 'text-xs md:text-sm text-gray-600 mb-3' },
                       'VMRS: ',
                       subItem.description
                     ),
@@ -548,11 +536,11 @@ const SubItems = () => {
                     // Stock & Price Info
                     React.createElement(
                       'div',
-                      { className: 'flex items-center gap-4 text-sm mb-4' },
+                      { className: 'flex flex-wrap items-center gap-2 md:gap-4 text-xs md:text-sm mb-3' },
                       React.createElement(
                         'span',
                         { 
-                          className: `px-3 py-1 rounded-full font-medium ${
+                          className: `px-2 md:px-3 py-1 rounded-full font-medium text-xs ${
                             subItem.status === 'active' && subItem.stock_quantity > 0 
                               ? 'bg-green-100 text-green-800' 
                               : 'bg-red-100 text-red-800'
@@ -562,14 +550,24 @@ const SubItems = () => {
                       ),
                       subItem.stock_quantity > 0 && React.createElement(
                         'span',
-                        { className: 'text-gray-600' },
+                        { className: 'text-gray-600 text-xs md:text-sm' },
                         `Qty: ${subItem.stock_quantity}`
                       ),
                       subItem.price > 0 && React.createElement(
                         'span',
-                        { className: 'text-gray-900 font-bold text-lg' },
+                        { className: 'text-gray-900 font-bold text-base md:text-lg' },
                         `$${parseFloat(subItem.price).toFixed(2)}`
                       )
+                    ),
+
+                    // Add to Cart Button (Mobile)
+                    React.createElement(
+                      'button',
+                      { 
+                        onClick: () => addToCart(subItem),
+                        className: 'w-full md:w-auto bg-blue-600 text-white text-sm px-4 py-2 rounded hover:bg-blue-700 transition-colors font-medium'
+                      },
+                      'Add to Cart'
                     )
                   )
                 ),

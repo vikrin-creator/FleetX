@@ -39,6 +39,9 @@ switch ($action) {
     case 'resend_otp':
         handleResendOTP();
         break;
+    case 'forgot_password':
+        handleForgotPassword();
+        break;
     default:
         Response::error('Invalid action', 400);
 }
@@ -248,6 +251,57 @@ function handleResendOTP() {
     } catch (Exception $e) {
         error_log("Resend OTP error: " . $e->getMessage());
         Response::error('Failed to resend OTP', 500);
+    }
+}
+
+/**
+ * Handle forgot password
+ */
+function handleForgotPassword() {
+    $data = json_decode(file_get_contents('php://input'), true);
+    
+    $email = filter_var($data['email'] ?? '', FILTER_VALIDATE_EMAIL);
+    
+    if (!$email) {
+        echo json_encode(['success' => false, 'message' => 'Email is required']);
+        return;
+    }
+    
+    try {
+        $db = Database::getInstance()->getConnection();
+        
+        // Check if user exists
+        $stmt = $db->prepare("SELECT id, email_verified FROM users WHERE email = ?");
+        $stmt->execute([$email]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        // Always show success message for security (don't reveal if email exists)
+        if (!$user) {
+            echo json_encode([
+                'success' => true,
+                'message' => 'If an account exists with this email, you will receive password reset instructions.'
+            ]);
+            return;
+        }
+        
+        // Generate OTP for password reset
+        $otp_code = generateOTP();
+        storeOTP($email, $otp_code);
+        $emailResult = sendPasswordResetEmail($email, $otp_code);
+        
+        if (!$emailResult['success']) {
+            echo json_encode(['success' => false, 'message' => 'Failed to send reset email']);
+            return;
+        }
+        
+        echo json_encode([
+            'success' => true,
+            'message' => 'If an account exists with this email, you will receive password reset instructions.'
+        ]);
+        
+    } catch (Exception $e) {
+        error_log("Forgot password error: " . $e->getMessage());
+        echo json_encode(['success' => false, 'message' => 'Failed to process request']);
     }
 }
 ?>

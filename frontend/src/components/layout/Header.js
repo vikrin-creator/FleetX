@@ -114,12 +114,12 @@ const Header = () => {
       React.createElement(
         'div',
         { className: 'flex gap-1.5 items-center' },
-        // Cart Icon
+        // Cart Icon (Hidden on mobile)
         React.createElement(
           'button',
           { 
             onClick: () => navigate('/cart'),
-            className: 'flex items-center justify-center w-9 h-9 rounded-full hover:bg-gray-100 transition-colors relative'
+            className: 'hidden lg:flex items-center justify-center w-9 h-9 rounded-full hover:bg-gray-100 transition-colors relative'
           },
           React.createElement(
             'svg',
@@ -138,10 +138,10 @@ const Header = () => {
             cartCount > 99 ? '99+' : cartCount
           )
         ),
-        // Profile Icon with Dropdown
+        // Profile Icon with Dropdown (Hidden on mobile)
         user ? React.createElement(
           'div',
-          { className: 'relative profile-dropdown' },
+          { className: 'relative profile-dropdown hidden lg:block' },
           React.createElement(
             'button',
             { 
@@ -323,6 +323,35 @@ const Header = () => {
       React.createElement(
         'nav',
         { className: 'flex flex-col gap-4' },
+        // Cart Link (Mobile)
+        React.createElement(
+          'button',
+          { 
+            onClick: () => { navigate('/cart'); setIsMobileMenuOpen(false); },
+            className: 'flex items-center gap-3 px-2 py-2 text-gray-700 hover:text-gray-900 text-sm font-medium'
+          },
+          React.createElement(
+            'div',
+            { className: 'relative' },
+            React.createElement(
+              'svg',
+              { className: 'w-5 h-5', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' },
+              React.createElement('path', { 
+                strokeLinecap: 'round', 
+                strokeLinejoin: 'round', 
+                strokeWidth: 2, 
+                d: 'M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z'
+              })
+            ),
+            cartCount > 0 && React.createElement(
+              'span',
+              { className: 'absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-4 h-4 flex items-center justify-center' },
+              cartCount > 9 ? '9+' : cartCount
+            )
+          ),
+          React.createElement('span', null, 'Cart'),
+          cartCount > 0 && React.createElement('span', { className: 'text-xs text-gray-500' }, `(${cartCount} items)`)
+        ),
         React.createElement(
           Link,
           { 
@@ -362,14 +391,116 @@ const Header = () => {
         user ? React.createElement(
           React.Fragment,
           null,
-          React.createElement('div', { className: 'text-xs text-gray-600 px-2' }, user.email),
+          // User Info Section
+          React.createElement(
+            'div',
+            { className: 'border-t border-gray-200 pt-4 mt-2' },
+            React.createElement(
+              'div',
+              { className: 'flex items-center gap-3 px-2 pb-3 border-b border-gray-200' },
+              React.createElement(
+                'div',
+                { className: 'flex items-center justify-center w-10 h-10 rounded-full bg-blue-600 text-white font-semibold' },
+                user.email?.charAt(0).toUpperCase() || 'U'
+              ),
+              React.createElement(
+                'div',
+                { className: 'flex-1 min-w-0' },
+                React.createElement('p', { className: 'text-sm font-semibold text-gray-900 truncate' }, user.email),
+                React.createElement('p', { className: 'text-xs text-gray-500' }, 'Account')
+              )
+            )
+          ),
+          // Profile Menu Items
+          React.createElement(
+            'button',
+            { 
+              onClick: () => { navigate('/profile'); setIsMobileMenuOpen(false); },
+              className: 'w-full text-left px-2 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-3 rounded'
+            },
+            React.createElement(
+              'svg',
+              { className: 'w-5 h-5 text-gray-500', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' },
+              React.createElement('path', { 
+                strokeLinecap: 'round', 
+                strokeLinejoin: 'round', 
+                strokeWidth: 2, 
+                d: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z'
+              })
+            ),
+            'Profile'
+          ),
+          React.createElement(
+            'button',
+            { 
+              onClick: () => { navigate('/my-orders'); setIsMobileMenuOpen(false); },
+              className: 'w-full text-left px-2 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-3 rounded'
+            },
+            React.createElement(
+              'svg',
+              { className: 'w-5 h-5 text-gray-500', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' },
+              React.createElement('path', { 
+                strokeLinecap: 'round', 
+                strokeLinejoin: 'round', 
+                strokeWidth: 2, 
+                d: 'M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z'
+              })
+            ),
+            'My Orders'
+          ),
+          React.createElement(
+            'button',
+            { 
+              onClick: () => { navigate('/my-addresses'); setIsMobileMenuOpen(false); },
+              className: 'w-full text-left px-2 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-3 rounded'
+            },
+            React.createElement(
+              'svg',
+              { className: 'w-5 h-5 text-gray-500', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' },
+              React.createElement('path', { 
+                strokeLinecap: 'round', 
+                strokeLinejoin: 'round', 
+                strokeWidth: 2, 
+                d: 'M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z'
+              })
+            ),
+            'My Addresses'
+          ),
+          React.createElement(
+            'button',
+            { 
+              onClick: () => { navigate('/change-password'); setIsMobileMenuOpen(false); },
+              className: 'w-full text-left px-2 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-3 rounded'
+            },
+            React.createElement(
+              'svg',
+              { className: 'w-5 h-5 text-gray-500', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' },
+              React.createElement('path', { 
+                strokeLinecap: 'round', 
+                strokeLinejoin: 'round', 
+                strokeWidth: 2, 
+                d: 'M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z'
+              })
+            ),
+            'Change Password'
+          ),
           React.createElement(
             'button',
             { 
               onClick: () => { handleLogout(); setIsMobileMenuOpen(false); },
-              className: 'flex min-w-[50px] cursor-pointer items-center justify-center overflow-hidden rounded h-8 px-3 bg-[#5B5B5B] hover:bg-[#6B6B6B] text-white text-xs font-medium leading-normal transition-colors mt-2'
+              className: 'w-full text-left px-2 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-3 rounded mt-2 border-t border-gray-200 pt-4'
             },
-            React.createElement('span', { className: 'truncate' }, 'Logout')
+            React.createElement(
+              'svg',
+              { className: 'w-5 h-5 text-red-600', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' },
+              React.createElement('path', { 
+                strokeLinecap: 'round', 
+                strokeLinejoin: 'round', 
+                strokeWidth: 2, 
+                d: 'M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1'
+              })
+            ),
+            'Logout'
           )
         ) : React.createElement(
           React.Fragment,

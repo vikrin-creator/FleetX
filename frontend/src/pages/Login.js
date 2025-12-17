@@ -142,6 +142,15 @@ const Login = () => {
           )
         ),
         React.createElement(
+          'div',
+          { className: 'flex items-center justify-end' },
+          React.createElement(
+            Link,
+            { to: '/forgot-password', className: 'text-sm font-medium text-blue-600 hover:text-blue-500' },
+            'Forgot your password?'
+          )
+        ),
+        React.createElement(
           'button',
           {
             type: 'submit',
