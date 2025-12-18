@@ -269,45 +269,54 @@ function handleForgotPassword() {
     $email = filter_var($data['email'] ?? '', FILTER_VALIDATE_EMAIL);
     
     if (!$email) {
-        echo json_encode(['success' => false, 'message' => 'Email is required']);
+        echo json_encode(['success' => false, 'message' => 'Valid email is required']);
         return;
     }
     
-    try {
-        $db = Database::getInstance()->getConnection();
-        
-        // Check if user exists
-        $stmt = $db->prepare("SELECT id, email_verified FROM users WHERE email = ?");
-        $stmt->execute([$email]);
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
-        
-        // Always show success message for security (don't reveal if email exists)
-        if (!$user) {
-            echo json_encode([
-                'success' => true,
-                'message' => 'If an account exists with this email, you will receive password reset instructions.'
-            ]);
-            return;
-        }
-        
-        // Generate OTP for password reset
-        $otp_code = generateOTP();
-        storeOTP($email, $otp_code);
-        $emailResult = sendPasswordResetEmail($email, $otp_code);
-        
-        if (!$emailResult['success']) {
-            echo json_encode(['success' => false, 'message' => 'Failed to send reset email']);
-            return;
-        }
-        
+    // Use the EXACT same approach as registration (which works)
+    $otp_code = str_pad(random_int(100000, 999999), 6, '0', STR_PAD_LEFT);
+    
+    // Use the same sendOTPEmail function that works for registration
+    $emailResult = sendOTPEmail($email, $otp_code);
+    
+    if ($emailResult['success']) {
         echo json_encode([
             'success' => true,
-            'message' => 'If an account exists with this email, you will receive password reset instructions.'
+            'message' => 'Password reset code sent! Check your inbox.'
         ]);
+    } else {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Failed to send reset email. Please try again.'
+        ]);
+    }
+}
+
+/**
+ * Create OTP verification table if it doesn't exist
+ */
+function createOTPTableIfNotExists($db) {
+    try {
+        $sql = "CREATE TABLE IF NOT EXISTS otp_verification (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            email VARCHAR(255) NOT NULL,
+            otp_code VARCHAR(6) NOT NULL,
+            expires_at DATETIME NOT NULL,
+            verified TINYINT(1) DEFAULT 0,
+            verified_at DATETIME NULL,
+            attempts INT DEFAULT 0,
+            password_hash VARCHAR(255) NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            INDEX idx_email_otp (email, otp_code),
+            INDEX idx_expires_at (expires_at)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
         
+        $db->exec($sql);
+        return true;
     } catch (Exception $e) {
-        error_log("Forgot password error: " . $e->getMessage());
-        echo json_encode(['success' => false, 'message' => 'Failed to process request']);
+        error_log("Failed to create OTP table: " . $e->getMessage());
+        return false;
     }
 }
 

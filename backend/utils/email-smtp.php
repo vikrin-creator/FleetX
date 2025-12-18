@@ -2,8 +2,10 @@
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-// Load PHPMailer via autoload
-require_once __DIR__ . '/../vendor/autoload.php';
+// Load PHPMailer via autoload (only if available)
+if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
+    require_once __DIR__ . '/../vendor/autoload.php';
+}
 
 /**
  * Send OTP email using SMTP
