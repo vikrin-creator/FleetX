@@ -2,28 +2,23 @@
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-// If you don't have PHPMailer installed via composer, download it manually
-// Or use the simple mail() function as fallback
+// Load PHPMailer via autoload
+require_once __DIR__ . '/../vendor/autoload.php';
 
 /**
  * Send OTP email using SMTP
  */
 function sendOTPEmail($email, $otp_code) {
-    // Email configuration for GoDaddy email with Outlook
-    $smtp_host = 'smtp.office365.com'; // GoDaddy with Outlook uses Office365 SMTP
-    $smtp_port = 587; // STARTTLS port
+    // Email configuration for GoDaddy Direct SMTP (Proven Working)
+    $smtp_host = 'smtpout.secureserver.net'; // GoDaddy Direct SMTP for inbox delivery
+    $smtp_port = 465; // SSL port
     $smtp_username = 'sarwan@fleetxusa.com'; // Full email address
     $smtp_password = 'Sarwan2005'; // GoDaddy email password
     $from_email = 'sarwan@fleetxusa.com';
     $from_name = 'Fleet X Parts';
     
-    // Check if PHPMailer is available
-    if (class_exists('PHPMailer\PHPMailer\PHPMailer')) {
-        return sendOTPWithPHPMailer($email, $otp_code, $smtp_host, $smtp_port, $smtp_username, $smtp_password, $from_email, $from_name);
-    } else {
-        // Fallback to simple mail()
-        return sendOTPWithMailFunction($email, $otp_code, $from_email, $from_name);
-    }
+    // Use PHPMailer directly (no fallback needed - it's installed)
+    return sendOTPWithPHPMailer($email, $otp_code, $smtp_host, $smtp_port, $smtp_username, $smtp_password, $from_email, $from_name);
 }
 
 /**
@@ -39,7 +34,7 @@ function sendOTPWithPHPMailer($email, $otp_code, $smtp_host, $smtp_port, $smtp_u
         $mail->SMTPAuth = true;
         $mail->Username = $smtp_username;
         $mail->Password = $smtp_password;
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS; // SSL for port 465
         $mail->Port = $smtp_port;
         
         // Anti-spam settings
@@ -63,11 +58,6 @@ function sendOTPWithPHPMailer($email, $otp_code, $smtp_host, $smtp_port, $smtp_u
         $mail->addCustomHeader('List-Unsubscribe', '<mailto:' . $from_email . '>');
         $mail->addCustomHeader('Precedence', 'bulk');
         $mail->Sender = $from_email;
-        $mail->addCustomHeader('X-Priority', '3');
-        $mail->addCustomHeader('X-MSMail-Priority', 'Normal');
-        $mail->addCustomHeader('List-Unsubscribe', '<mailto:' . $from_email . '>');
-        $mail->addCustomHeader('Precedence', 'bulk');
-        $mail->Sender = $from_email;
         
         // Content
         $mail->isHTML(true);
@@ -83,29 +73,7 @@ function sendOTPWithPHPMailer($email, $otp_code, $smtp_host, $smtp_port, $smtp_u
     }
 }
 
-/**
- * Send OTP using PHP mail() function (fallback)
- */
-function sendOTPWithMailFunction($email, $otp_code, $from_email, $from_name) {
-    $subject = '[Fleet X Parts] Email Verification Code';
-    $message = getOTPEmailTemplate($otp_code);
-    
-    $headers = "MIME-Version: 1.0" . "\r\n";
-    $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
-    $headers .= "From: $from_name <$from_email>" . "\r\n";
-    $headers .= "Reply-To: $from_name <$from_email>" . "\r\n";
-    $headers .= "Return-Path: $from_email" . "\r\n";
-    $headers .= "X-Mailer: Fleet X Parts System" . "\r\n";
-    $headers .= "X-Priority: 3" . "\r\n";
-    $headers .= "List-Unsubscribe: <mailto:$from_email>" . "\r\n";
-    $headers .= "Precedence: bulk" . "\r\n";
-    
-    if (mail($email, $subject, $message, $headers)) {
-        return ['success' => true, 'message' => 'OTP sent successfully'];
-    } else {
-        return ['success' => false, 'message' => 'Failed to send email'];
-    }
-}
+
 
 /**
  * Get HTML email template for OTP
@@ -164,20 +132,16 @@ function getOTPEmailTemplate($otp_code) {
  * Send password reset email
  */
 function sendPasswordResetEmail($email, $otp_code) {
-    // Email configuration for GoDaddy email with Outlook
-    $smtp_host = 'smtp.office365.com';
-    $smtp_port = 587;
+    // Email configuration for GoDaddy Direct SMTP (Proven Working)
+    $smtp_host = 'smtpout.secureserver.net';
+    $smtp_port = 465;
     $smtp_username = 'sarwan@fleetxusa.com';
     $smtp_password = 'Sarwan2005';
     $from_email = 'sarwan@fleetxusa.com';
     $from_name = 'Fleet X Parts';
     
-    // Check if PHPMailer is available
-    if (class_exists('PHPMailer\PHPMailer\PHPMailer')) {
-        return sendPasswordResetWithPHPMailer($email, $otp_code, $smtp_host, $smtp_port, $smtp_username, $smtp_password, $from_email, $from_name);
-    } else {
-        return sendPasswordResetWithMailFunction($email, $otp_code, $from_email, $from_name);
-    }
+    // Use PHPMailer directly (no fallback needed - it's installed)
+    return sendPasswordResetWithPHPMailer($email, $otp_code, $smtp_host, $smtp_port, $smtp_username, $smtp_password, $from_email, $from_name);
 }
 
 /**
@@ -192,7 +156,7 @@ function sendPasswordResetWithPHPMailer($email, $otp_code, $smtp_host, $smtp_por
         $mail->SMTPAuth = true;
         $mail->Username = $smtp_username;
         $mail->Password = $smtp_password;
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS; // SSL for port 465
         $mail->Port = $smtp_port;
         
         // Anti-spam settings
@@ -229,29 +193,7 @@ function sendPasswordResetWithPHPMailer($email, $otp_code, $smtp_host, $smtp_por
     }
 }
 
-/**
- * Send password reset using PHP mail() function (fallback)
- */
-function sendPasswordResetWithMailFunction($email, $otp_code, $from_email, $from_name) {
-    $subject = '[Fleet X Parts] Password Reset Request';
-    $message = getPasswordResetEmailTemplate($otp_code);
-    
-    $headers = "MIME-Version: 1.0" . "\r\n";
-    $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
-    $headers .= "From: $from_name <$from_email>" . "\r\n";
-    $headers .= "Reply-To: $from_name <$from_email>" . "\r\n";
-    $headers .= "Return-Path: $from_email" . "\r\n";
-    $headers .= "X-Mailer: Fleet X Parts System" . "\r\n";
-    $headers .= "X-Priority: 3" . "\r\n";
-    $headers .= "List-Unsubscribe: <mailto:$from_email>" . "\r\n";
-    $headers .= "Precedence: bulk" . "\r\n";
-    
-    if (mail($email, $subject, $message, $headers)) {
-        return ['success' => true, 'message' => 'Reset email sent successfully'];
-    } else {
-        return ['success' => false, 'message' => 'Failed to send email'];
-    }
-}
+
 
 /**
  * Get password reset email template
