@@ -27,7 +27,7 @@ const Footer = () => {
           React.createElement('a', { href: '#', className: 'text-sm text-gray-300 hover:text-white transition-colors' }, 'Home'),
           React.createElement('a', { href: '#', className: 'text-sm text-gray-300 hover:text-white transition-colors' }, 'Products'),
           React.createElement('a', { href: '#', className: 'text-sm text-gray-300 hover:text-white transition-colors' }, 'About Us'),
-          React.createElement('a', { href: '#', className: 'text-sm text-gray-300 hover:text-white transition-colors' }, 'Contact')
+          React.createElement('a', { href: '/contact', className: 'text-sm text-gray-300 hover:text-white transition-colors' }, 'Contact')
         ),
         
         // Customer Service
@@ -35,9 +35,10 @@ const Footer = () => {
           'div',
           { className: 'flex flex-col gap-3' },
           React.createElement('h3', { className: 'text-lg font-bold mb-2' }, 'Customer Service'),
-          React.createElement('a', { href: '#', className: 'text-sm text-gray-300 hover:text-white transition-colors' }, 'Help Center'),
-          React.createElement('a', { href: '#', className: 'text-sm text-gray-300 hover:text-white transition-colors' }, 'Shipping Info'),
-          React.createElement('a', { href: '#', className: 'text-sm text-gray-300 hover:text-white transition-colors' }, 'Returns'),
+          React.createElement('a', { href: '/privacy-policy', className: 'text-sm text-gray-300 hover:text-white transition-colors' }, 'Privacy Policy'),
+          React.createElement('a', { href: '/terms-conditions', className: 'text-sm text-gray-300 hover:text-white transition-colors' }, 'Terms & Conditions'),
+          React.createElement('a', { href: '/shipping-return-policy', className: 'text-sm text-gray-300 hover:text-white transition-colors' }, 'Shipping & Return Policy'),
+          React.createElement('a', { href: '/cancellation-refund-policy', className: 'text-sm text-gray-300 hover:text-white transition-colors' }, 'Cancellation & Refunds'),
           React.createElement('a', { href: '#', className: 'text-sm text-gray-300 hover:text-white transition-colors' }, 'FAQs')
         ),
         

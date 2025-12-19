@@ -15,6 +15,11 @@ import MyAddresses from './pages/MyAddresses.js';
 import Profile from './pages/Profile.js';
 import ChangePassword from './pages/ChangePassword.js';
 import ForgotPassword from './pages/ForgotPassword.js';
+import PrivacyPolicy from './pages/PrivacyPolicy.js';
+import ShippingReturnPolicy from './pages/ShippingReturnPolicy.js';
+import CancellationRefundPolicy from './pages/CancellationRefundPolicy.js';
+import TermsConditions from './pages/TermsConditions.js';
+import ContactUs from './pages/ContactUs.js';
 
 function App() {
   return React.createElement(
@@ -82,6 +87,26 @@ function App() {
       React.createElement(Route, { 
         path: '/admin', 
         element: React.createElement(Admin) 
+      }),
+      React.createElement(Route, { 
+        path: '/privacy-policy', 
+        element: React.createElement(Layout, null, React.createElement(PrivacyPolicy)) 
+      }),
+      React.createElement(Route, { 
+        path: '/shipping-return-policy', 
+        element: React.createElement(Layout, null, React.createElement(ShippingReturnPolicy)) 
+      }),
+      React.createElement(Route, { 
+        path: '/cancellation-refund-policy', 
+        element: React.createElement(Layout, null, React.createElement(CancellationRefundPolicy)) 
+      }),
+      React.createElement(Route, { 
+        path: '/terms-conditions', 
+        element: React.createElement(Layout, null, React.createElement(TermsConditions)) 
+      }),
+      React.createElement(Route, { 
+        path: '/contact', 
+        element: React.createElement(Layout, null, React.createElement(ContactUs)) 
       })
     )
   );
