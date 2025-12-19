@@ -83,7 +83,7 @@ function sendContactEmail($fullName, $email, $phone, $subject, $message, $upload
     $smtp_password = 'Sarwan2005';
     $from_email = 'sarwan@fleetxusa.com';
     $from_name = 'Fleet X Parts Contact Form';
-    $admin_email = 'vikrin48@gmail.com'; // Admin email to receive contact form submissions
+    $admin_email = 'sarwan@fleetxusa.com'; // Admin email to receive contact form submissions
     
     try {
         $mail = new PHPMailer(true);
