@@ -34,18 +34,37 @@ const ContactUs = () => {
     setSubmitStatus({ type: '', message: '' });
 
     try {
-      const response = await fetch('https://sandybrown-squirrel-472536.hostingersite.com/api/contact.php', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      // Use FormData if there's a file, otherwise use JSON
+      let requestBody;
+      let headers = {};
+      
+      if (formData.file) {
+        // Use FormData for file upload
+        const formDataToSend = new FormData();
+        formDataToSend.append('fullName', formData.fullName);
+        formDataToSend.append('email', formData.email);
+        formDataToSend.append('phone', formData.phone);
+        formDataToSend.append('subject', formData.subject);
+        formDataToSend.append('message', formData.message);
+        formDataToSend.append('file', formData.file);
+        requestBody = formDataToSend;
+        // Don't set Content-Type header - browser will set it with boundary
+      } else {
+        // Use JSON when no file
+        headers['Content-Type'] = 'application/json';
+        requestBody = JSON.stringify({
           fullName: formData.fullName,
           email: formData.email,
           phone: formData.phone,
           subject: formData.subject,
           message: formData.message
-        })
+        });
+      }
+
+      const response = await fetch('https://sandybrown-squirrel-472536.hostingersite.com/backend/api/contact.php', {
+        method: 'POST',
+        headers: headers,
+        body: requestBody
       });
 
       const contentType = response.headers.get('content-type');

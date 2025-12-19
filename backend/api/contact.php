@@ -23,8 +23,15 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit();
 }
 
-// Get JSON input
-$input = json_decode(file_get_contents('php://input'), true);
+// Get input from either JSON or FormData
+$contentType = $_SERVER['CONTENT_TYPE'] ?? '';
+if (strpos($contentType, 'application/json') !== false) {
+    // JSON request
+    $input = json_decode(file_get_contents('php://input'), true);
+} else {
+    // FormData request
+    $input = $_POST;
+}
 
 // Validate required fields
 $required_fields = ['fullName', 'email', 'phone', 'subject', 'message'];
@@ -42,6 +49,12 @@ $phone = htmlspecialchars(trim($input['phone']));
 $subject = htmlspecialchars(trim($input['subject']));
 $message = htmlspecialchars(trim($input['message']));
 
+// Handle file upload if present
+$uploadedFile = null;
+if (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
+    $uploadedFile = $_FILES['file'];
+}
+
 // Validate email
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     Response::error('Invalid email address', 400);
@@ -49,7 +62,7 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
 }
 
 // Send email to admin
-$result = sendContactEmail($fullName, $email, $phone, $subject, $message);
+$result = sendContactEmail($fullName, $email, $phone, $subject, $message, $uploadedFile);
 
 if ($result['success']) {
     Response::success('Message sent successfully! We will get back to you within 1 business day.', [
@@ -62,7 +75,7 @@ if ($result['success']) {
 /**
  * Send contact form email to admin
  */
-function sendContactEmail($fullName, $email, $phone, $subject, $message) {
+function sendContactEmail($fullName, $email, $phone, $subject, $message, $uploadedFile = null) {
     // Email configuration for GoDaddy Direct SMTP
     $smtp_host = 'smtpout.secureserver.net';
     $smtp_port = 465;
@@ -102,6 +115,11 @@ function sendContactEmail($fullName, $email, $phone, $subject, $message) {
         $mail->Subject = "[FleetX Contact] $subject";
         $mail->Body = getContactEmailTemplate($fullName, $email, $phone, $subject, $message);
         $mail->AltBody = "New Contact Form Submission\n\nName: $fullName\nEmail: $email\nPhone: $phone\nSubject: $subject\n\nMessage:\n$message";
+        
+        // Attach file if present
+        if ($uploadedFile && isset($uploadedFile['tmp_name']) && file_exists($uploadedFile['tmp_name'])) {
+            $mail->addAttachment($uploadedFile['tmp_name'], $uploadedFile['name']);
+        }
         
         $mail->send();
         
