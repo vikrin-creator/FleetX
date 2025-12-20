@@ -43,7 +43,7 @@ export const categoryAPI = {
 
   updateCategory: async (id, categoryData) => {
     const response = await fetch(`${API_BASE_URL}/categories/${id}`, {
-      method: 'PUT',
+      method: 'POST',
       body: categoryData, // FormData for file upload
     });
     const data = await response.json();
@@ -117,7 +117,7 @@ export const categoryAPI = {
     try {
       console.log(`Updating item ID: ${id}`);
       const response = await fetch(`${API_BASE_URL}/categories/items/${id}`, {
-        method: 'PUT',
+        method: 'POST',
         body: itemData, // FormData for file upload
       });
       

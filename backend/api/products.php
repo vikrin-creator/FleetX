@@ -234,7 +234,12 @@ switch ($method) {
         }
         break;
     case 'POST':
-        $controller->createProduct();
+        if (empty($path[0])) {
+            $controller->createProduct();
+        } elseif (isset($path[0]) && is_numeric($path[0])) {
+            // Handle POST update for products (alternative to PUT for FormData)
+            $controller->updateProduct($path[0]);
+        }
         break;
     case 'PUT':
         if (isset($path[0]) && is_numeric($path[0])) {

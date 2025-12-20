@@ -62,7 +62,7 @@ export const productAPI = {
   // Update product
   updateProduct: async (id, productData) => {
     const response = await fetch(`${API_BASE_URL}/products/${id}`, {
-      method: 'PUT',
+      method: 'POST',
       body: productData, // FormData for file upload
     });
     const data = await response.json();

@@ -543,6 +543,9 @@ switch ($method) {
     case 'POST':
         if (empty($path[0])) {
             $controller->createCategory();
+        } elseif (isset($path[0]) && is_numeric($path[0])) {
+            // Handle POST update for categories (alternative to PUT for FormData)
+            $controller->updateCategory($path[0]);
         } elseif ($path[0] === 'items' && empty($path[1])) {
             $controller->createCategoryItem();
         } elseif ($path[0] === 'items' && isset($path[1]) && is_numeric($path[1])) {
