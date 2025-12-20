@@ -61,11 +61,30 @@ export const productAPI = {
 
   // Update product
   updateProduct: async (id, productData) => {
+    console.log(`Updating product ID: ${id}`);
+    console.log('Update URL:', `${API_BASE_URL}/products/${id}`);
+    
+    // Log FormData contents
+    if (productData instanceof FormData) {
+      console.log('FormData entries:');
+      for (let [key, value] of productData.entries()) {
+        console.log(`  ${key}:`, value);
+      }
+    }
+    
     const response = await fetch(`${API_BASE_URL}/products/${id}`, {
       method: 'POST',
       body: productData, // FormData for file upload
     });
+    
+    if (!response.ok) {
+      console.error(`Update Product Error: ${response.status} - ${response.statusText}`);
+      const errorText = await response.text();
+      console.error('Error response:', errorText);
+    }
+    
     const data = await response.json();
+    console.log('Update product response:', data);
     
     // Process image URL in response
     if (data.success && data.data && data.data.image_url) {

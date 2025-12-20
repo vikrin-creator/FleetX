@@ -216,7 +216,23 @@ class ProductController {
 // Handle routing
 $controller = new ProductController();
 $method = $_SERVER['REQUEST_METHOD'];
-$path = explode('/', trim($_SERVER['PATH_INFO'] ?? '', '/'));
+
+// Parse path from PATH_INFO or REQUEST_URI
+$pathInfo = $_SERVER['PATH_INFO'] ?? '';
+if (empty($pathInfo) && isset($_SERVER['REQUEST_URI'])) {
+    // Extract path from REQUEST_URI if PATH_INFO is not available
+    $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+    $basePath = '/backend/api/products';
+    if (strpos($uri, $basePath) === 0) {
+        $pathInfo = substr($uri, strlen($basePath));
+    }
+}
+$path = explode('/', trim($pathInfo, '/'));
+
+// Debug logging
+error_log("Products API Request: " . $method . " " . $_SERVER['REQUEST_URI']);
+error_log("Parsed pathInfo: " . $pathInfo);
+error_log("Path array: " . json_encode($path));
 
 switch ($method) {
     case 'GET':
@@ -234,11 +250,17 @@ switch ($method) {
         }
         break;
     case 'POST':
+        error_log("POST request - path[0]: " . ($path[0] ?? 'empty'));
         if (empty($path[0])) {
+            error_log("Creating new product");
             $controller->createProduct();
         } elseif (isset($path[0]) && is_numeric($path[0])) {
             // Handle POST update for products (alternative to PUT for FormData)
+            error_log("Updating product ID: " . $path[0]);
             $controller->updateProduct($path[0]);
+        } else {
+            error_log("Invalid POST request path");
+            Response::error('Invalid request', 400);
         }
         break;
     case 'PUT':
