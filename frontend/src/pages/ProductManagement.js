@@ -380,9 +380,9 @@ const ProductManagement = () => {
             React.createElement(
               'tr',
               null,
-              React.createElement('th', { className: 'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider' }, 'Product'),
-              React.createElement('th', { className: 'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider' }, 'Category'),
-              React.createElement('th', { className: 'px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider' }, 'Actions')
+              React.createElement('th', { className: 'px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider' }, 'Product'),
+              React.createElement('th', { className: 'hidden sm:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider' }, 'Category'),
+              React.createElement('th', { className: 'px-3 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider' }, 'Actions')
             )
           ),
           React.createElement(
@@ -394,10 +394,10 @@ const ProductManagement = () => {
                 { key: product.id, className: 'hover:bg-gray-50' },
                 React.createElement(
                   'td',
-                  { className: 'px-6 py-4 whitespace-nowrap' },
+                  { className: 'px-3 sm:px-6 py-3 sm:py-4' },
                   React.createElement(
                     'div',
-                    { className: 'flex items-center' },
+                    { className: 'flex items-center gap-3' },
                     React.createElement('img', {
                       src: product.image_url || 'https://via.placeholder.com/60x60',
                       alt: product.name,
@@ -408,15 +408,15 @@ const ProductManagement = () => {
                 ),
                 React.createElement(
                   'td',
-                  { className: 'px-6 py-4 whitespace-nowrap text-sm text-gray-900' },
+                  { className: 'hidden sm:table-cell px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-900' },
                   product.category_name || 'Unknown'
                 ),
                 React.createElement(
                   'td',
-                  { className: 'px-6 py-4 whitespace-nowrap text-right text-sm font-medium' },
+                  { className: 'px-3 sm:px-6 py-3 sm:py-4 text-right text-xs sm:text-sm font-medium' },
                   React.createElement(
                     'div',
-                    { className: 'flex justify-end gap-2' },
+                    { className: 'flex justify-end gap-1 sm:gap-2' },
                     React.createElement(
                       'button',
                       {
@@ -456,7 +456,7 @@ const ProductManagement = () => {
       { className: 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50' },
       React.createElement(
         'div',
-        { className: 'bg-white rounded-lg p-6 w-full max-w-2xl mx-4 max-h-screen overflow-y-auto' },
+        { className: 'bg-white rounded-lg p-4 sm:p-6 w-full max-w-2xl mx-2 sm:mx-4 max-h-[90vh] overflow-y-auto' },
         React.createElement('h2', { className: 'text-lg font-bold text-gray-900 mb-4' }, 
           editingProduct ? 'Edit Product' : 'Add New Product'
         ),

@@ -5,6 +5,10 @@ const Customers = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [customerOrders, setCustomerOrders] = useState([]);
+  const [loadingOrders, setLoadingOrders] = useState(false);
+  const [showOrdersModal, setShowOrdersModal] = useState(false);
 
   useEffect(() => {
     fetchCustomers();
@@ -22,7 +26,7 @@ const Customers = () => {
       const data = await response.json();
       
       if (data.success) {
-        setCustomers(data.data || []);
+        setCustomers(data.users || []);
       } else {
         setError(data.message || 'Failed to load customers');
       }
@@ -53,6 +57,51 @@ const Customers = () => {
       day: 'numeric' 
     });
   };
+
+  const fetchCustomerOrders = async (customer) => {
+    try {
+      setLoadingOrders(true);
+      setSelectedCustomer(customer);
+      setShowOrdersModal(true);
+      
+      const response = await fetch(`https://sandybrown-squirrel-472536.hostingersite.com/backend/api/orders.php?action=get_user_orders&userId=${customer.id}`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch customer orders');
+      }
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        setCustomerOrders(data.data || []);
+      } else {
+        setCustomerOrders([]);
+      }
+    } catch (err) {
+      console.error('Error fetching customer orders:', err);
+      setCustomerOrders([]);
+    } finally {
+      setLoadingOrders(false);
+    }
+  };
+
+  const getStatusBadgeClass = (status) => {
+    switch (status) {
+      case 'pending': return 'bg-yellow-100 text-yellow-800';
+      case 'processing': return 'bg-blue-100 text-blue-800';
+      case 'shipped': return 'bg-purple-100 text-purple-800';
+      case 'delivered': return 'bg-green-100 text-green-800';
+      case 'cancelled': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const closeModal = () => {
+    setShowOrdersModal(false);
+    setSelectedCustomer(null);
+    setCustomerOrders([]);
+  };
+
 
   if (loading) {
     return React.createElement(
@@ -140,12 +189,12 @@ const Customers = () => {
             React.createElement(
               'tr',
               null,
-              React.createElement('th', { className: 'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider' }, 'ID'),
-              React.createElement('th', { className: 'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider' }, 'Name'),
-              React.createElement('th', { className: 'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider' }, 'Email'),
-              React.createElement('th', { className: 'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider' }, 'Phone'),
-              React.createElement('th', { className: 'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider' }, 'Status'),
-              React.createElement('th', { className: 'px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider' }, 'Registered')
+              React.createElement('th', { className: 'hidden sm:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider' }, 'ID'),
+              React.createElement('th', { className: 'px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider' }, 'Name'),
+              React.createElement('th', { className: 'px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider' }, 'Email'),
+              React.createElement('th', { className: 'hidden md:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider' }, 'Phone'),
+              React.createElement('th', { className: 'hidden lg:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider' }, 'Status'),
+              React.createElement('th', { className: 'hidden lg:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider' }, 'Registered')
             )
           ),
           
@@ -164,33 +213,37 @@ const Customers = () => {
             ) : filteredCustomers.map((customer) =>
               React.createElement(
                 'tr',
-                { key: customer.id, className: 'hover:bg-gray-50 transition-colors' },
+                { 
+                  key: customer.id, 
+                  className: 'hover:bg-gray-50 transition-colors cursor-pointer',
+                  onClick: () => fetchCustomerOrders(customer)
+                },
                 React.createElement(
                   'td',
-                  { className: 'px-6 py-4 whitespace-nowrap text-sm text-gray-900' },
+                  { className: 'hidden sm:table-cell px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-900' },
                   customer.id
                 ),
                 React.createElement(
                   'td',
-                  { className: 'px-6 py-4 whitespace-nowrap' },
+                  { className: 'px-3 sm:px-6 py-3 sm:py-4' },
                   React.createElement(
                     'div',
                     { className: 'flex items-center' },
                     React.createElement(
                       'div',
-                      { className: 'flex-shrink-0 h-10 w-10 bg-blue-600 rounded-full flex items-center justify-center' },
+                      { className: 'flex-shrink-0 h-8 w-8 sm:h-10 sm:w-10 bg-blue-600 rounded-full flex items-center justify-center' },
                       React.createElement(
                         'span',
-                        { className: 'text-white font-semibold' },
+                        { className: 'text-white text-xs sm:text-sm font-semibold' },
                         ((customer.first_name?.[0] || '') + (customer.last_name?.[0] || '')).toUpperCase() || 'U'
                       )
                     ),
                     React.createElement(
                       'div',
-                      { className: 'ml-4' },
+                      { className: 'ml-2 sm:ml-4' },
                       React.createElement(
                         'div',
-                        { className: 'text-sm font-medium text-gray-900' },
+                        { className: 'text-xs sm:text-sm font-medium text-gray-900' },
                         `${customer.first_name || ''} ${customer.last_name || ''}`.trim() || 'N/A'
                       )
                     )
@@ -198,17 +251,17 @@ const Customers = () => {
                 ),
                 React.createElement(
                   'td',
-                  { className: 'px-6 py-4 whitespace-nowrap text-sm text-gray-900' },
-                  customer.email || 'N/A'
+                  { className: 'px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-900' },
+                  React.createElement('div', { className: 'truncate max-w-[150px] sm:max-w-none' }, customer.email || 'N/A')
                 ),
                 React.createElement(
                   'td',
-                  { className: 'px-6 py-4 whitespace-nowrap text-sm text-gray-900' },
+                  { className: 'hidden md:table-cell px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-900' },
                   customer.phone || 'N/A'
                 ),
                 React.createElement(
                   'td',
-                  { className: 'px-6 py-4 whitespace-nowrap' },
+                  { className: 'hidden lg:table-cell px-3 sm:px-6 py-3 sm:py-4' },
                   React.createElement(
                     'span',
                     { 
@@ -221,8 +274,163 @@ const Customers = () => {
                 ),
                 React.createElement(
                   'td',
-                  { className: 'px-6 py-4 whitespace-nowrap text-sm text-gray-500' },
+                  { className: 'hidden lg:table-cell px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-500' },
                   formatDate(customer.created_at)
+                )
+              )
+            )
+          )
+        )
+      )
+    ),
+
+    // Customer Orders Modal
+    showOrdersModal && selectedCustomer && React.createElement(
+      'div',
+      { className: 'fixed inset-0 z-50 overflow-y-auto', onClick: closeModal },
+      React.createElement('div', { className: 'fixed inset-0 bg-black bg-opacity-50' }),
+      React.createElement(
+        'div',
+        { className: 'flex items-center justify-center min-h-screen p-4' },
+        React.createElement(
+          'div',
+          { 
+            className: 'relative bg-white rounded-lg shadow-xl max-w-5xl w-full max-h-[90vh] overflow-y-auto mx-2 sm:mx-4',
+            onClick: (e) => e.stopPropagation()
+          },
+          React.createElement(
+            'div',
+            { className: 'p-4 sm:p-6' },
+            // Modal Header
+            React.createElement(
+              'div',
+              { className: 'flex justify-between items-start mb-6 border-b pb-4' },
+              React.createElement(
+                'div',
+                null,
+                React.createElement('h2', { className: 'text-xl sm:text-2xl font-bold text-gray-900' }, 
+                  `${selectedCustomer.first_name} ${selectedCustomer.last_name}'s Orders`
+                ),
+                React.createElement('p', { className: 'text-sm text-gray-500 mt-1' }, selectedCustomer.email)
+              ),
+              React.createElement(
+                'button',
+                {
+                  onClick: closeModal,
+                  className: 'text-gray-400 hover:text-gray-600 text-2xl font-bold'
+                },
+                '×'
+              )
+            ),
+            
+            // Orders Content
+            loadingOrders ? React.createElement(
+              'div',
+              { className: 'flex items-center justify-center py-12' },
+              React.createElement('div', { className: 'text-gray-600' }, 'Loading orders...')
+            ) : customerOrders.length === 0 ? React.createElement(
+              'div',
+              { className: 'text-center py-12' },
+              React.createElement('p', { className: 'text-gray-500 text-lg' }, 'No orders found for this customer'),
+              React.createElement('p', { className: 'text-gray-400 text-sm mt-2' }, 'This customer has not placed any orders yet.')
+            ) : React.createElement(
+              'div',
+              { className: 'space-y-4' },
+              React.createElement(
+                'div',
+                { className: 'mb-4' },
+                React.createElement('h3', { className: 'text-lg font-semibold text-gray-900' }, 
+                  `Total Orders: ${customerOrders.length}`
+                )
+              ),
+              React.createElement(
+                'div',
+                { className: 'overflow-x-auto' },
+                React.createElement(
+                  'table',
+                  { className: 'w-full min-w-[500px]' },
+                  React.createElement(
+                    'thead',
+                    { className: 'bg-gray-50' },
+                    React.createElement(
+                      'tr',
+                      null,
+                      React.createElement('th', { className: 'px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase' }, 'Order #'),
+                      React.createElement('th', { className: 'px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase' }, 'Items'),
+                      React.createElement('th', { className: 'px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase' }, 'Total'),
+                      React.createElement('th', { className: 'px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase' }, 'Status'),
+                      React.createElement('th', { className: 'px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase' }, 'Date')
+                    )
+                  ),
+                  React.createElement(
+                    'tbody',
+                    { className: 'divide-y divide-gray-200' },
+                    customerOrders.map((order) =>
+                      React.createElement(
+                        'tr',
+                        { key: order.id, className: 'hover:bg-gray-50' },
+                        React.createElement(
+                          'td',
+                          { className: 'px-4 py-3 text-sm font-medium text-gray-900' },
+                          React.createElement('div', { className: 'font-mono text-xs' }, order.order_number)
+                        ),
+                        React.createElement(
+                          'td',
+                          { className: 'px-4 py-3 text-sm text-gray-600' },
+                          order.item_count
+                        ),
+                        React.createElement(
+                          'td',
+                          { className: 'px-4 py-3 text-sm font-semibold text-gray-900' },
+                          `$${parseFloat(order.total).toFixed(2)}`
+                        ),
+                        React.createElement(
+                          'td',
+                          { className: 'px-4 py-3' },
+                          React.createElement(
+                            'span',
+                            { className: `px-2 py-1 text-xs font-semibold rounded-full ${getStatusBadgeClass(order.status)}` },
+                            order.status.charAt(0).toUpperCase() + order.status.slice(1)
+                          )
+                        ),
+                        React.createElement(
+                          'td',
+                          { className: 'px-4 py-3 text-sm text-gray-600' },
+                          formatDate(order.created_at)
+                        )
+                      )
+                    )
+                  )
+                )
+              ),
+              
+              // Summary Stats
+              React.createElement(
+                'div',
+                { className: 'grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6 pt-6 border-t' },
+                React.createElement(
+                  'div',
+                  { className: 'bg-blue-50 rounded-lg p-4' },
+                  React.createElement('p', { className: 'text-sm text-blue-600 font-medium' }, 'Total Spent'),
+                  React.createElement('p', { className: 'text-xl sm:text-2xl font-bold text-blue-900' }, 
+                    `$${customerOrders.reduce((sum, order) => sum + parseFloat(order.total), 0).toFixed(2)}`
+                  )
+                ),
+                React.createElement(
+                  'div',
+                  { className: 'bg-green-50 rounded-lg p-4' },
+                  React.createElement('p', { className: 'text-sm text-green-600 font-medium' }, 'Completed Orders'),
+                  React.createElement('p', { className: 'text-xl sm:text-2xl font-bold text-green-900' }, 
+                    customerOrders.filter(o => o.status === 'delivered').length
+                  )
+                ),
+                React.createElement(
+                  'div',
+                  { className: 'bg-yellow-50 rounded-lg p-4' },
+                  React.createElement('p', { className: 'text-sm text-yellow-600 font-medium' }, 'Pending Orders'),
+                  React.createElement('p', { className: 'text-xl sm:text-2xl font-bold text-yellow-900' }, 
+                    customerOrders.filter(o => ['pending', 'processing'].includes(o.status)).length
+                  )
                 )
               )
             )

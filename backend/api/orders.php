@@ -236,9 +236,12 @@ function getOrderDetails($pdo) {
     }
     
     try {
-        // Get order details
+        // Get order details with user email
         $stmt = $pdo->prepare("
-            SELECT * FROM orders WHERE id = :order_id
+            SELECT o.*, u.email
+            FROM orders o
+            LEFT JOIN users u ON o.user_id = u.id
+            WHERE o.id = :order_id
         ");
         $stmt->execute([':order_id' => $orderId]);
         $order = $stmt->fetch(PDO::FETCH_ASSOC);

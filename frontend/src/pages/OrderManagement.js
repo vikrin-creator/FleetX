@@ -104,7 +104,7 @@ const OrderManagement = () => {
     // Filters and Search
     React.createElement(
       'div',
-      { className: 'mb-6 flex flex-col sm:flex-row gap-4' },
+      { className: 'mb-4 sm:mb-6 flex flex-col sm:flex-row gap-3 sm:gap-4' },
       // Search
       React.createElement(
         'div',
@@ -137,7 +137,7 @@ const OrderManagement = () => {
     // Stats
     React.createElement(
       'div',
-      { className: 'grid grid-cols-2 md:grid-cols-5 gap-4 mb-6' },
+      { className: 'grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-4 sm:mb-6' },
       React.createElement(
         'div',
         { className: 'bg-white dark:bg-slate-800 p-4 rounded-lg shadow' },
@@ -173,26 +173,26 @@ const OrderManagement = () => {
     // Orders Table
     React.createElement(
       'div',
-      { className: 'bg-white dark:bg-slate-800 rounded-lg shadow overflow-hidden' },
+      { className: 'bg-white dark:bg-slate-800 rounded-lg shadow overflow-hidden -mx-4 sm:mx-0' },
       React.createElement(
         'div',
-        { className: 'overflow-x-auto' },
+        { className: 'overflow-x-auto -mx-4 sm:mx-0' },
         React.createElement(
           'table',
-          { className: 'w-full' },
+          { className: 'w-full min-w-[640px]' },
           React.createElement(
             'thead',
             { className: 'bg-slate-50 dark:bg-slate-700' },
             React.createElement(
               'tr',
               null,
-              React.createElement('th', { className: 'px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-300 uppercase tracking-wider' }, 'Order #'),
-              React.createElement('th', { className: 'px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-300 uppercase tracking-wider' }, 'Customer'),
-              React.createElement('th', { className: 'px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-300 uppercase tracking-wider' }, 'Items'),
-              React.createElement('th', { className: 'px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-300 uppercase tracking-wider' }, 'Total'),
-              React.createElement('th', { className: 'px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-300 uppercase tracking-wider' }, 'Status'),
-              React.createElement('th', { className: 'px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-300 uppercase tracking-wider' }, 'Date'),
-              React.createElement('th', { className: 'px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-300 uppercase tracking-wider' }, 'Actions')
+              React.createElement('th', { className: 'px-3 sm:px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-300 uppercase tracking-wider' }, 'Order #'),
+              React.createElement('th', { className: 'px-3 sm:px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-300 uppercase tracking-wider' }, 'Customer'),
+              React.createElement('th', { className: 'hidden md:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-300 uppercase tracking-wider' }, 'Items'),
+              React.createElement('th', { className: 'px-3 sm:px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-300 uppercase tracking-wider' }, 'Total'),
+              React.createElement('th', { className: 'px-3 sm:px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-300 uppercase tracking-wider' }, 'Status'),
+              React.createElement('th', { className: 'hidden lg:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-300 uppercase tracking-wider' }, 'Date'),
+              React.createElement('th', { className: 'px-3 sm:px-6 py-3 text-right text-xs font-medium text-slate-500 dark:text-slate-300 uppercase tracking-wider' }, 'Actions')
             )
           ),
           React.createElement(
@@ -210,50 +210,60 @@ const OrderManagement = () => {
                   { key: order.id, className: 'hover:bg-slate-50 dark:hover:bg-slate-700' },
                   React.createElement(
                     'td',
-                    { className: 'px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900 dark:text-slate-50' },
-                    order.order_number
+                    { className: 'px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-medium text-slate-900 dark:text-slate-50' },
+                    React.createElement(
+                      'div',
+                      { className: 'font-mono' },
+                      React.createElement('span', { className: 'hidden sm:inline' }, order.order_number),
+                      React.createElement('span', { className: 'sm:hidden' }, order.order_number.slice(-8))
+                    )
                   ),
                   React.createElement(
                     'td',
-                    { className: 'px-6 py-4 whitespace-nowrap' },
-                    React.createElement('div', { className: 'text-sm font-medium text-slate-900 dark:text-slate-50' }, order.full_name),
-                    React.createElement('div', { className: 'text-sm text-slate-500 dark:text-slate-400' }, order.email || order.phone)
+                    { className: 'px-3 sm:px-6 py-3 sm:py-4' },
+                    React.createElement('div', { className: 'text-xs sm:text-sm font-medium text-slate-900 dark:text-slate-50 truncate max-w-[100px] sm:max-w-none' }, order.full_name),
+                    React.createElement('div', { className: 'text-xs text-slate-500 dark:text-slate-400 truncate max-w-[100px] sm:max-w-none' }, order.email || order.phone)
                   ),
-                  React.createElement('td', { className: 'px-6 py-4 whitespace-nowrap text-sm text-slate-900 dark:text-slate-50' }, order.item_count),
-                  React.createElement('td', { className: 'px-6 py-4 whitespace-nowrap text-sm font-semibold text-slate-900 dark:text-slate-50' }, `$${parseFloat(order.total).toFixed(2)}`),
+                  React.createElement('td', { className: 'hidden md:table-cell px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-slate-900 dark:text-slate-50' }, order.item_count),
+                  React.createElement('td', { className: 'px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-50' }, `$${parseFloat(order.total).toFixed(2)}`),
                   React.createElement(
                     'td',
-                    { className: 'px-6 py-4 whitespace-nowrap' },
+                    { className: 'px-3 sm:px-6 py-3 sm:py-4' },
                     React.createElement(
                       'span',
                       { className: `px-2 py-1 text-xs font-semibold rounded-full ${getStatusBadgeClass(order.status)}` },
                       order.status.charAt(0).toUpperCase() + order.status.slice(1)
                     )
                   ),
-                  React.createElement('td', { className: 'px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400' }, new Date(order.created_at).toLocaleDateString()),
+                  React.createElement('td', { className: 'hidden lg:table-cell px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-slate-500 dark:text-slate-400' }, new Date(order.created_at).toLocaleDateString()),
                   React.createElement(
                     'td',
-                    { className: 'px-6 py-4 whitespace-nowrap text-sm font-medium' },
+                    { className: 'px-3 sm:px-6 py-3 sm:py-4' },
                     React.createElement(
-                      'button',
-                      {
-                        onClick: () => fetchOrderDetails(order.id),
-                        className: 'text-primary hover:text-primary/80 mr-3'
-                      },
-                      'View'
-                    ),
-                    React.createElement(
-                      'select',
-                      {
-                        value: order.status,
-                        onChange: (e) => updateOrderStatus(order.id, e.target.value),
-                        className: 'text-xs border rounded px-2 py-1'
-                      },
-                      React.createElement('option', { value: 'pending' }, 'Pending'),
-                      React.createElement('option', { value: 'processing' }, 'Processing'),
-                      React.createElement('option', { value: 'shipped' }, 'Shipped'),
-                      React.createElement('option', { value: 'delivered' }, 'Delivered'),
-                      React.createElement('option', { value: 'cancelled' }, 'Cancelled')
+                      'div',
+                      { className: 'flex gap-2 items-center justify-end min-w-[140px]' },
+                      React.createElement(
+                        'button',
+                        {
+                          onClick: () => fetchOrderDetails(order.id),
+                          className: 'text-primary hover:text-primary/80 text-xs font-medium whitespace-nowrap'
+                        },
+                        'View'
+                      ),
+                      React.createElement(
+                        'select',
+                        {
+                          value: order.status,
+                          onChange: (e) => updateOrderStatus(order.id, e.target.value),
+                          className: 'text-xs border rounded px-1.5 py-1 bg-white dark:bg-slate-700 dark:border-slate-600 min-w-[80px]',
+                          onClick: (e) => e.stopPropagation()
+                        },
+                        React.createElement('option', { value: 'pending' }, 'Pending'),
+                        React.createElement('option', { value: 'processing' }, 'Process'),
+                        React.createElement('option', { value: 'shipped' }, 'Shipped'),
+                        React.createElement('option', { value: 'delivered' }, 'Deliver'),
+                        React.createElement('option', { value: 'cancelled' }, 'Cancel')
+                      )
                     )
                   )
                 )
@@ -274,7 +284,7 @@ const OrderManagement = () => {
         React.createElement(
           'div',
           { 
-            className: 'relative bg-white dark:bg-slate-800 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto',
+            className: 'relative bg-white dark:bg-slate-800 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto mx-2 sm:mx-4',
             onClick: (e) => e.stopPropagation()
           },
           React.createElement(
@@ -332,7 +342,7 @@ const OrderManagement = () => {
               'div',
               { className: 'mb-6' },
               React.createElement('h3', { className: 'font-semibold text-slate-900 dark:text-slate-50 mb-3' }, 'Order Items'),
-              React.createElement(
+              selectedOrder.items && selectedOrder.items.length > 0 ? React.createElement(
                 'div',
                 { className: 'border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden' },
                 React.createElement(
@@ -345,19 +355,35 @@ const OrderManagement = () => {
                       'tr',
                       null,
                       React.createElement('th', { className: 'px-4 py-2 text-left text-xs font-medium text-slate-500 dark:text-slate-300' }, 'Product'),
+                      React.createElement('th', { className: 'px-4 py-2 text-left text-xs font-medium text-slate-500 dark:text-slate-300' }, 'Part #'),
                       React.createElement('th', { className: 'px-4 py-2 text-right text-xs font-medium text-slate-500 dark:text-slate-300' }, 'Price'),
-                      React.createElement('th', { className: 'px-4 py-2 text-right text-xs font-medium text-slate-500 dark:text-slate-300' }, 'Quantity'),
+                      React.createElement('th', { className: 'px-4 py-2 text-right text-xs font-medium text-slate-500 dark:text-slate-300' }, 'Qty'),
                       React.createElement('th', { className: 'px-4 py-2 text-right text-xs font-medium text-slate-500 dark:text-slate-300' }, 'Subtotal')
                     )
                   ),
                   React.createElement(
                     'tbody',
                     { className: 'divide-y divide-slate-200 dark:divide-slate-700' },
-                    selectedOrder.items?.map((item, index) =>
+                    selectedOrder.items.map((item, index) =>
                       React.createElement(
                         'tr',
                         { key: index },
-                        React.createElement('td', { className: 'px-4 py-3 text-sm text-slate-900 dark:text-slate-50' }, item.product_name),
+                        React.createElement(
+                          'td', 
+                          { className: 'px-4 py-3 text-sm text-slate-900 dark:text-slate-50' },
+                          React.createElement(
+                            'div',
+                            { className: 'flex items-center gap-3' },
+                            item.image_url && React.createElement('img', {
+                              src: item.image_url.startsWith('http') ? item.image_url : `https://sandybrown-squirrel-472536.hostingersite.com/backend/${item.image_url}`,
+                              alt: item.product_name,
+                              className: 'h-10 w-10 rounded object-cover',
+                              onError: (e) => { e.target.style.display = 'none'; }
+                            }),
+                            React.createElement('span', null, item.product_name)
+                          )
+                        ),
+                        React.createElement('td', { className: 'px-4 py-3 text-xs text-slate-600 dark:text-slate-400' }, item.part_number || 'N/A'),
                         React.createElement('td', { className: 'px-4 py-3 text-sm text-slate-900 dark:text-slate-50 text-right' }, `$${parseFloat(item.price).toFixed(2)}`),
                         React.createElement('td', { className: 'px-4 py-3 text-sm text-slate-900 dark:text-slate-50 text-right' }, item.quantity),
                         React.createElement('td', { className: 'px-4 py-3 text-sm font-semibold text-slate-900 dark:text-slate-50 text-right' }, `$${(parseFloat(item.price) * item.quantity).toFixed(2)}`)
@@ -365,6 +391,10 @@ const OrderManagement = () => {
                     )
                   )
                 )
+              ) : React.createElement(
+                'div',
+                { className: 'text-center py-8 text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-700 rounded-lg' },
+                'No items found in this order'
               )
             ),
 

@@ -273,15 +273,26 @@ const ProductCategories = () => {
     
     React.createElement(
       'div',
-      { className: 'flex justify-end mb-8' },
+      { className: 'flex justify-between items-center mb-6' },
+      React.createElement(
+        'div',
+        { className: 'flex-1 max-w-md' },
+        React.createElement('input', {
+          type: 'text',
+          placeholder: 'Search categories...',
+          value: searchQuery,
+          onChange: (e) => setSearchQuery(e.target.value),
+          className: 'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+        })
+      ),
       React.createElement(
         'button',
         {
           onClick: handleAdd,
-          className: 'px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium flex items-center gap-2'
+          className: 'ml-4 px-4 sm:px-6 py-2 sm:py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium flex items-center gap-2'
         },
         React.createElement('span', { className: 'material-symbols-outlined text-sm' }, 'add'),
-        'Add Category'
+        React.createElement('span', { className: 'hidden sm:inline' }, 'Add Category')
       )
     ),
     
@@ -289,70 +300,112 @@ const ProductCategories = () => {
       React.createElement('div', { className: 'text-center py-12' }, 'Loading categories...') :
       React.createElement(
         'div',
-        { className: 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6' },
-        categories.map(category => 
+        { className: 'bg-white rounded-lg shadow overflow-hidden -mx-4 sm:mx-0' },
+        React.createElement(
+          'div',
+          { className: 'overflow-x-auto' },
           React.createElement(
-            'div',
-            { 
-              key: category.id, 
-              className: 'bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow'
-            },
+            'table',
+            { className: 'w-full min-w-[640px]' },
             React.createElement(
-              'div',
-              { className: 'relative' },
-              React.createElement('img', {
-                src: category.image_url || 'https://via.placeholder.com/300x200',
-                alt: category.name,
-                className: 'w-full h-48 object-cover'
-              }),
+              'thead',
+              { className: 'bg-gray-50' },
               React.createElement(
-                'div',
-                { className: 'absolute top-3 right-3 flex gap-2' },
-                React.createElement(
-                  'button',
-                  {
-                    onClick: () => handleEdit(category),
-                    className: 'p-2 bg-white rounded-full shadow-md hover:bg-gray-50 transition-colors'
-                  },
-                  React.createElement('span', { className: 'material-symbols-outlined text-gray-600 text-lg' }, 'edit')
-                ),
-                React.createElement(
-                  'button',
-                  {
-                    onClick: () => handleDelete(category.id),
-                    className: 'p-2 bg-white rounded-full shadow-md hover:bg-red-50 transition-colors'
-                  },
-                  React.createElement('span', { className: 'material-symbols-outlined text-red-600 text-lg' }, 'delete')
-                )
+                'tr',
+                null,
+                React.createElement('th', { className: 'px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider' }, 'Category'),
+                React.createElement('th', { className: 'hidden md:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider' }, 'Description'),
+                React.createElement('th', { className: 'px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider' }, 'Items'),
+                React.createElement('th', { className: 'hidden sm:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider' }, 'Status'),
+                React.createElement('th', { className: 'px-3 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider' }, 'Actions')
               )
             ),
             React.createElement(
-              'div',
-              { className: 'p-5' },
-              React.createElement('h3', { className: 'text-lg font-bold text-gray-900 mb-2' }, category.name),
-              React.createElement('p', { className: 'text-sm text-gray-600 mb-4 line-clamp-2' }, category.description),
-              React.createElement(
-                'div',
-                { className: 'flex justify-between items-center mb-3' },
+              'tbody',
+              { className: 'bg-white divide-y divide-gray-200' },
+              filteredCategories.length === 0 ?
                 React.createElement(
-                  'span',
-                  { className: 'text-sm text-gray-500' },
-                  `Items: ${category.item_count || 0}`
-                ),
-                React.createElement(
-                  'span',
-                  { className: 'px-3 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full' },
-                  'Active'
+                  'tr',
+                  null,
+                  React.createElement('td', { colSpan: 5, className: 'px-6 py-8 text-center text-gray-500' }, 
+                    searchQuery ? 'No categories found matching your search' : 'No categories yet. Click "Add Category" to create one.'
+                  )
+                ) :
+                filteredCategories.map((category) =>
+                  React.createElement(
+                    'tr',
+                    { key: category.id, className: 'hover:bg-gray-50 transition-colors' },
+                    React.createElement(
+                      'td',
+                      { className: 'px-3 sm:px-6 py-3 sm:py-4' },
+                      React.createElement(
+                        'div',
+                        { className: 'flex items-center gap-3' },
+                        React.createElement('img', {
+                          src: category.image_url || 'https://via.placeholder.com/60x60',
+                          alt: category.name,
+                          className: 'h-12 w-12 rounded-lg object-cover'
+                        }),
+                        React.createElement('div', { className: 'text-sm font-medium text-gray-900' }, category.name)
+                      )
+                    ),
+                    React.createElement(
+                      'td',
+                      { className: 'hidden md:table-cell px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-600' },
+                      React.createElement('div', { className: 'line-clamp-2 max-w-xs' }, category.description || 'N/A')
+                    ),
+                    React.createElement(
+                      'td',
+                      { className: 'px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-900' },
+                      category.item_count || 0
+                    ),
+                    React.createElement(
+                      'td',
+                      { className: 'hidden sm:table-cell px-3 sm:px-6 py-3 sm:py-4' },
+                      React.createElement(
+                        'span',
+                        { className: 'px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800' },
+                        'Active'
+                      )
+                    ),
+                    React.createElement(
+                      'td',
+                      { className: 'px-3 sm:px-6 py-3 sm:py-4' },
+                      React.createElement(
+                        'div',
+                        { className: 'flex justify-end gap-1 sm:gap-2' },
+                        React.createElement(
+                          'button',
+                          {
+                            onClick: () => handleManageItems(category),
+                            className: 'px-2 sm:px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700',
+                            title: 'Manage Items'
+                          },
+                          React.createElement('span', { className: 'hidden sm:inline' }, 'Manage'),
+                          React.createElement('span', { className: 'sm:hidden material-symbols-outlined text-sm' }, 'inventory_2')
+                        ),
+                        React.createElement(
+                          'button',
+                          {
+                            onClick: () => handleEdit(category),
+                            className: 'p-1.5 text-gray-600 hover:bg-gray-100 rounded',
+                            title: 'Edit'
+                          },
+                          React.createElement('span', { className: 'material-symbols-outlined text-lg' }, 'edit')
+                        ),
+                        React.createElement(
+                          'button',
+                          {
+                            onClick: () => handleDelete(category.id),
+                            className: 'p-1.5 text-red-600 hover:bg-red-50 rounded',
+                            title: 'Delete'
+                          },
+                          React.createElement('span', { className: 'material-symbols-outlined text-lg' }, 'delete')
+                        )
+                      )
+                    )
+                  )
                 )
-              ),
-              React.createElement(
-                'button',
-                {
-                  onClick: () => handleManageItems(category),
-                  className: 'w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium'
-                },
-                'Manage Items'
-              )
             )
           )
         )
@@ -363,7 +416,7 @@ const ProductCategories = () => {
       { className: 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50' },
       React.createElement(
         'div',
-        { className: 'bg-white rounded-lg p-6 w-full max-w-md mx-4' },
+        { className: 'bg-white rounded-lg p-4 sm:p-6 w-full max-w-md mx-2 sm:mx-4' },
         React.createElement('h2', { className: 'text-lg font-bold text-gray-900 mb-4' }, 
           editingCategory ? 'Edit Category' : 'Add New Category'
         ),

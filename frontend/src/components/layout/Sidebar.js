@@ -44,10 +44,10 @@ const Sidebar = ({ activeTab, onTabChange, isMobileOpen, setIsMobileOpen, onColl
         { className: 'flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-800' },
         !isCollapsed && React.createElement(
           'div',
-          { className: 'flex items-center gap-3 text-slate-900 dark:text-slate-50' },
+          { className: 'flex items-center gap-2 sm:gap-3 text-slate-900 dark:text-slate-50' },
           React.createElement(
             'div',
-            { className: 'size-8 text-primary' },
+            { className: 'size-6 sm:size-8 text-primary' },
             React.createElement(
               'svg',
               { fill: 'none', viewBox: '0 0 48 48', xmlns: 'http://www.w3.org/2000/svg' },
@@ -57,7 +57,7 @@ const Sidebar = ({ activeTab, onTabChange, isMobileOpen, setIsMobileOpen, onColl
               })
             )
           ),
-          React.createElement('h2', { className: 'text-lg font-bold' }, 'Fleet X Admin')
+          React.createElement('h2', { className: 'text-base sm:text-lg font-bold' }, 'Fleet X Admin')
         ),
         React.createElement(
           'button',
