@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { categoryAPI } from '../services/categoryService.js';
+import searchService from '../services/searchService.js';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -8,7 +9,7 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearchModal, setShowSearchModal] = useState(false);
-  const [searchResults, setSearchResults] = useState({ categories: [], items: [] });
+  const [searchResults, setSearchResults] = useState({ categories: [], items: [], sub_items: [] });
   const [searchLoading, setSearchLoading] = useState(false);
   
   // Fallback categories in case API fails
@@ -64,43 +65,24 @@ const Home = () => {
 
   const performSearch = async (query) => {
     if (!query.trim()) {
-      setSearchResults({ categories: [], items: [] });
+      setSearchResults({ categories: [], items: [], sub_items: [] });
       return;
     }
 
     setSearchLoading(true);
     try {
-      // Search categories
-      const categoriesResult = categories.filter(category =>
-        category.name.toLowerCase().includes(query.toLowerCase())
-      );
-
-      // Search items across all categories
-      let allItems = [];
-      for (const category of categories) {
-        try {
-          const categoryItems = await categoryAPI.getCategoryItems(category.id);
-          const filteredItems = categoryItems.filter(item =>
-            item.name.toLowerCase().includes(query.toLowerCase())
-          );
-          // Add category name to items for context
-          const itemsWithCategory = filteredItems.map(item => ({
-            ...item,
-            categoryName: category.name
-          }));
-          allItems = [...allItems, ...itemsWithCategory];
-        } catch (error) {
-          console.error(`Error searching items in category ${category.name}:`, error);
-        }
+      // Use backend search API that searches across categories, items, and sub-items
+      // Includes: names, descriptions, part numbers, brand, manufacturer
+      const response = await searchService.search(query);
+      
+      if (response.success && response.results) {
+        setSearchResults(response.results);
+      } else {
+        setSearchResults({ categories: [], items: [], sub_items: [] });
       }
-
-      setSearchResults({
-        categories: categoriesResult,
-        items: allItems
-      });
     } catch (error) {
       console.error('Search error:', error);
-      setSearchResults({ categories: [], items: [] });
+      setSearchResults({ categories: [], items: [], sub_items: [] });
     }
     setSearchLoading(false);
   };
@@ -119,7 +101,7 @@ const Home = () => {
   const closeSearchModal = () => {
     setShowSearchModal(false);
     setSearchQuery('');
-    setSearchResults({ categories: [], items: [] });
+    setSearchResults({ categories: [], items: [], sub_items: [] });
   };
 
   const handleCategoryClick = (category) => {
@@ -139,6 +121,18 @@ const Home = () => {
         selectedCategoryId: item.category_id || item.categoryId,
         selectedCategoryName: item.categoryName,
         selectedItem: item 
+      }
+    });
+  };
+
+  const handleSubItemClick = (subItem) => {
+    closeSearchModal();
+    // Navigate to sub-items page for this item
+    navigate(`/sub-items/${subItem.item_id}`, {
+      state: {
+        itemName: subItem.item_name,
+        categoryName: subItem.categoryName,
+        categoryId: subItem.category_id || subItem.categoryId
       }
     });
   };
@@ -218,14 +212,14 @@ const Home = () => {
           ) :
           React.createElement(
             'div',
-            { className: 'grid grid-cols-1 md:grid-cols-2 gap-6' },
+            { className: 'grid grid-cols-1 md:grid-cols-3 gap-6' },
             // Categories section
             React.createElement(
               'div',
               { className: 'flex flex-col h-full' },
               React.createElement('h4', { className: 'text-xs font-semibold text-slate-600 dark:text-slate-400 mb-3 uppercase tracking-wide flex items-center gap-2' }, 
                 React.createElement('span', { className: 'material-symbols-outlined text-sm' }, 'category'),
-                'Categories'
+                `Categories (${searchResults.categories.length})`
               ),
               searchResults.categories.length > 0 ?
               React.createElement(
@@ -237,7 +231,7 @@ const Home = () => {
                     {
                       key: index,
                       onClick: () => handleCategoryClick(category),
-                      className: 'flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-700 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-600 cursor-pointer transition-colors h-16'
+                      className: 'flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-700 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-600 cursor-pointer transition-colors'
                     },
                     React.createElement('img', {
                       src: category.image_url || 'https://via.placeholder.com/32',
@@ -258,7 +252,7 @@ const Home = () => {
                 { className: 'flex-1 flex items-center justify-center py-8 text-slate-400' },
                 React.createElement('div', { className: 'text-center' },
                   React.createElement('span', { className: 'material-symbols-outlined text-xl mb-1 block' }, 'folder_off'),
-                  React.createElement('p', { className: 'text-xs' }, 'No categories found')
+                  React.createElement('p', { className: 'text-xs' }, 'No categories')
                 )
               )
             ),
@@ -268,7 +262,7 @@ const Home = () => {
               { className: 'flex flex-col h-full' },
               React.createElement('h4', { className: 'text-xs font-semibold text-slate-600 dark:text-slate-400 mb-3 uppercase tracking-wide flex items-center gap-2' }, 
                 React.createElement('span', { className: 'material-symbols-outlined text-sm' }, 'inventory'),
-                'Items'
+                `Items (${searchResults.items.length})`
               ),
               searchResults.items.length > 0 ?
               React.createElement(
@@ -280,7 +274,7 @@ const Home = () => {
                     {
                       key: index,
                       onClick: () => handleItemClick(item),
-                      className: 'flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-700 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-600 cursor-pointer transition-colors h-16'
+                      className: 'flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-700 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-600 cursor-pointer transition-colors'
                     },
                     React.createElement('img', {
                       src: item.image_url || 'https://via.placeholder.com/32',
@@ -291,8 +285,9 @@ const Home = () => {
                       'div',
                       { className: 'flex-1 min-w-0' },
                       React.createElement('div', { className: 'text-sm font-medium text-slate-900 dark:text-slate-50 truncate' }, item.name),
-                      React.createElement('div', { className: 'text-xs text-slate-500 dark:text-slate-400 truncate' }, `in ${item.categoryName}`),
-                      item.price && React.createElement('div', { className: 'text-xs font-semibold text-primary' }, `$${item.price}`)
+                      item.part_number && React.createElement('div', { className: 'text-xs text-blue-600 dark:text-blue-400 truncate' }, `Part #: ${item.part_number}`),
+                      React.createElement('div', { className: 'text-xs text-slate-500 dark:text-slate-400 truncate' }, item.categoryName),
+                      item.price && React.createElement('div', { className: 'text-xs font-semibold text-primary' }, `$${parseFloat(item.price).toFixed(2)}`)
                     )
                   )
                 )
@@ -302,18 +297,69 @@ const Home = () => {
                 { className: 'flex-1 flex items-center justify-center py-8 text-slate-400' },
                 React.createElement('div', { className: 'text-center' },
                   React.createElement('span', { className: 'material-symbols-outlined text-xl mb-1 block' }, 'inventory_2'),
-                  React.createElement('p', { className: 'text-xs' }, 'No items found')
+                  React.createElement('p', { className: 'text-xs' }, 'No items')
+                )
+              )
+            ),
+            // Sub-Items section
+            React.createElement(
+              'div',
+              { className: 'flex flex-col h-full' },
+              React.createElement('h4', { className: 'text-xs font-semibold text-slate-600 dark:text-slate-400 mb-3 uppercase tracking-wide flex items-center gap-2' }, 
+                React.createElement('span', { className: 'material-symbols-outlined text-sm' }, 'widgets'),
+                `Sub-Items (${searchResults.sub_items.length})`
+              ),
+              searchResults.sub_items.length > 0 ?
+              React.createElement(
+                'div',
+                { className: 'space-y-2 flex-1' },
+                searchResults.sub_items.map((subItem, index) =>
+                  React.createElement(
+                    'div',
+                    {
+                      key: index,
+                      onClick: () => handleSubItemClick(subItem),
+                      className: 'flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-700 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-600 cursor-pointer transition-colors'
+                    },
+                    React.createElement('img', {
+                      src: subItem.image_url || 'https://via.placeholder.com/32',
+                      alt: subItem.name,
+                      className: 'w-8 h-8 rounded object-cover flex-shrink-0'
+                    }),
+                    React.createElement(
+                      'div',
+                      { className: 'flex-1 min-w-0' },
+                      React.createElement('div', { className: 'text-sm font-medium text-slate-900 dark:text-slate-50 truncate' }, subItem.name),
+                      subItem.part_number && React.createElement('div', { className: 'text-xs text-blue-600 dark:text-blue-400 truncate' }, `Part #: ${subItem.part_number}`),
+                      React.createElement('div', { className: 'text-xs text-slate-500 dark:text-slate-400 truncate' }, `${subItem.categoryName} › ${subItem.item_name}`),
+                      (subItem.brand || subItem.manufacturer) && React.createElement(
+                        'div',
+                        { className: 'flex gap-1 mt-0.5' },
+                        subItem.brand && React.createElement('span', { className: 'text-xs bg-gray-200 dark:bg-gray-600 px-1.5 py-0.5 rounded truncate' }, subItem.brand),
+                        subItem.manufacturer && React.createElement('span', { className: 'text-xs bg-gray-200 dark:bg-gray-600 px-1.5 py-0.5 rounded truncate' }, subItem.manufacturer)
+                      ),
+                      subItem.price && React.createElement('div', { className: 'text-xs font-semibold text-primary mt-0.5' }, `$${parseFloat(subItem.price).toFixed(2)}`)
+                    )
+                  )
+                )
+              ) :
+              React.createElement(
+                'div',
+                { className: 'flex-1 flex items-center justify-center py-8 text-slate-400' },
+                React.createElement('div', { className: 'text-center' },
+                  React.createElement('span', { className: 'material-symbols-outlined text-xl mb-1 block' }, 'widgets'),
+                  React.createElement('p', { className: 'text-xs' }, 'No sub-items')
                 )
               )
             ),
             // No results at all
-            searchResults.categories.length === 0 && searchResults.items.length === 0 &&
+            searchResults.categories.length === 0 && searchResults.items.length === 0 && searchResults.sub_items.length === 0 &&
             React.createElement(
               'div',
               { className: 'col-span-full text-center py-6 text-slate-500 dark:text-slate-400' },
               React.createElement('span', { className: 'material-symbols-outlined text-2xl mb-2 block' }, 'search_off'),
-              React.createElement('p', { className: 'text-sm' }, 'No results found'),
-              React.createElement('p', { className: 'text-xs mt-1' }, 'Try searching with different keywords')
+              React.createElement('p', { className: 'text-sm font-medium' }, 'No results found'),
+              React.createElement('p', { className: 'text-xs mt-1' }, 'Try searching with different keywords or part numbers')
             )
           )
         )
