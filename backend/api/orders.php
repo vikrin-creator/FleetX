@@ -25,6 +25,10 @@ try {
             getUserOrders($pdo);
             break;
             
+        case 'get_all_orders':
+            getAllOrders($pdo);
+            break;
+            
         case 'get_order_details':
             getOrderDetails($pdo);
             break;
@@ -174,6 +178,45 @@ function getUserOrders($pdo) {
         ");
         
         $stmt->execute([':user_id' => $userId]);
+        $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        echo json_encode(['success' => true, 'orders' => $orders]);
+        
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'message' => 'Failed to fetch orders: ' . $e->getMessage()]);
+    }
+}
+
+function getAllOrders($pdo) {
+    try {
+        $stmt = $pdo->prepare("
+            SELECT 
+                o.id,
+                o.user_id,
+                o.order_number,
+                o.full_name,
+                o.email,
+                o.phone,
+                o.address_line1,
+                o.address_line2,
+                o.city,
+                o.state,
+                o.zip_code,
+                o.country,
+                o.payment_method,
+                o.subtotal,
+                o.shipping_cost,
+                o.total,
+                o.status,
+                o.created_at,
+                COUNT(oi.id) as item_count
+            FROM orders o
+            LEFT JOIN order_items oi ON o.id = oi.order_id
+            GROUP BY o.id
+            ORDER BY o.created_at DESC
+        ");
+        
+        $stmt->execute();
         $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
         echo json_encode(['success' => true, 'orders' => $orders]);

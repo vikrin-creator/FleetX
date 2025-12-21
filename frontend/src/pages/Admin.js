@@ -3,6 +3,7 @@ import Sidebar from '../components/layout/Sidebar.js';
 import ProductCategories from './ProductCategories.js';
 import ProductManagement from './ProductManagement.js';
 import Customers from './Customers.js';
+import OrderManagement from './OrderManagement.js';
 
 const Admin = () => {
   const [activeTab, setActiveTab] = useState('products');
@@ -53,12 +54,7 @@ const Admin = () => {
       case 'inventory':
         return React.createElement(ProductManagement, null);
       case 'orders':
-        return React.createElement(
-          'div',
-          { className: 'p-4 sm:p-6 lg:p-8' },
-          React.createElement('h1', { className: 'text-2xl sm:text-3xl font-bold text-slate-900 dark:text-slate-50 mb-4' }, 'Orders'),
-          React.createElement('p', { className: 'text-slate-600 dark:text-slate-400' }, 'Orders management coming soon...')
-        );
+        return React.createElement(OrderManagement, null);
       case 'customers':
         return React.createElement(Customers, null);
       default:
