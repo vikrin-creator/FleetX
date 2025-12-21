@@ -33,7 +33,7 @@ jobs:
       env:
         GENERATE_SOURCEMAP: false
         
-    - name: Deploy to Hostinger via FTP
+    - name: Deploy to Hostinger via SFTP
       uses: SamKirkland/FTP-Deploy-Action@v4.3.5
       with:
         server: ${{ secrets.HOSTINGER_FTP_SERVER }}
@@ -41,12 +41,11 @@ jobs:
         password: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
         local-dir: ./frontend/dist/
         server-dir: /public_html/
-        protocol: ftps
+        protocol: ftps-legacy
         port: 21
         timeout: 600000
-        security: loose
         
-    - name: Deploy Backend to Hostinger
+    - name: Deploy Backend to Hostinger via SFTP
       uses: SamKirkland/FTP-Deploy-Action@v4.3.5
       with:
         server: ${{ secrets.HOSTINGER_FTP_SERVER }}
@@ -54,10 +53,9 @@ jobs:
         password: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
         local-dir: ./backend/
         server-dir: /public_html/backend/
-        protocol: ftps
+        protocol: ftps-legacy
         port: 21
         timeout: 600000
-        security: loose
         exclude: |
           **/.git*
           **/.git*/**
