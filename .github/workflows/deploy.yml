@@ -8,7 +8,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 15  # Increase timeout
+    timeout-minutes: 30  # Increase timeout for FTP connection issues
     
     steps:
     - name: Checkout code
@@ -33,7 +33,7 @@ jobs:
       env:
         GENERATE_SOURCEMAP: false
         
-    - name: Deploy to Hostinger via SFTP
+    - name: Deploy Frontend to Hostinger
       uses: SamKirkland/FTP-Deploy-Action@v4.3.5
       with:
         server: ${{ secrets.HOSTINGER_FTP_SERVER }}
@@ -41,11 +41,10 @@ jobs:
         password: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
         local-dir: ./frontend/dist/
         server-dir: /public_html/
-        protocol: ftps-legacy
+        protocol: ftp
         port: 21
-        timeout: 600000
         
-    - name: Deploy Backend to Hostinger via SFTP
+    - name: Deploy Backend to Hostinger
       uses: SamKirkland/FTP-Deploy-Action@v4.3.5
       with:
         server: ${{ secrets.HOSTINGER_FTP_SERVER }}
@@ -53,9 +52,8 @@ jobs:
         password: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
         local-dir: ./backend/
         server-dir: /public_html/backend/
-        protocol: ftps-legacy
+        protocol: ftp
         port: 21
-        timeout: 600000
         exclude: |
           **/.git*
           **/.git*/**
