@@ -32,6 +32,10 @@ jobs:
         CI=false npm run build
       env:
         GENERATE_SOURCEMAP: false
+        VITE_API_BASE_URL: https://sandybrown-squirrel-472536.hostingersite.com/backend/api
+        VITE_APP_NAME: FleetX
+        VITE_APP_VERSION: 1.0.0
+        VITE_STRIPE_PUBLIC_KEY: pk_test_51Sc8ijKGf2r0XJoC0MYKBJPbtVG3yIKO1XMORxRvqXwppDYSOWUxZjRKxsIQTN2VPYKn0B3Wzv7uBeoLwxDnqPIH007sxY1MkX
         
     - name: Deploy Frontend to Hostinger
       uses: SamKirkland/FTP-Deploy-Action@v4.3.5
