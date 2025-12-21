@@ -17,17 +17,25 @@ const Customers = () => {
   const fetchCustomers = async () => {
     try {
       setLoading(true);
+      console.log('Fetching customers from API...');
       const response = await fetch('https://sandybrown-squirrel-472536.hostingersite.com/backend/api/users.php?action=get_all');
+      
+      console.log('Response status:', response.status);
+      console.log('Response ok:', response.ok);
       
       if (!response.ok) {
         throw new Error('Failed to fetch customers');
       }
       
       const data = await response.json();
+      console.log('API Response:', data);
       
       if (data.success) {
-        setCustomers(data.users || []);
+        const users = data.data?.users || data.users || [];
+        console.log('Users from API:', users);
+        setCustomers(users);
       } else {
+        console.error('API returned error:', data.message);
         setError(data.message || 'Failed to load customers');
       }
     } catch (err) {
@@ -60,21 +68,29 @@ const Customers = () => {
 
   const fetchCustomerOrders = async (customer) => {
     try {
+      console.log('Fetching orders for customer:', customer);
       setLoadingOrders(true);
       setSelectedCustomer(customer);
       setShowOrdersModal(true);
       
-      const response = await fetch(`https://sandybrown-squirrel-472536.hostingersite.com/backend/api/orders.php?action=get_user_orders&userId=${customer.id}`);
+      const url = `https://sandybrown-squirrel-472536.hostingersite.com/backend/api/orders.php?action=get_user_orders&userId=${customer.id}`;
+      console.log('Fetching from URL:', url);
+      
+      const response = await fetch(url);
       
       if (!response.ok) {
         throw new Error('Failed to fetch customer orders');
       }
       
       const data = await response.json();
+      console.log('Orders API response:', data);
       
       if (data.success) {
-        setCustomerOrders(data.data || []);
+        const orders = data.data || data.orders || [];
+        console.log('Customer orders:', orders);
+        setCustomerOrders(orders);
       } else {
+        console.log('API returned no success');
         setCustomerOrders([]);
       }
     } catch (err) {
@@ -436,30 +452,6 @@ const Customers = () => {
             )
           )
         )
-      )
-    ),
-
-    // Statistics Cards (optional)
-    React.createElement(
-      'div',
-      { className: 'grid grid-cols-1 md:grid-cols-3 gap-4 mt-6' },
-      React.createElement(
-        'div',
-        { className: 'bg-blue-50 rounded-lg p-4' },
-        React.createElement('p', { className: 'text-sm text-blue-600 font-medium' }, 'Total Customers'),
-        React.createElement('p', { className: 'text-2xl font-bold text-blue-900' }, customers.length)
-      ),
-      React.createElement(
-        'div',
-        { className: 'bg-green-50 rounded-lg p-4' },
-        React.createElement('p', { className: 'text-sm text-green-600 font-medium' }, 'Verified'),
-        React.createElement('p', { className: 'text-2xl font-bold text-green-900' }, customers.filter(c => c.email_verified).length)
-      ),
-      React.createElement(
-        'div',
-        { className: 'bg-yellow-50 rounded-lg p-4' },
-        React.createElement('p', { className: 'text-sm text-yellow-600 font-medium' }, 'Pending'),
-        React.createElement('p', { className: 'text-2xl font-bold text-yellow-900' }, customers.filter(c => !c.email_verified).length)
       )
     )
   );
