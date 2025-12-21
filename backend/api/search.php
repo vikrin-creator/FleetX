@@ -4,10 +4,30 @@ require_once '../utils/Response.php';
 
 class SearchController {
     private $db;
+    private $baseUrl;
 
     public function __construct() {
         $database = Database::getInstance();
         $this->db = $database->getConnection();
+        
+        // Get the base URL for converting relative image paths
+        $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
+        $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+        $this->baseUrl = $protocol . '://' . $host . '/backend/';
+    }
+
+    private function formatImageUrl($imageUrl) {
+        if (empty($imageUrl)) {
+            return null;
+        }
+        
+        // If it's already a full URL, return as is
+        if (strpos($imageUrl, 'http://') === 0 || strpos($imageUrl, 'https://') === 0) {
+            return $imageUrl;
+        }
+        
+        // Convert relative path to absolute URL
+        return $this->baseUrl . $imageUrl;
     }
 
     public function search() {
@@ -45,7 +65,13 @@ class SearchController {
                 LIMIT 50
             ");
             $stmt->execute([$searchTerm, $searchTerm]);
-            $results['categories'] = $stmt->fetchAll();
+            $categories = $stmt->fetchAll();
+            
+            // Format image URLs for categories
+            foreach ($categories as &$category) {
+                $category['image_url'] = $this->formatImageUrl($category['image_url']);
+            }
+            $results['categories'] = $categories;
 
             // Search in category_items (items)
             $stmt = $this->db->prepare("
@@ -75,9 +101,10 @@ class SearchController {
             $stmt->execute([$searchTerm, $searchTerm, $searchTerm]);
             $items = $stmt->fetchAll();
             
-            // Add categoryName for consistency with frontend
+            // Add categoryName for consistency with frontend and format image URLs
             foreach ($items as &$item) {
                 $item['categoryName'] = $item['category_name'];
+                $item['image_url'] = $this->formatImageUrl($item['image_url']);
             }
             $results['items'] = $items;
 
@@ -125,9 +152,10 @@ class SearchController {
             ]);
             $subItems = $stmt->fetchAll();
             
-            // Add categoryName for consistency with frontend
+            // Add categoryName for consistency with frontend and format image URLs
             foreach ($subItems as &$subItem) {
                 $subItem['categoryName'] = $subItem['category_name'];
+                $subItem['image_url'] = $this->formatImageUrl($subItem['image_url']);
             }
             $results['sub_items'] = $subItems;
 

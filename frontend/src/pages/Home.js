@@ -73,15 +73,20 @@ const Home = () => {
     try {
       // Use backend search API that searches across categories, items, and sub-items
       // Includes: names, descriptions, part numbers, brand, manufacturer
+      console.log('Searching for:', query);
       const response = await searchService.search(query);
+      console.log('Search response:', response);
       
       if (response.success && response.results) {
+        console.log('Setting search results:', response.results);
         setSearchResults(response.results);
       } else {
+        console.log('No results or unsuccessful response');
         setSearchResults({ categories: [], items: [], sub_items: [] });
       }
     } catch (error) {
       console.error('Search error:', error);
+      console.error('Error details:', error.response?.data);
       setSearchResults({ categories: [], items: [], sub_items: [] });
     }
     setSearchLoading(false);
@@ -236,7 +241,8 @@ const Home = () => {
                     React.createElement('img', {
                       src: category.image_url || 'https://via.placeholder.com/32',
                       alt: category.name,
-                      className: 'w-8 h-8 rounded object-cover flex-shrink-0'
+                      className: 'w-8 h-8 rounded object-cover flex-shrink-0',
+                      onError: (e) => { e.target.src = 'https://via.placeholder.com/32?text=No+Image'; }
                     }),
                     React.createElement(
                       'div',
@@ -279,7 +285,8 @@ const Home = () => {
                     React.createElement('img', {
                       src: item.image_url || 'https://via.placeholder.com/32',
                       alt: item.name,
-                      className: 'w-8 h-8 rounded object-cover flex-shrink-0'
+                      className: 'w-8 h-8 rounded object-cover flex-shrink-0',
+                      onError: (e) => { e.target.src = 'https://via.placeholder.com/32?text=No+Image'; }
                     }),
                     React.createElement(
                       'div',
@@ -324,7 +331,8 @@ const Home = () => {
                     React.createElement('img', {
                       src: subItem.image_url || 'https://via.placeholder.com/32',
                       alt: subItem.name,
-                      className: 'w-8 h-8 rounded object-cover flex-shrink-0'
+                      className: 'w-8 h-8 rounded object-cover flex-shrink-0',
+                      onError: (e) => { e.target.src = 'https://via.placeholder.com/32?text=No+Image'; }
                     }),
                     React.createElement(
                       'div',
