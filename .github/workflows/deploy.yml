@@ -33,25 +33,29 @@ jobs:
       env:
         GENERATE_SOURCEMAP: false
         
-    - name: Deploy Frontend to Hostinger via SFTP
-      uses: wlixcc/SFTP-Deploy-Action@v1.2.4
+    - name: Deploy Frontend to Hostinger
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
       with:
         server: ${{ secrets.HOSTINGER_FTP_SERVER }}
         username: ${{ secrets.HOSTINGER_FTP_USERNAME }}
         password: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
-        local_path: ./frontend/dist/*
-        remote_path: /public_html/
-        sftp_only: true
-        port: 22
+        local-dir: ./frontend/dist/
+        server-dir: /public_html/
+        protocol: ftp
+        port: 21
         
-    - name: Deploy Backend to Hostinger via SFTP
-      uses: wlixcc/SFTP-Deploy-Action@v1.2.4
+    - name: Deploy Backend to Hostinger
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
       with:
         server: ${{ secrets.HOSTINGER_FTP_SERVER }}
         username: ${{ secrets.HOSTINGER_FTP_USERNAME }}
         password: ${{ secrets.HOSTINGER_FTP_PASSWORD }}
-        local_path: ./backend/
-        remote_path: /public_html/backend/
-        sftp_only: true
-        port: 22
-        args: '-o ConnectTimeout=5'
+        local-dir: ./backend/
+        server-dir: /public_html/backend/
+        protocol: ftp
+        port: 21
+        exclude: |
+          **/.git*
+          **/.git*/**
+          **/node_modules/**
+          **/vendor/**
