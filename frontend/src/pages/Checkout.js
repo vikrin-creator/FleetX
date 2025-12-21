@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { loadStripe } from '@stripe/stripe-js';
+
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -15,7 +18,7 @@ const Checkout = () => {
     zipCode: '',
     country: ''
   });
-  const [paymentMethod, setPaymentMethod] = useState('cod');
+  const [paymentMethod, setPaymentMethod] = useState('card');
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
@@ -95,7 +98,7 @@ const Checkout = () => {
         body: JSON.stringify({
           userId: user.id,
           ...shippingAddress,
-          isDefault: false // Let user set default manually from My Addresses page
+          isDefault: false
         })
       });
 
@@ -106,7 +109,7 @@ const Checkout = () => {
         shippingAddressId = addressResult.addressId;
       }
 
-      // Save order to database
+      // Save order to database first
       const orderResponse = await fetch('https://sandybrown-squirrel-472536.hostingersite.com/backend/api/orders.php?action=save_order', {
         method: 'POST',
         headers: {
@@ -130,14 +133,38 @@ const Checkout = () => {
         alert('Failed to place order: ' + orderResult.message);
         return;
       }
-      
-      // Clear cart
-      localStorage.removeItem('cart');
-      window.dispatchEvent(new Event('storage'));
-      
-      // Show success message and redirect
-      alert(`Order placed successfully! Your order number is ${orderResult.orderNumber}`);
-      navigate('/my-orders');
+
+      // If payment method is card, redirect to Stripe
+      if (paymentMethod === 'card') {
+        // Create Stripe checkout session
+        const paymentResponse = await fetch('https://sandybrown-squirrel-472536.hostingersite.com/backend/api/stripe.php?action=create_payment_intent', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            amount: Math.round(calculateTotal() * 100), // Convert to cents
+            orderId: orderResult.orderId,
+            userId: user.id
+          })
+        });
+
+        const paymentResult = await paymentResponse.json();
+        
+        if (!paymentResult.success) {
+          alert('Failed to initialize payment: ' + paymentResult.message);
+          return;
+        }
+
+        // Redirect to Stripe Checkout page
+        window.location.href = paymentResult.url;
+      } else {
+        // For other payment methods, just clear cart and redirect
+        localStorage.removeItem('cart');
+        window.dispatchEvent(new Event('storage'));
+        alert(`Order placed successfully! Your order number is ${orderResult.orderNumber}`);
+        navigate('/my-orders');
+      }
     } catch (error) {
       console.error('Order placement error:', error);
       alert('Failed to place order. Please try again.');
@@ -321,42 +348,23 @@ const Checkout = () => {
             'div',
             { className: 'space-y-3' },
             
-            // Cash on Delivery
+            // Credit/Debit Card via Stripe
             React.createElement(
               'label',
-              { className: 'flex items-center p-4 border-2 rounded-lg cursor-pointer ' + (paymentMethod === 'cod' ? 'border-blue-600 bg-blue-50' : 'border-gray-200 hover:border-gray-300') },
+              { className: 'flex items-center p-4 border-2 rounded-lg cursor-pointer ' + (paymentMethod === 'card' ? 'border-blue-600 bg-blue-50' : 'border-gray-200 hover:border-gray-300') },
               React.createElement('input', {
                 type: 'radio',
                 name: 'paymentMethod',
-                value: 'cod',
-                checked: paymentMethod === 'cod',
+                value: 'card',
+                checked: paymentMethod === 'card',
                 onChange: (e) => setPaymentMethod(e.target.value),
                 className: 'w-4 h-4 text-blue-600'
               }),
               React.createElement(
                 'div',
                 { className: 'ml-3' },
-                React.createElement('p', { className: 'font-medium text-gray-900' }, 'Cash on Delivery'),
-                React.createElement('p', { className: 'text-sm text-gray-500' }, 'Pay when you receive your order')
-              )
-            ),
-            
-            // Credit Card (disabled for now)
-            React.createElement(
-              'label',
-              { className: 'flex items-center p-4 border-2 rounded-lg opacity-50 cursor-not-allowed border-gray-200' },
-              React.createElement('input', {
-                type: 'radio',
-                name: 'paymentMethod',
-                value: 'card',
-                disabled: true,
-                className: 'w-4 h-4 text-blue-600'
-              }),
-              React.createElement(
-                'div',
-                { className: 'ml-3' },
                 React.createElement('p', { className: 'font-medium text-gray-900' }, 'Credit/Debit Card'),
-                React.createElement('p', { className: 'text-sm text-gray-500' }, 'Coming soon')
+                React.createElement('p', { className: 'text-sm text-gray-500' }, 'Pay securely with Stripe')
               )
             )
           )

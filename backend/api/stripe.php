@@ -47,12 +47,22 @@ function createPaymentIntent() {
     }
     
     try {
-        $paymentIntent = \Stripe\PaymentIntent::create([
-            'amount' => $data['amount'], // Amount in cents
-            'currency' => 'usd',
-            'automatic_payment_methods' => [
-                'enabled' => true,
-            ],
+        // Create Checkout Session instead of Payment Intent
+        $session = \Stripe\Checkout\Session::create([
+            'payment_method_types' => ['card'],
+            'line_items' => [[
+                'price_data' => [
+                    'currency' => 'usd',
+                    'product_data' => [
+                        'name' => 'Order #' . ($data['orderId'] ?? 'New Order'),
+                    ],
+                    'unit_amount' => $data['amount'], // Amount in cents
+                ],
+                'quantity' => 1,
+            ]],
+            'mode' => 'payment',
+            'success_url' => 'https://sandybrown-squirrel-472536.hostingersite.com/my-orders?payment=success',
+            'cancel_url' => 'https://sandybrown-squirrel-472536.hostingersite.com/checkout?payment=cancelled',
             'metadata' => [
                 'order_id' => $data['orderId'] ?? '',
                 'user_id' => $data['userId'] ?? '',
@@ -61,8 +71,8 @@ function createPaymentIntent() {
         
         echo json_encode([
             'success' => true,
-            'clientSecret' => $paymentIntent->client_secret,
-            'paymentIntentId' => $paymentIntent->id
+            'sessionId' => $session->id,
+            'url' => $session->url
         ]);
         
     } catch (\Stripe\Exception\ApiErrorException $e) {
