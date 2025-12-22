@@ -45,6 +45,7 @@ const ProductManagement = () => {
   });
 
   const [additionalImages, setAdditionalImages] = useState([]);
+  const [existingAdditionalImages, setExistingAdditionalImages] = useState([]);
 
   useEffect(() => {
     fetchCategories();
@@ -211,10 +212,12 @@ const ProductManagement = () => {
       manufacturer: '',
       dtna_classification: ''
     });
+    setAdditionalImages([]);
+    setExistingAdditionalImages([]);
     setShowSubItemForm(true);
   };
 
-  const handleEditSubItem = (subItem) => {
+  const handleEditSubItem = async (subItem) => {
     setEditingSubItem(subItem);
     setSubItemForm({
       name: subItem.name || '',
@@ -228,6 +231,21 @@ const ProductManagement = () => {
       manufacturer: subItem.manufacturer || '',
       dtna_classification: subItem.dtna_classification || ''
     });
+    
+    // Load existing additional images
+    try {
+      const subItemDetails = await categoryAPI.getSubItemById(subItem.id);
+      if (subItemDetails.images && Array.isArray(subItemDetails.images)) {
+        const existingImages = subItemDetails.images.filter(img => !img.is_primary);
+        setExistingAdditionalImages(existingImages);
+      } else {
+        setExistingAdditionalImages([]);
+      }
+    } catch (error) {
+      console.error('Error loading sub-item details:', error);
+      setExistingAdditionalImages([]);
+    }
+    
     setAdditionalImages([]);
     setShowSubItemForm(true);
   };
@@ -292,6 +310,22 @@ const ProductManagement = () => {
 
   const removeAdditionalImage = (index) => {
     setAdditionalImages(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const removeExistingImage = async (imageId) => {
+    if (!window.confirm('Are you sure you want to delete this image?')) {
+      return;
+    }
+    
+    try {
+      await categoryAPI.deleteSubItemImage(imageId);
+      // Remove from local state
+      setExistingAdditionalImages(prev => prev.filter(img => img.id !== imageId));
+      alert('Image deleted successfully');
+    } catch (error) {
+      console.error('Error deleting image:', error);
+      alert('Failed to delete image. Please try again.');
+    }
   };
 
   const handleDeleteSubItem = async (subItemId) => {
@@ -821,6 +855,39 @@ const ProductManagement = () => {
               className: 'block text-sm font-medium text-gray-700 mb-1',
               htmlFor: 'additional-images-input'
             }, 'Additional Images (Multiple)'),
+            
+            // Display existing additional images if editing
+            existingAdditionalImages.length > 0 && React.createElement(
+              'div',
+              { className: 'mb-3' },
+              React.createElement('p', { className: 'text-xs text-gray-600 mb-2' }, 'Existing Images:'),
+              React.createElement(
+                'div',
+                { className: 'grid grid-cols-4 gap-2' },
+                existingAdditionalImages.map((image, index) =>
+                  React.createElement(
+                    'div',
+                    { key: image.id, className: 'relative' },
+                    React.createElement('img', {
+                      src: image.image_url,
+                      alt: `Existing ${index + 1}`,
+                      className: 'w-full h-20 object-cover rounded-lg border',
+                      onError: (e) => { e.target.src = 'https://via.placeholder.com/80?text=No+Image'; }
+                    }),
+                    React.createElement(
+                      'button',
+                      {
+                        type: 'button',
+                        onClick: () => removeExistingImage(image.id),
+                        className: 'absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600'
+                      },
+                      '×'
+                    )
+                  )
+                )
+              )
+            ),
+            
             React.createElement('input', {
               id: 'additional-images-input',
               type: 'file',
@@ -830,15 +897,19 @@ const ProductManagement = () => {
               className: 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
             }),
             React.createElement('p', { className: 'text-xs text-gray-500 mt-1' }, 'Hold Ctrl (Windows) or Cmd (Mac) and click to select multiple images'),
-            React.createElement('div', { className: 'text-xs text-blue-600 mt-1' }, `${additionalImages.length} image(s) selected`),
+            React.createElement('div', { className: 'text-xs text-blue-600 mt-1' }, `${additionalImages.length} new image(s) selected`),
             additionalImages.length > 0 && React.createElement(
               'div',
-              { className: 'mt-3 grid grid-cols-4 gap-2' },
-              additionalImages.map((file, index) =>
-                React.createElement(
-                  'div',
-                  { key: index, className: 'relative' },
-                  React.createElement('img', {
+              { className: 'mt-3' },
+              React.createElement('p', { className: 'text-xs text-gray-600 mb-2' }, 'New Images to Upload:'),
+              React.createElement(
+                'div',
+                { className: 'grid grid-cols-4 gap-2' },
+                additionalImages.map((file, index) =>
+                  React.createElement(
+                    'div',
+                    { key: index, className: 'relative' },
+                    React.createElement('img', {
                     src: URL.createObjectURL(file),
                     alt: `Additional ${index + 1}`,
                     className: 'w-full h-20 object-cover rounded-lg border'
@@ -856,6 +927,7 @@ const ProductManagement = () => {
               )
             )
           )
+        )
         ),
         React.createElement(
           'div',
