@@ -9,7 +9,12 @@ const SubItems = () => {
   const [subItems, setSubItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedItem, setExpandedItem] = useState(null);
-  const [selectedFilters, setSelectedFilters] = useState([]);
+  const [selectedFilters, setSelectedFilters] = useState({
+    partTypes: [],
+    brands: [],
+    manufacturers: [],
+    dtna: []
+  });
   const [isFilterOpen, setIsFilterOpen] = useState(false); // Mobile filter toggle
   
   // Get item and category info from navigation state
@@ -76,6 +81,24 @@ const SubItems = () => {
     setExpandedItem(expandedItem === id ? null : id);
   };
 
+  // Sidebar section expand/collapse state
+  const [expandedSections, setExpandedSections] = useState({
+    partType: true,
+    dtna: true,
+    brand: true,
+    manufacturer: true
+  });
+
+  // Collapse whole filters panel (keeps header visible)
+  const [filtersCollapsed, setFiltersCollapsed] = useState(false);
+
+  const toggleSection = (key) => {
+    setExpandedSections(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const expandAll = () => setExpandedSections({ partType: true, dtna: true, brand: true, manufacturer: true });
+  const collapseAll = () => setExpandedSections({ partType: false, dtna: false, brand: false, manufacturer: false });
+
   // Get unique sub-item names with counts for Part Type filter
   const getPartTypeCounts = () => {
     const counts = {};
@@ -126,6 +149,37 @@ const SubItems = () => {
   const brands = getBrandCounts();
   const manufacturers = getManufacturerCounts();
   const dtnaClassifications = getDTNACounts();
+
+  // Helper: toggle a value in a named filter category
+  const toggleFilter = (category, value) => {
+    setSelectedFilters(prev => {
+      const list = prev[category] || [];
+      const exists = list.includes(value);
+      const updated = exists ? list.filter(v => v !== value) : [...list, value];
+      return { ...prev, [category]: updated };
+    });
+  };
+
+  const selectedFiltersCount = Object.values(selectedFilters).reduce((acc, arr) => acc + (arr ? arr.length : 0), 0);
+
+  // Compute filtered list based on selected filters
+  let filteredSubItems = subItems;
+  if (subItems && subItems.length > 0) {
+    const selParts = selectedFilters.partTypes || [];
+    const selBrands = selectedFilters.brands || [];
+    const selMfr = selectedFilters.manufacturers || [];
+    const selDtna = selectedFilters.dtna || [];
+
+    if (selParts.length || selBrands.length || selMfr.length || selDtna.length) {
+      filteredSubItems = subItems.filter(item => {
+        if (selParts.length && !selParts.includes(item.name || 'Unknown')) return false;
+        if (selBrands.length && !selBrands.includes(item.brand || '')) return false;
+        if (selMfr.length && !selMfr.includes(item.manufacturer || '')) return false;
+        if (selDtna.length && !selDtna.includes(item.dtna_classification || '')) return false;
+        return true;
+      });
+    }
+  }
 
 
 
@@ -262,14 +316,14 @@ const SubItems = () => {
                 'h3',
                 { className: 'text-lg font-semibold text-gray-900' },
                 React.createElement('span', null, 'Applied Filters '),
-                React.createElement('span', { className: 'text-gray-500' }, `(${selectedFilters.length})`)
+                React.createElement('span', { className: 'text-gray-500' }, `(${selectedFiltersCount})`)
               ),
               React.createElement(
                 'button',
-                { className: 'text-blue-600 hover:text-blue-700' },
+                { onClick: () => setFiltersCollapsed(!filtersCollapsed), className: 'text-blue-600 hover:text-blue-700' },
                 React.createElement(
                   'svg',
-                  { className: 'w-5 h-5', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' },
+                  { className: filtersCollapsed ? 'w-5 h-5 transform rotate-180' : 'w-5 h-5', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' },
                   React.createElement('path', { strokeLinecap: 'round', strokeLinejoin: 'round', strokeWidth: 2, d: 'M5 15l7-7 7 7' })
                 )
               )
@@ -279,15 +333,15 @@ const SubItems = () => {
           // Expand/Collapse All
           React.createElement(
             'div',
-            { className: 'mb-4 flex justify-between text-sm' },
+            { className: filtersCollapsed ? 'hidden mb-4 flex justify-between text-sm' : 'mb-4 flex justify-between text-sm' },
             React.createElement(
               'button',
-              { className: 'text-blue-600 hover:text-blue-700 font-medium' },
+              { onClick: expandAll, className: 'text-blue-600 hover:text-blue-700 font-medium' },
               'Expand All'
             ),
             React.createElement(
               'button',
-              { className: 'text-blue-600 hover:text-blue-700 font-medium' },
+              { onClick: collapseAll, className: 'text-blue-600 hover:text-blue-700 font-medium' },
               'Collapse All'
             )
           ),
@@ -295,7 +349,7 @@ const SubItems = () => {
           // Filter Sections
           React.createElement(
             'div',
-            { className: 'space-y-4' },
+            { className: filtersCollapsed ? 'hidden space-y-4' : 'space-y-4' },
             
             // Part Type Filter
             React.createElement(
@@ -305,18 +359,18 @@ const SubItems = () => {
                 'button',
                 { 
                   className: 'w-full flex items-center justify-between text-left font-semibold text-gray-900 mb-3',
-                  onClick: () => {}
+                  onClick: () => toggleSection('partType')
                 },
                 React.createElement('span', null, 'Part Type'),
                 React.createElement(
                   'svg',
-                  { className: 'w-5 h-5 text-blue-600', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' },
+                  { className: expandedSections.partType ? 'w-5 h-5 text-blue-600 transform rotate-180' : 'w-5 h-5 text-blue-600', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' },
                   React.createElement('path', { strokeLinecap: 'round', strokeLinejoin: 'round', strokeWidth: 2, d: 'M19 9l-7 7-7-7' })
                 )
               ),
               React.createElement(
                 'div',
-                { className: 'space-y-2 ml-1' },
+                { className: expandedSections.partType ? 'space-y-2 ml-1' : 'hidden space-y-2 ml-1' },
                 partTypes.length > 0 ? partTypes.map((type, index) =>
                   React.createElement(
                     'label',
@@ -324,7 +378,7 @@ const SubItems = () => {
                       key: index,
                       className: 'flex items-center text-sm text-gray-700 hover:text-gray-900 cursor-pointer' 
                     },
-                    React.createElement('input', { type: 'checkbox', className: 'mr-3 w-4 h-4 text-blue-600 border-gray-300 rounded' }),
+                    React.createElement('input', { type: 'checkbox', className: 'mr-3 w-4 h-4 text-blue-600 border-gray-300 rounded', checked: selectedFilters.partTypes.includes(type.name), onChange: () => toggleFilter('partTypes', type.name) }),
                     React.createElement('span', null, type.name + ' '),
                     React.createElement('span', { className: 'text-gray-500' }, `(${type.count})`)
                   )
@@ -344,18 +398,18 @@ const SubItems = () => {
                 'button',
                 { 
                   className: 'w-full flex items-center justify-between text-left font-semibold text-gray-900 mb-3',
-                  onClick: () => {}
+                  onClick: () => toggleSection('dtna')
                 },
                 React.createElement('span', null, 'DTNA Parts Classification'),
                 React.createElement(
                   'svg',
-                  { className: 'w-5 h-5 text-blue-600', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' },
+                  { className: expandedSections.dtna ? 'w-5 h-5 text-blue-600 transform rotate-180' : 'w-5 h-5 text-blue-600', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' },
                   React.createElement('path', { strokeLinecap: 'round', strokeLinejoin: 'round', strokeWidth: 2, d: 'M19 9l-7 7-7-7' })
                 )
               ),
               React.createElement(
                 'div',
-                { className: 'space-y-2 ml-1' },
+                { className: expandedSections.dtna ? 'space-y-2 ml-1' : 'hidden space-y-2 ml-1' },
                 dtnaClassifications.length > 0 ? dtnaClassifications.map((classification, index) =>
                   React.createElement(
                     'label',
@@ -363,7 +417,7 @@ const SubItems = () => {
                       key: index,
                       className: 'flex items-center text-sm text-gray-700 hover:text-gray-900 cursor-pointer' 
                     },
-                    React.createElement('input', { type: 'checkbox', className: 'mr-3 w-4 h-4 text-blue-600 border-gray-300 rounded' }),
+                    React.createElement('input', { type: 'checkbox', className: 'mr-3 w-4 h-4 text-blue-600 border-gray-300 rounded', checked: selectedFilters.dtna.includes(classification.name), onChange: () => toggleFilter('dtna', classification.name) }),
                     React.createElement(
                       'span',
                       { className: 'flex items-center' },
@@ -392,18 +446,18 @@ const SubItems = () => {
                 'button',
                 { 
                   className: 'w-full flex items-center justify-between text-left font-semibold text-gray-900 mb-3',
-                  onClick: () => {}
+                  onClick: () => toggleSection('brand')
                 },
                 React.createElement('span', null, 'Brand'),
                 React.createElement(
                   'svg',
-                  { className: 'w-5 h-5 text-blue-600', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' },
+                  { className: expandedSections.brand ? 'w-5 h-5 text-blue-600 transform rotate-180' : 'w-5 h-5 text-blue-600', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' },
                   React.createElement('path', { strokeLinecap: 'round', strokeLinejoin: 'round', strokeWidth: 2, d: 'M19 9l-7 7-7-7' })
                 )
               ),
               React.createElement(
                 'div',
-                { className: 'space-y-2 ml-1' },
+                { className: expandedSections.brand ? 'space-y-2 ml-1' : 'hidden space-y-2 ml-1' },
                 brands.length > 0 ? brands.map((brand, index) =>
                   React.createElement(
                     'label',
@@ -411,7 +465,7 @@ const SubItems = () => {
                       key: index,
                       className: 'flex items-center text-sm text-gray-700 hover:text-gray-900 cursor-pointer' 
                     },
-                    React.createElement('input', { type: 'checkbox', className: 'mr-3 w-4 h-4 text-blue-600 border-gray-300 rounded' }),
+                    React.createElement('input', { type: 'checkbox', className: 'mr-3 w-4 h-4 text-blue-600 border-gray-300 rounded', checked: selectedFilters.brands.includes(brand.name), onChange: () => toggleFilter('brands', brand.name) }),
                     React.createElement('span', null, brand.name + ' '),
                     React.createElement('span', { className: 'text-gray-500' }, `(${brand.count})`)
                   )
@@ -427,22 +481,22 @@ const SubItems = () => {
             React.createElement(
               'div',
               { className: 'pb-4' },
-              React.createElement(
+                React.createElement(
                 'button',
                 { 
                   className: 'w-full flex items-center justify-between text-left font-semibold text-gray-900 mb-3',
-                  onClick: () => {}
+                  onClick: () => toggleSection('manufacturer')
                 },
                 React.createElement('span', null, 'Manufacturer'),
                 React.createElement(
                   'svg',
-                  { className: 'w-5 h-5 text-blue-600', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' },
+                  { className: expandedSections.manufacturer ? 'w-5 h-5 text-blue-600 transform rotate-180' : 'w-5 h-5 text-blue-600', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' },
                   React.createElement('path', { strokeLinecap: 'round', strokeLinejoin: 'round', strokeWidth: 2, d: 'M19 9l-7 7-7-7' })
                 )
               ),
               React.createElement(
                 'div',
-                { className: 'space-y-2 ml-1' },
+                { className: expandedSections.manufacturer ? 'space-y-2 ml-1' : 'hidden space-y-2 ml-1' },
                 manufacturers.length > 0 ? manufacturers.map((manufacturer, index) =>
                   React.createElement(
                     'label',
@@ -450,7 +504,7 @@ const SubItems = () => {
                       key: index,
                       className: 'flex items-center text-sm text-gray-700 hover:text-gray-900 cursor-pointer' 
                     },
-                    React.createElement('input', { type: 'checkbox', className: 'mr-3 w-4 h-4 text-blue-600 border-gray-300 rounded' }),
+                    React.createElement('input', { type: 'checkbox', className: 'mr-3 w-4 h-4 text-blue-600 border-gray-300 rounded', checked: selectedFilters.manufacturers.includes(manufacturer.name), onChange: () => toggleFilter('manufacturers', manufacturer.name) }),
                     React.createElement('span', null, manufacturer.name + ' '),
                     React.createElement('span', { className: 'text-gray-500' }, `(${manufacturer.count})`)
                   )
@@ -470,7 +524,7 @@ const SubItems = () => {
         'main',
         { className: 'flex-1' },
         
-        subItems.length === 0 ? React.createElement(
+        filteredSubItems.length === 0 ? React.createElement(
           'div',
           { className: 'text-center py-12 bg-white rounded-lg shadow-sm' },
           React.createElement('div', { className: 'text-gray-400 text-6xl mb-4' }, '📦'),
@@ -479,7 +533,7 @@ const SubItems = () => {
         ) : React.createElement(
           'div',
           { className: 'space-y-4' },
-          ...subItems.map(subItem =>
+          ...filteredSubItems.map(subItem =>
             React.createElement(
               'div',
               {
