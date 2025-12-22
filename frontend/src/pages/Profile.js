@@ -70,7 +70,7 @@ const Profile = () => {
           React.createElement('div', null,
             React.createElement('label', { className: 'block text-sm font-medium text-gray-700 mb-2' }, 'Name'),
             React.createElement('p', { className: 'text-gray-900 text-lg' },
-              `${user.first_name || ''} ${user.last_name || ''}`.trim() || '-'
+              user.name || `${user.first_name || ''} ${user.last_name || ''}`.trim() || '-'
             )
           ),
 

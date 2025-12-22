@@ -37,7 +37,7 @@ function getUserProfile() {
         $db = Database::getInstance()->getConnection();
         
         $stmt = $db->prepare("
-            SELECT id, first_name, last_name, email, phone, email_verified, created_at
+            SELECT id, name, first_name, last_name, email, phone, email_verified, created_at
             FROM users 
             WHERE id = ?
         ");
@@ -48,6 +48,11 @@ function getUserProfile() {
         if (!$user) {
             echo json_encode(['success' => false, 'message' => 'User not found']);
             return;
+        }
+        
+        // Use 'name' if first_name/last_name are empty
+        if (empty($user['first_name']) && empty($user['last_name']) && !empty($user['name'])) {
+            $user['first_name'] = $user['name'];
         }
         
         // Convert email_verified to boolean

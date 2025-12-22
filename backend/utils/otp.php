@@ -98,14 +98,24 @@ function verifyOTP($email, $otp_code) {
         
         if (!$checkStmt->fetch()) {
             // Create the user account with name and phone
-            $fullName = $record['full_name'] ?? null;
-            $phone = $record['phone'] ?? null;
+            $fullName = isset($record['full_name']) ? $record['full_name'] : null;
+            $phone = isset($record['phone']) ? $record['phone'] : null;
             
-            $createStmt = $db->prepare("
-                INSERT INTO users (email, password, name, phone, email_verified) 
-                VALUES (?, ?, ?, ?, 1)
-            ");
-            $createStmt->execute([$email, $record['password_hash'], $fullName, $phone]);
+            try {
+                // Try with name and phone columns
+                $createStmt = $db->prepare("
+                    INSERT INTO users (email, password, name, phone, email_verified) 
+                    VALUES (?, ?, ?, ?, 1)
+                ");
+                $createStmt->execute([$email, $record['password_hash'], $fullName, $phone]);
+            } catch (PDOException $e) {
+                // Fallback without name and phone columns
+                $createStmt = $db->prepare("
+                    INSERT INTO users (email, password, email_verified) 
+                    VALUES (?, ?, 1)
+                ");
+                $createStmt->execute([$email, $record['password_hash']]);
+            }
         }
     } else {
         // Mark email as verified in existing users table
