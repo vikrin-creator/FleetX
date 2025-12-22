@@ -11,16 +11,11 @@ if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
  * Send OTP email using SMTP
  */
 function sendOTPEmail($email, $otp_code) {
-    // Email configuration for GoDaddy Direct SMTP (Proven Working)
-    $smtp_host = 'smtpout.secureserver.net'; // GoDaddy Direct SMTP for inbox delivery
-    $smtp_port = 465; // SSL port
-    $smtp_username = 'sarwan@fleetxusa.com'; // Full email address
-    $smtp_password = 'Sarwan2005'; // GoDaddy email password
-    $from_email = 'sarwan@fleetxusa.com';
-    $from_name = 'Fleet X Parts';
+    // Load email configuration from config file
+    $config = require __DIR__ . '/../config/email.php';
     
-    // Use PHPMailer directly (no fallback needed - it's installed)
-    return sendOTPWithPHPMailer($email, $otp_code, $smtp_host, $smtp_port, $smtp_username, $smtp_password, $from_email, $from_name);
+    // Use PHPMailer with config file settings
+    return sendOTPWithPHPMailer($email, $otp_code, $config['smtp_host'], $config['smtp_port'], $config['smtp_username'], $config['smtp_password'], $config['from_email'], $config['from_name']);
 }
 
 /**
@@ -30,8 +25,8 @@ function sendOTPWithPHPMailer($email, $otp_code, $smtp_host, $smtp_port, $smtp_u
     try {
         $mail = new PHPMailer(true);
         
-        // Check if OpenSSL is available
-        $hasOpenSSL = extension_loaded('openssl');
+        // Load config to get smtp_secure setting
+        $config = require __DIR__ . '/../config/email.php';
         
         // Server settings
         $mail->isSMTP();
@@ -39,15 +34,13 @@ function sendOTPWithPHPMailer($email, $otp_code, $smtp_host, $smtp_port, $smtp_u
         $mail->SMTPAuth = true;
         $mail->Username = $smtp_username;
         $mail->Password = $smtp_password;
+        $mail->Port = $smtp_port;
         
-        if ($hasOpenSSL) {
-            $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS; // SSL for port 465
-            $mail->Port = $smtp_port;
+        // Set encryption based on config
+        if ($config['smtp_secure'] === 'tls') {
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;  // TLS for port 587
         } else {
-            // Fallback for local development without OpenSSL
-            error_log("Warning: OpenSSL not available, using non-secure SMTP");
-            $mail->SMTPSecure = false;
-            $mail->Port = 25; // Non-secure port
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;  // SSL for port 465
         }
         
         // Anti-spam settings
@@ -145,16 +138,11 @@ function getOTPEmailTemplate($otp_code) {
  * Send password reset email
  */
 function sendPasswordResetEmail($email, $otp_code) {
-    // Email configuration for GoDaddy Direct SMTP (Proven Working)
-    $smtp_host = 'smtpout.secureserver.net';
-    $smtp_port = 465;
-    $smtp_username = 'sarwan@fleetxusa.com';
-    $smtp_password = 'Sarwan2005';
-    $from_email = 'sarwan@fleetxusa.com';
-    $from_name = 'Fleet X Parts';
+    // Load email configuration from config file
+    $config = require __DIR__ . '/../config/email.php';
     
-    // Use PHPMailer directly (no fallback needed - it's installed)
-    return sendPasswordResetWithPHPMailer($email, $otp_code, $smtp_host, $smtp_port, $smtp_username, $smtp_password, $from_email, $from_name);
+    // Use PHPMailer with config file settings
+    return sendPasswordResetWithPHPMailer($email, $otp_code, $config['smtp_host'], $config['smtp_port'], $config['smtp_username'], $config['smtp_password'], $config['from_email'], $config['from_name']);
 }
 
 /**
@@ -164,23 +152,21 @@ function sendPasswordResetWithPHPMailer($email, $otp_code, $smtp_host, $smtp_por
     try {
         $mail = new PHPMailer(true);
         
-        // Check if OpenSSL is available
-        $hasOpenSSL = extension_loaded('openssl');
+        // Load config to get smtp_secure setting
+        $config = require __DIR__ . '/../config/email.php';
         
         $mail->isSMTP();
         $mail->Host = $smtp_host;
         $mail->SMTPAuth = true;
         $mail->Username = $smtp_username;
         $mail->Password = $smtp_password;
+        $mail->Port = $smtp_port;
         
-        if ($hasOpenSSL) {
-            $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS; // SSL for port 465
-            $mail->Port = $smtp_port;
+        // Set encryption based on config
+        if ($config['smtp_secure'] === 'tls') {
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;  // TLS for port 587
         } else {
-            // Fallback for local development without OpenSSL
-            error_log("Warning: OpenSSL not available, using non-secure SMTP");
-            $mail->SMTPSecure = false;
-            $mail->Port = 25; // Non-secure port
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;  // SSL for port 465
         }
         
         // Anti-spam settings

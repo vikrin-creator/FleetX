@@ -67,4 +67,3 @@ echo "HTTP Host: " . ($_SERVER['HTTP_HOST'] ?? 'Unknown') . "<br>";
 echo "<h3>Testing Email with Current Config:</h3>";
 testWithConfigFile('test@example.com', '123456');
 ?>
-?>
