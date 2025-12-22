@@ -5,6 +5,7 @@ import Home from './pages/Home.js';
 import Products from './pages/Products.js';
 import ProductCategories from './pages/ProductCategories.js';
 import SubItems from './pages/SubItems.js';
+import SubItemDetail from './pages/SubItemDetail.js';
 import Admin from './pages/Admin.js';
 import Login from './pages/Login.js';
 import SignUp from './pages/SignUp.js';
@@ -43,6 +44,10 @@ function App() {
       React.createElement(Route, { 
         path: '/items/:itemId/sub-items', 
         element: React.createElement(Layout, null, React.createElement(SubItems)) 
+      }),
+      React.createElement(Route, { 
+        path: '/sub-item/:subItemId', 
+        element: React.createElement(Layout, null, React.createElement(SubItemDetail)) 
       }),
       React.createElement(Route, { 
         path: '/cart', 

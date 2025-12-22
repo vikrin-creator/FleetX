@@ -215,18 +215,30 @@ const Home = () => {
             React.createElement('div', { className: 'animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full' }),
             React.createElement('span', { className: 'ml-3 text-sm text-slate-600 dark:text-slate-400' }, 'Searching...')
           ) :
+          searchResults.categories.length === 0 && searchResults.items.length === 0 && searchResults.sub_items.length === 0 ?
+          // No results at all
           React.createElement(
             'div',
-            { className: 'grid grid-cols-1 md:grid-cols-3 gap-6' },
-            // Categories section
-            React.createElement(
+            { className: 'text-center py-6 text-slate-500 dark:text-slate-400' },
+            React.createElement('span', { className: 'material-symbols-outlined text-2xl mb-2 block' }, 'search_off'),
+            React.createElement('p', { className: 'text-sm font-medium' }, 'No results found'),
+            React.createElement('p', { className: 'text-xs mt-1' }, 'Try searching with different keywords or part numbers')
+          ) :
+          React.createElement(
+            'div',
+            { className: `grid gap-6 ${
+              [searchResults.categories.length > 0, searchResults.items.length > 0, searchResults.sub_items.length > 0].filter(Boolean).length === 1 ? 'grid-cols-1' :
+              [searchResults.categories.length > 0, searchResults.items.length > 0, searchResults.sub_items.length > 0].filter(Boolean).length === 2 ? 'grid-cols-1 md:grid-cols-2' :
+              'grid-cols-1 md:grid-cols-3'
+            }` },
+            // Categories section - only show if has results
+            searchResults.categories.length > 0 && React.createElement(
               'div',
               { className: 'flex flex-col h-full' },
               React.createElement('h4', { className: 'text-xs font-semibold text-slate-600 dark:text-slate-400 mb-3 uppercase tracking-wide flex items-center gap-2' }, 
                 React.createElement('span', { className: 'material-symbols-outlined text-sm' }, 'category'),
                 `Categories (${searchResults.categories.length})`
               ),
-              searchResults.categories.length > 0 ?
               React.createElement(
                 'div',
                 { className: 'space-y-2 flex-1' },
@@ -252,25 +264,16 @@ const Home = () => {
                     )
                   )
                 )
-              ) :
-              React.createElement(
-                'div',
-                { className: 'flex-1 flex items-center justify-center py-8 text-slate-400' },
-                React.createElement('div', { className: 'text-center' },
-                  React.createElement('span', { className: 'material-symbols-outlined text-xl mb-1 block' }, 'folder_off'),
-                  React.createElement('p', { className: 'text-xs' }, 'No categories')
-                )
               )
             ),
-            // Items section
-            React.createElement(
+            // Items section - only show if has results
+            searchResults.items.length > 0 && React.createElement(
               'div',
               { className: 'flex flex-col h-full' },
               React.createElement('h4', { className: 'text-xs font-semibold text-slate-600 dark:text-slate-400 mb-3 uppercase tracking-wide flex items-center gap-2' }, 
                 React.createElement('span', { className: 'material-symbols-outlined text-sm' }, 'inventory'),
                 `Items (${searchResults.items.length})`
               ),
-              searchResults.items.length > 0 ?
               React.createElement(
                 'div',
                 { className: 'space-y-2 flex-1' },
@@ -298,25 +301,16 @@ const Home = () => {
                     )
                   )
                 )
-              ) :
-              React.createElement(
-                'div',
-                { className: 'flex-1 flex items-center justify-center py-8 text-slate-400' },
-                React.createElement('div', { className: 'text-center' },
-                  React.createElement('span', { className: 'material-symbols-outlined text-xl mb-1 block' }, 'inventory_2'),
-                  React.createElement('p', { className: 'text-xs' }, 'No items')
-                )
               )
             ),
-            // Sub-Items section
-            React.createElement(
+            // Sub-Items section - only show if has results
+            searchResults.sub_items.length > 0 && React.createElement(
               'div',
               { className: 'flex flex-col h-full' },
               React.createElement('h4', { className: 'text-xs font-semibold text-slate-600 dark:text-slate-400 mb-3 uppercase tracking-wide flex items-center gap-2' }, 
                 React.createElement('span', { className: 'material-symbols-outlined text-sm' }, 'widgets'),
                 `Sub-Items (${searchResults.sub_items.length})`
               ),
-              searchResults.sub_items.length > 0 ?
               React.createElement(
                 'div',
                 { className: 'space-y-2 flex-1' },
@@ -350,24 +344,7 @@ const Home = () => {
                     )
                   )
                 )
-              ) :
-              React.createElement(
-                'div',
-                { className: 'flex-1 flex items-center justify-center py-8 text-slate-400' },
-                React.createElement('div', { className: 'text-center' },
-                  React.createElement('span', { className: 'material-symbols-outlined text-xl mb-1 block' }, 'widgets'),
-                  React.createElement('p', { className: 'text-xs' }, 'No sub-items')
-                )
               )
-            ),
-            // No results at all
-            searchResults.categories.length === 0 && searchResults.items.length === 0 && searchResults.sub_items.length === 0 &&
-            React.createElement(
-              'div',
-              { className: 'col-span-full text-center py-6 text-slate-500 dark:text-slate-400' },
-              React.createElement('span', { className: 'material-symbols-outlined text-2xl mb-2 block' }, 'search_off'),
-              React.createElement('p', { className: 'text-sm font-medium' }, 'No results found'),
-              React.createElement('p', { className: 'text-xs mt-1' }, 'Try searching with different keywords or part numbers')
             )
           )
         )

@@ -264,4 +264,42 @@ export const categoryAPI = {
       throw error;
     }
   },
+
+  // Get single sub-item by ID with images
+  getSubItemById: async (subItemId) => {
+    try {
+      console.log(`Fetching sub-item details for ID: ${subItemId}`);
+      
+      const response = await fetch(`${API_BASE_URL}/categories/sub-items/${subItemId}`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log(`Sub-item details received:`, data);
+      
+      if (data.success && data.data) {
+        const subItem = data.data;
+        
+        // Process main image URL
+        subItem.image_url = processImageUrl(subItem.image_url);
+        
+        // Process multiple images if available
+        if (subItem.images && Array.isArray(subItem.images)) {
+          subItem.images = subItem.images.map(img => ({
+            ...img,
+            image_url: processImageUrl(img.image_url)
+          }));
+        }
+        
+        return subItem;
+      } else {
+        throw new Error('Sub-item not found');
+      }
+    } catch (error) {
+      console.error('Error fetching sub-item details:', error);
+      throw error;
+    }
+  },
 };

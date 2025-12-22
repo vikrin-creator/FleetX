@@ -490,8 +490,18 @@ const SubItems = () => {
                   
                   // Product Image
                   React.createElement(
-                    'div',
-                    { className: 'flex-shrink-0 mx-auto md:mx-0' },
+                    'button',
+                    { 
+                      className: 'flex-shrink-0 mx-auto md:mx-0 cursor-pointer hover:opacity-80 transition-opacity',
+                      onClick: () => navigate(`/sub-item/${subItem.id}`, {
+                        state: {
+                          itemName: itemName,
+                          categoryName: categoryName,
+                          categoryId: categoryId,
+                          itemId: itemId
+                        }
+                      })
+                    },
                     subItem.image_url ? React.createElement('img', {
                       src: subItem.image_url,
                       alt: subItem.name,

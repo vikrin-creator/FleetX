@@ -40,6 +40,8 @@ const ProductCategories = () => {
     dtna_classification: ''
   });
 
+  const [additionalImages, setAdditionalImages] = useState([]);
+
   useEffect(() => {
     fetchCategories();
   }, []);
@@ -129,6 +131,7 @@ const ProductCategories = () => {
       manufacturer: '',
       dtna_classification: ''
     });
+    setAdditionalImages([]);
     setShowSubItemForm(true);
   };
 
@@ -146,6 +149,7 @@ const ProductCategories = () => {
       manufacturer: subItem.manufacturer || '',
       dtna_classification: subItem.dtna_classification || ''
     });
+    setAdditionalImages([]);
     setShowSubItemForm(true);
   };
 
@@ -164,10 +168,18 @@ const ProductCategories = () => {
       formData.append('manufacturer', subItemForm.manufacturer || '');
       formData.append('dtna_classification', subItemForm.dtna_classification || '');
       
+      // Add primary image
       if (subItemForm.image_file) {
         formData.append('image', subItemForm.image_file);
       } else if (subItemForm.image_url && !editingSubItem) {
         formData.append('image_url', subItemForm.image_url);
+      }
+
+      // Add additional images
+      if (additionalImages.length > 0) {
+        additionalImages.forEach((imageFile) => {
+          formData.append('images[]', imageFile);
+        });
       }
 
       if (editingSubItem) {
@@ -177,6 +189,7 @@ const ProductCategories = () => {
       }
 
       setShowSubItemForm(false);
+      setAdditionalImages([]);
       handleManageSubItems(selectedItem); // Refresh sub-items
     } catch (error) {
       console.error('Error saving sub-item:', error);
@@ -193,6 +206,17 @@ const ProductCategories = () => {
         image_url: URL.createObjectURL(file) // For preview
       });
     }
+  };
+
+  const handleAdditionalImagesChange = (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length > 0) {
+      setAdditionalImages(prev => [...prev, ...files]);
+    }
+  };
+
+  const removeAdditionalImage = (index) => {
+    setAdditionalImages(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleDeleteSubItem = async (subItemId) => {
@@ -785,22 +809,59 @@ const ProductCategories = () => {
           React.createElement(
             'div',
             null,
-            React.createElement('label', { className: 'block text-sm font-medium text-gray-700 mb-1' }, 'Sub-Item Image'),
+            React.createElement('label', { className: 'block text-sm font-medium text-gray-700 mb-1' }, 'Primary Image'),
             React.createElement('input', {
               type: 'file',
               accept: 'image/*',
               onChange: handleSubItemImageChange,
               className: 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
-            })
+            }),
+            subItemForm.image_url && React.createElement(
+              'div',
+              { className: 'mt-3' },
+              React.createElement('img', {
+                src: subItemForm.image_url,
+                alt: 'Preview',
+                className: 'w-32 h-32 object-cover rounded-lg border'
+              })
+            )
           ),
-          subItemForm.image_url && React.createElement(
+          React.createElement(
             'div',
-            { className: 'mt-3' },
-            React.createElement('img', {
-              src: subItemForm.image_url,
-              alt: 'Preview',
-              className: 'w-32 h-32 object-cover rounded-lg border'
-            })
+            null,
+            React.createElement('label', { className: 'block text-sm font-medium text-gray-700 mb-1' }, 'Additional Images (Multiple)'),
+            React.createElement('input', {
+              type: 'file',
+              accept: 'image/*',
+              multiple: true,
+              onChange: handleAdditionalImagesChange,
+              className: 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
+            }),
+            React.createElement('p', { className: 'text-xs text-gray-500 mt-1' }, 'You can select multiple images at once'),
+            additionalImages.length > 0 && React.createElement(
+              'div',
+              { className: 'mt-3 grid grid-cols-4 gap-2' },
+              additionalImages.map((file, index) =>
+                React.createElement(
+                  'div',
+                  { key: index, className: 'relative' },
+                  React.createElement('img', {
+                    src: URL.createObjectURL(file),
+                    alt: `Additional ${index + 1}`,
+                    className: 'w-full h-20 object-cover rounded-lg border'
+                  }),
+                  React.createElement(
+                    'button',
+                    {
+                      type: 'button',
+                      onClick: () => removeAdditionalImage(index),
+                      className: 'absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600'
+                    },
+                    '×'
+                  )
+                )
+              )
+            )
           )
         ),
         React.createElement(
