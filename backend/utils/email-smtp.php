@@ -11,9 +11,9 @@ if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
  * Send OTP email using SMTP
  */
 function sendOTPEmail($email, $otp_code) {
-    // Email configuration for GoDaddy Direct SMTP (Proven Working)
+    // Email configuration for GoDaddy Direct SMTP
     $smtp_host = 'smtpout.secureserver.net'; // GoDaddy Direct SMTP for inbox delivery
-    $smtp_port = 465; // SSL port
+    $smtp_port = 587; // TLS port (alternative to 465)
     $smtp_username = 'sarwan@fleetxusa.com'; // Full email address
     $smtp_password = 'Sarwan2005'; // GoDaddy email password
     $from_email = 'sarwan@fleetxusa.com';
@@ -36,7 +36,7 @@ function sendOTPWithPHPMailer($email, $otp_code, $smtp_host, $smtp_port, $smtp_u
         $mail->SMTPAuth = true;
         $mail->Username = $smtp_username;
         $mail->Password = $smtp_password;
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS; // SSL for port 465
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // TLS for port 587
         $mail->Port = $smtp_port;
         
         // Anti-spam settings
@@ -134,9 +134,9 @@ function getOTPEmailTemplate($otp_code) {
  * Send password reset email
  */
 function sendPasswordResetEmail($email, $otp_code) {
-    // Email configuration for GoDaddy Direct SMTP (Proven Working)
+    // Email configuration for GoDaddy Direct SMTP
     $smtp_host = 'smtpout.secureserver.net';
-    $smtp_port = 465;
+    $smtp_port = 587;
     $smtp_username = 'sarwan@fleetxusa.com';
     $smtp_password = 'Sarwan2005';
     $from_email = 'sarwan@fleetxusa.com';
