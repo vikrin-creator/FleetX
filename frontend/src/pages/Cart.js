@@ -7,10 +7,19 @@ const Cart = () => {
 
   useEffect(() => {
     loadCart();
+    
+    // Listen for cart updates
+    const handleCartUpdate = () => loadCart();
+    window.addEventListener('cartUpdate', handleCartUpdate);
+    
+    return () => {
+      window.removeEventListener('cartUpdate', handleCartUpdate);
+    };
   }, []);
 
   const loadCart = () => {
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    console.log('Loading cart:', cart);
     setCartItems(cart);
   };
 
@@ -34,7 +43,7 @@ const Cart = () => {
   };
 
   const getTotalPrice = () => {
-    return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
+    return cartItems.reduce((total, item) => total + (parseFloat(item.price || 0) * item.quantity), 0);
   };
 
   return React.createElement(
@@ -96,10 +105,14 @@ const Cart = () => {
               React.createElement(
                 'div',
                 { className: 'w-24 h-24 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden' },
-                item.image ? React.createElement('img', {
-                  src: item.image,
+                (item.image_url) ? React.createElement('img', {
+                  src: item.image_url,
                   alt: item.name,
-                  className: 'w-full h-full object-cover'
+                  className: 'w-full h-full object-cover',
+                  onError: (e) => {
+                    console.error('Image failed to load:', item.image_url);
+                    e.target.style.display = 'none';
+                  }
                 }) : React.createElement(
                   'div',
                   { className: 'w-full h-full flex items-center justify-center text-gray-400' },
@@ -122,7 +135,7 @@ const Cart = () => {
                 { className: 'flex-1 min-w-0' },
                 React.createElement('h3', { className: 'font-semibold text-gray-900 mb-1' }, item.name),
                 item.part_number && React.createElement('p', { className: 'text-sm text-gray-600 mb-2' }, `Part #: ${item.part_number}`),
-                React.createElement('p', { className: 'text-lg font-bold text-blue-600' }, `$${item.price.toFixed(2)}`)
+                React.createElement('p', { className: 'text-lg font-bold text-blue-600' }, `$${parseFloat(item.price || 0).toFixed(2)}`)
               ),
               
               // Quantity Controls

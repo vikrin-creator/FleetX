@@ -44,6 +44,8 @@ const ProductManagement = () => {
     dtna_classification: ''
   });
 
+  const [additionalImages, setAdditionalImages] = useState([]);
+
   useEffect(() => {
     fetchCategories();
     fetchProducts();
@@ -226,6 +228,7 @@ const ProductManagement = () => {
       manufacturer: subItem.manufacturer || '',
       dtna_classification: subItem.dtna_classification || ''
     });
+    setAdditionalImages([]);
     setShowSubItemForm(true);
   };
 
@@ -250,6 +253,11 @@ const ProductManagement = () => {
         formData.append('image_url', subItemForm.image_url);
       }
 
+      // Add additional images
+      additionalImages.forEach((imageFile) => {
+        formData.append('images[]', imageFile);
+      });
+
       if (editingSubItem) {
         await categoryAPI.updateSubItem(editingSubItem.id, formData);
       } else {
@@ -273,6 +281,17 @@ const ProductManagement = () => {
         image_url: URL.createObjectURL(file) // For preview
       });
     }
+  };
+
+  const handleAdditionalImagesChange = (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length > 0) {
+      setAdditionalImages(prev => [...prev, ...files]);
+    }
+  };
+
+  const removeAdditionalImage = (index) => {
+    setAdditionalImages(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleDeleteSubItem = async (subItemId) => {
@@ -370,7 +389,17 @@ const ProductManagement = () => {
       React.createElement('div', { className: 'text-center py-12' }, 'Loading products...') :
       React.createElement(
         'div',
-        { className: 'bg-white rounded-lg shadow overflow-hidden' },
+        { 
+          className: 'bg-white rounded-lg shadow overflow-x-auto relative',
+          style: { 
+            WebkitOverflowScrolling: 'touch',
+            background: 'linear-gradient(to right, white 30%, rgba(255,255,255,0)), linear-gradient(to right, rgba(255,255,255,0), white 70%) 0 100%, radial-gradient(farthest-side at 0% 50%, rgba(0,0,0,0.1), rgba(0,0,0,0)), radial-gradient(farthest-side at 100% 50%, rgba(0,0,0,0.1), rgba(0,0,0,0)) 0 100%',
+            backgroundRepeat: 'no-repeat',
+            backgroundSize: '40px 100%, 40px 100%, 14px 100%, 14px 100%',
+            backgroundPosition: '0 0, 100%, 0 0, 100%',
+            backgroundAttachment: 'local, local, scroll, scroll'
+          }
+        },
         React.createElement(
           'table',
           { className: 'min-w-full divide-y divide-gray-200' },
@@ -382,7 +411,7 @@ const ProductManagement = () => {
               null,
               React.createElement('th', { className: 'px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider' }, 'Product'),
               React.createElement('th', { className: 'hidden sm:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider' }, 'Category'),
-              React.createElement('th', { className: 'px-3 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider' }, 'Actions')
+              React.createElement('th', { className: 'px-3 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[120px]' }, 'Actions')
             )
           ),
           React.createElement(
@@ -413,10 +442,10 @@ const ProductManagement = () => {
                 ),
                 React.createElement(
                   'td',
-                  { className: 'px-3 sm:px-6 py-3 sm:py-4 text-right text-xs sm:text-sm font-medium' },
+                  { className: 'px-3 sm:px-6 py-3 sm:py-4 text-right text-xs sm:text-sm font-medium min-w-[120px]' },
                   React.createElement(
                     'div',
-                    { className: 'flex justify-end gap-1 sm:gap-2' },
+                    { className: 'flex justify-end gap-2 items-center whitespace-nowrap' },
                     React.createElement(
                       'button',
                       {
@@ -768,22 +797,64 @@ const ProductManagement = () => {
           React.createElement(
             'div',
             null,
-            React.createElement('label', { className: 'block text-sm font-medium text-gray-700 mb-1' }, 'Sub-Item Image'),
+            React.createElement('label', { className: 'block text-sm font-medium text-gray-700 mb-1' }, 'Primary Sub-Item Image'),
             React.createElement('input', {
               type: 'file',
               accept: 'image/*',
               onChange: handleSubItemImageChange,
               className: 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
-            })
+            }),
+            subItemForm.image_url && React.createElement(
+              'div',
+              { className: 'mt-3' },
+              React.createElement('img', {
+                src: subItemForm.image_url,
+                alt: 'Preview',
+                className: 'w-32 h-32 object-cover rounded-lg border'
+              })
+            )
           ),
-          subItemForm.image_url && React.createElement(
+          React.createElement(
             'div',
-            { className: 'mt-3' },
-            React.createElement('img', {
-              src: subItemForm.image_url,
-              alt: 'Preview',
-              className: 'w-32 h-32 object-cover rounded-lg border'
-            })
+            null,
+            React.createElement('label', { 
+              className: 'block text-sm font-medium text-gray-700 mb-1',
+              htmlFor: 'additional-images-input'
+            }, 'Additional Images (Multiple)'),
+            React.createElement('input', {
+              id: 'additional-images-input',
+              type: 'file',
+              accept: 'image/*',
+              multiple: true,
+              onChange: handleAdditionalImagesChange,
+              className: 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
+            }),
+            React.createElement('p', { className: 'text-xs text-gray-500 mt-1' }, 'Hold Ctrl (Windows) or Cmd (Mac) and click to select multiple images'),
+            React.createElement('div', { className: 'text-xs text-blue-600 mt-1' }, `${additionalImages.length} image(s) selected`),
+            additionalImages.length > 0 && React.createElement(
+              'div',
+              { className: 'mt-3 grid grid-cols-4 gap-2' },
+              additionalImages.map((file, index) =>
+                React.createElement(
+                  'div',
+                  { key: index, className: 'relative' },
+                  React.createElement('img', {
+                    src: URL.createObjectURL(file),
+                    alt: `Additional ${index + 1}`,
+                    className: 'w-full h-20 object-cover rounded-lg border'
+                  }),
+                  React.createElement(
+                    'button',
+                    {
+                      type: 'button',
+                      onClick: () => removeAdditionalImage(index),
+                      className: 'absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600'
+                    },
+                    '×'
+                  )
+                )
+              )
+            )
           )
         ),
         React.createElement(

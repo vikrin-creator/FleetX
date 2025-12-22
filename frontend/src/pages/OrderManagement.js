@@ -173,13 +173,20 @@ const OrderManagement = () => {
     // Orders Table
     React.createElement(
       'div',
-      { className: 'bg-white dark:bg-slate-800 rounded-lg shadow overflow-hidden -mx-4 sm:mx-0' },
+      { 
+        className: 'bg-white dark:bg-slate-800 rounded-lg shadow overflow-x-auto relative',
+        style: { 
+          WebkitOverflowScrolling: 'touch',
+          background: 'linear-gradient(to right, white 30%, rgba(255,255,255,0)), linear-gradient(to right, rgba(255,255,255,0), white 70%) 0 100%, radial-gradient(farthest-side at 0% 50%, rgba(0,0,0,0.1), rgba(0,0,0,0)), radial-gradient(farthest-side at 100% 50%, rgba(0,0,0,0.1), rgba(0,0,0,0)) 0 100%',
+          backgroundRepeat: 'no-repeat',
+          backgroundSize: '40px 100%, 40px 100%, 14px 100%, 14px 100%',
+          backgroundPosition: '0 0, 100%, 0 0, 100%',
+          backgroundAttachment: 'local, local, scroll, scroll'
+        }
+      },
       React.createElement(
-        'div',
-        { className: 'overflow-x-auto -mx-4 sm:mx-0' },
-        React.createElement(
-          'table',
-          { className: 'w-full min-w-[640px]' },
+        'table',
+        { className: 'w-full min-w-[640px]' },
           React.createElement(
             'thead',
             { className: 'bg-slate-50 dark:bg-slate-700' },
@@ -192,7 +199,7 @@ const OrderManagement = () => {
               React.createElement('th', { className: 'px-3 sm:px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-300 uppercase tracking-wider' }, 'Total'),
               React.createElement('th', { className: 'px-3 sm:px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-300 uppercase tracking-wider' }, 'Status'),
               React.createElement('th', { className: 'hidden lg:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-300 uppercase tracking-wider' }, 'Date'),
-              React.createElement('th', { className: 'px-3 sm:px-6 py-3 text-right text-xs font-medium text-slate-500 dark:text-slate-300 uppercase tracking-wider' }, 'Actions')
+              React.createElement('th', { className: 'px-3 sm:px-6 py-3 text-right text-xs font-medium text-slate-500 dark:text-slate-300 uppercase tracking-wider min-w-[140px]' }, 'Actions')
             )
           ),
           React.createElement(
@@ -238,7 +245,7 @@ const OrderManagement = () => {
                   React.createElement('td', { className: 'hidden lg:table-cell px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-slate-500 dark:text-slate-400' }, new Date(order.created_at).toLocaleDateString()),
                   React.createElement(
                     'td',
-                    { className: 'px-3 sm:px-6 py-3 sm:py-4' },
+                    { className: 'px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap' },
                     React.createElement(
                       'div',
                       { className: 'flex gap-2 items-center justify-end min-w-[140px]' },
@@ -270,8 +277,7 @@ const OrderManagement = () => {
               )
           )
         )
-      )
-    ),
+      ),
 
     // Order Details Modal
     showModal && selectedOrder && React.createElement(

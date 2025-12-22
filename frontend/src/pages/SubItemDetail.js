@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { categoryAPI } from '../services/categoryService.js';
 
@@ -18,6 +18,32 @@ const SubItemDetail = () => {
   const categoryName = location.state?.categoryName || 'Category';
   const categoryId = location.state?.categoryId;
   const itemId = location.state?.itemId;
+
+  // Magnifier state for full image zoom
+  const [isZoomed, setIsZoomed] = useState(false);
+  const imageRef = useRef(null);
+
+  // Direct mouse move handler for smooth zoom
+  const handleZoomMouseMove = (e) => {
+    if (!imageRef.current) return;
+    const rect = imageRef.current.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    
+    // Apply transform directly to avoid re-render lag
+    imageRef.current.style.transform = `scale(2.5) translate(${-((x - 50) * 1.2)}px, ${-((y - 50) * 1.2)}px)`;
+  };
+
+  const handleZoomEnter = () => {
+    setIsZoomed(true);
+  };
+
+  const handleZoomLeave = () => {
+    setIsZoomed(false);
+    if (imageRef.current) {
+      imageRef.current.style.transform = 'scale(1) translate(0, 0)';
+    }
+  };
 
   useEffect(() => {
     fetchSubItemDetails();
@@ -48,6 +74,9 @@ const SubItemDetail = () => {
   const addToCart = () => {
     if (!subItem) return;
     
+    const imageUrl = images[0]?.image_url || subItem.image_url;
+    console.log('Adding to cart with image:', imageUrl);
+    
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
     const existingItemIndex = cart.findIndex(item => item.id === subItem.id && item.type === 'sub_item');
     
@@ -59,21 +88,19 @@ const SubItemDetail = () => {
         type: 'sub_item',
         name: subItem.name,
         part_number: subItem.part_number,
-        price: subItem.price,
-        image_url: images[0]?.image_url || subItem.image_url,
+        price: parseFloat(subItem.price || 0),
+        image_url: imageUrl,
         quantity: quantity
       });
     }
     
     localStorage.setItem('cart', JSON.stringify(cart));
+    console.log('Cart updated:', cart);
     window.dispatchEvent(new Event('cartUpdate'));
     alert('Added to cart!');
   };
 
-  const handleFindMyDealer = () => {
-    // Implement dealer finder functionality
-    alert('Find My Dealer functionality - Coming Soon!');
-  };
+
 
   if (loading) {
     return React.createElement(
@@ -171,12 +198,24 @@ const SubItemDetail = () => {
           // Main Image
           React.createElement(
             'div',
-            { className: 'bg-white border border-gray-200 rounded-lg p-6 flex items-center justify-center aspect-square' },
+            {
+              className: 'bg-white border border-gray-200 rounded-lg p-4 flex items-center justify-center w-96 h-96 overflow-hidden',
+              style: { position: 'relative' }
+            },
             React.createElement('img', {
+              ref: imageRef,
               src: currentImage.image_url,
               alt: subItem.name,
-              className: 'max-w-full max-h-full object-contain',
-              onError: (e) => { e.target.src = 'https://via.placeholder.com/400?text=No+Image'; }
+              className: 'w-80 h-80 object-contain',
+              style: {
+                transform: 'scale(1) translate(0, 0)',
+                willChange: 'transform',
+                cursor: 'zoom-in'
+              },
+              onError: (e) => { e.target.src = 'https://via.placeholder.com/400?text=No+Image'; },
+              onMouseEnter: handleZoomEnter,
+              onMouseLeave: handleZoomLeave,
+              onMouseMove: isZoomed ? handleZoomMouseMove : null
             })
           ),
           
@@ -190,7 +229,7 @@ const SubItemDetail = () => {
                 {
                   key: image.id || index,
                   onClick: () => setSelectedImageIndex(index),
-                  className: `flex-shrink-0 w-20 h-20 border-2 rounded-lg overflow-hidden transition-all ${
+                  className: `flex-shrink-0 w-16 h-16 border-2 rounded-lg overflow-hidden transition-all ${
                     selectedImageIndex === index ? 'border-blue-600' : 'border-gray-200 hover:border-gray-400'
                   }`
                 },
@@ -240,15 +279,7 @@ const SubItemDetail = () => {
             React.createElement('h2', { className: 'text-lg text-gray-700 font-medium' }, subItem.name)
           ),
           
-          // Find My Dealer Button
-          React.createElement(
-            'button',
-            {
-              onClick: handleFindMyDealer,
-              className: 'w-full md:w-auto px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors'
-            },
-            'Find My Dealer'
-          ),
+
           
           // VMRS/Description
           subItem.description && React.createElement(
@@ -345,24 +376,14 @@ const SubItemDetail = () => {
                 'button',
                 {
                   onClick: addToCart,
-                  className: 'mt-6 px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors'
+                  className: 'mt-6 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors'
                 },
                 'Add to Cart'
               )
             )
           ),
           
-          // Alternatives Link (placeholder)
-          React.createElement(
-            'div',
-            { className: 'border-t border-gray-200 pt-4' },
-            React.createElement(
-              'button',
-              { className: 'text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1' },
-              React.createElement('span', { className: 'material-symbols-outlined text-lg' }, 'add'),
-              `Alternatives (0)`
-            )
-          )
+
         )
       )
     )

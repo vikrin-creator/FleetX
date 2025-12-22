@@ -220,9 +220,24 @@ const ProductCategories = () => {
   };
 
   const handleAdditionalImagesChange = (e) => {
+    console.log('=== Additional Images Change ===');
+    console.log('Event target:', e.target);
+    console.log('Files selected:', e.target.files);
+    console.log('Number of files:', e.target.files.length);
+    console.log('Multiple attribute:', e.target.multiple);
+    
     const files = Array.from(e.target.files);
+    console.log('Files array:', files);
+    
     if (files.length > 0) {
-      setAdditionalImages(prev => [...prev, ...files]);
+      setAdditionalImages(prev => {
+        const newImages = [...prev, ...files];
+        console.log('Updated additional images count:', newImages.length);
+        console.log('Updated additional images:', newImages.map(f => f.name));
+        return newImages;
+      });
+    } else {
+      console.log('No files selected');
     }
   };
 
@@ -335,13 +350,20 @@ const ProductCategories = () => {
       React.createElement('div', { className: 'text-center py-12' }, 'Loading categories...') :
       React.createElement(
         'div',
-        { className: 'bg-white rounded-lg shadow overflow-hidden -mx-4 sm:mx-0' },
+        { 
+          className: 'bg-white rounded-lg shadow overflow-x-auto relative',
+          style: { 
+            WebkitOverflowScrolling: 'touch',
+            background: 'linear-gradient(to right, white 30%, rgba(255,255,255,0)), linear-gradient(to right, rgba(255,255,255,0), white 70%) 0 100%, radial-gradient(farthest-side at 0% 50%, rgba(0,0,0,0.1), rgba(0,0,0,0)), radial-gradient(farthest-side at 100% 50%, rgba(0,0,0,0.1), rgba(0,0,0,0)) 0 100%',
+            backgroundRepeat: 'no-repeat',
+            backgroundSize: '40px 100%, 40px 100%, 14px 100%, 14px 100%',
+            backgroundPosition: '0 0, 100%, 0 0, 100%',
+            backgroundAttachment: 'local, local, scroll, scroll'
+          }
+        },
         React.createElement(
-          'div',
-          { className: 'overflow-x-auto' },
-          React.createElement(
-            'table',
-            { className: 'w-full min-w-[640px]' },
+          'table',
+          { className: 'w-full min-w-[640px]' },
             React.createElement(
               'thead',
               { className: 'bg-gray-50' },
@@ -352,7 +374,7 @@ const ProductCategories = () => {
                 React.createElement('th', { className: 'hidden md:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider' }, 'Description'),
                 React.createElement('th', { className: 'px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider' }, 'Items'),
                 React.createElement('th', { className: 'hidden sm:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider' }, 'Status'),
-                React.createElement('th', { className: 'px-3 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider' }, 'Actions')
+                React.createElement('th', { className: 'px-3 sm:px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[140px]' }, 'Actions')
               )
             ),
             React.createElement(
@@ -405,10 +427,10 @@ const ProductCategories = () => {
                     ),
                     React.createElement(
                       'td',
-                      { className: 'px-3 sm:px-6 py-3 sm:py-4' },
+                      { className: 'px-3 sm:px-6 py-3 sm:py-4 min-w-[140px]' },
                       React.createElement(
                         'div',
-                        { className: 'flex justify-end gap-1 sm:gap-2' },
+                        { className: 'flex justify-end gap-2 items-center whitespace-nowrap' },
                         React.createElement(
                           'button',
                           {
@@ -443,8 +465,7 @@ const ProductCategories = () => {
                 )
             )
           )
-        )
-      ),
+        ),
     
     showModal && React.createElement(
       'div',
@@ -573,16 +594,8 @@ const ProductCategories = () => {
                 },
                 React.createElement(
                   'div',
-                  { className: 'flex items-center justify-between mb-2' },
-                  React.createElement('h3', { className: 'font-medium text-gray-900 truncate' }, item.name),
-                  React.createElement(
-                    'button',
-                    {
-                      onClick: () => handleManageSubItems(item),
-                      className: 'text-xs bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700'
-                    },
-                    'Sub-Items'
-                  )
+                  { className: 'mb-2' },
+                  React.createElement('h3', { className: 'font-medium text-gray-900 truncate' }, item.name)
                 ),
                 React.createElement('p', { className: 'text-sm text-gray-600 mb-2' }, item.description || 'No description'),
                 React.createElement(
@@ -840,15 +853,20 @@ const ProductCategories = () => {
           React.createElement(
             'div',
             null,
-            React.createElement('label', { className: 'block text-sm font-medium text-gray-700 mb-1' }, 'Additional Images (Multiple)'),
+            React.createElement('label', { 
+              className: 'block text-sm font-medium text-gray-700 mb-1',
+              htmlFor: 'additional-images-input'
+            }, 'Additional Images (Multiple)'),
             React.createElement('input', {
+              id: 'additional-images-input',
               type: 'file',
               accept: 'image/*',
               multiple: true,
               onChange: handleAdditionalImagesChange,
               className: 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
             }),
-            React.createElement('p', { className: 'text-xs text-gray-500 mt-1' }, 'You can select multiple images at once'),
+            React.createElement('p', { className: 'text-xs text-gray-500 mt-1' }, 'Hold Ctrl (Windows) or Cmd (Mac) and click to select multiple images'),
+            React.createElement('div', { className: 'text-xs text-blue-600 mt-1' }, `${additionalImages.length} image(s) selected`),
             additionalImages.length > 0 && React.createElement(
               'div',
               { className: 'mt-3 grid grid-cols-4 gap-2' },

@@ -18,30 +18,37 @@ const SubItems = () => {
   const categoryId = location.state?.categoryId;
 
   const addToCart = (subItem) => {
+    console.log('Adding to cart from SubItems page:', subItem);
+    console.log('Image URL:', subItem.image_url);
+    
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
     
     // Check if item already exists in cart
-    const existingItemIndex = cart.findIndex(item => item.id === subItem.id);
+    const existingItemIndex = cart.findIndex(item => item.id === subItem.id && item.type === 'sub_item');
     
     if (existingItemIndex >= 0) {
       // Increment quantity if item exists
       cart[existingItemIndex].quantity += 1;
     } else {
       // Add new item to cart
-      cart.push({
+      const cartItem = {
         id: subItem.id,
+        type: 'sub_item',
         name: subItem.name,
         part_number: subItem.part_number,
         price: parseFloat(subItem.price) || 0,
-        image: subItem.image_url,
+        image_url: subItem.image_url,
         quantity: 1
-      });
+      };
+      console.log('Cart item being added:', cartItem);
+      cart.push(cartItem);
     }
     
     localStorage.setItem('cart', JSON.stringify(cart));
+    console.log('Cart updated from SubItems:', cart);
     
-    // Trigger storage event for other components to update
-    window.dispatchEvent(new Event('storage'));
+    // Trigger cart update event
+    window.dispatchEvent(new Event('cartUpdate'));
     
     // Show success message
     alert('Item added to cart!');
