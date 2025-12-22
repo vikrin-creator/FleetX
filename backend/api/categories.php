@@ -401,6 +401,14 @@ class CategoryController {
 
     public function createSubItem() {
         try {
+            // Debug logging
+            error_log("=== CREATE SUB-ITEM DEBUG ===");
+            error_log("POST data: " . json_encode($_POST));
+            error_log("FILES keys: " . json_encode(array_keys($_FILES)));
+            if (isset($_FILES['images'])) {
+                error_log("images structure: " . json_encode($_FILES['images']));
+            }
+            
             $item_id = $_POST['item_id'] ?? null;
             $name = $_POST['name'] ?? null;
 
@@ -413,6 +421,7 @@ class CategoryController {
             $image_url = null;
             if (isset($_FILES['image'])) {
                 $image_url = $this->handleFileUpload('image', 'sub-items');
+                error_log("Primary image uploaded: " . $image_url);
             }
 
             // Create sub-item
@@ -432,18 +441,23 @@ class CategoryController {
             ]);
 
             $subItemId = $this->db->lastInsertId();
+            error_log("Sub-item created with ID: " . $subItemId);
 
             // Handle multiple images if provided
             if ($image_url) {
                 // Insert primary image into sub_item_images table
                 $imageStmt = $this->db->prepare("INSERT INTO sub_item_images (sub_item_id, image_url, display_order, is_primary) VALUES (?, ?, ?, ?)");
                 $imageStmt->execute([$subItemId, $image_url, 0, true]);
+                error_log("Primary image saved to sub_item_images table");
             }
 
             // Handle additional images (images[])
+            $additionalImagesProcessed = 0;
             if (isset($_FILES['images']) && is_array($_FILES['images']['name'])) {
+                error_log("Processing images array - count: " . count($_FILES['images']['name']));
                 $displayOrder = 1; // Start from 1 since primary is 0
                 foreach ($_FILES['images']['name'] as $key => $filename) {
+                    error_log("Processing image $key: $filename");
                     if ($_FILES['images']['error'][$key] === UPLOAD_ERR_OK) {
                         // Temporarily restructure $_FILES for handleFileUpload
                         $tempFile = [
@@ -460,34 +474,45 @@ class CategoryController {
                         if ($additionalImageUrl) {
                             $imageStmt = $this->db->prepare("INSERT INTO sub_item_images (sub_item_id, image_url, display_order, is_primary) VALUES (?, ?, ?, ?)");
                             $imageStmt->execute([$subItemId, $additionalImageUrl, $displayOrder++, false]);
+                            $additionalImagesProcessed++;
+                            error_log("Additional image saved: " . $additionalImageUrl);
                         }
                         
                         unset($_FILES['temp_image']);
+                    } else {
+                        error_log("Image $key has error: " . $_FILES['images']['error'][$key]);
                     }
                 }
+            } else {
+                error_log("No images array found or not an array");
             }
 
-            Response::json(['id' => $subItemId, 'message' => 'Sub-item created successfully'], 201);
+            error_log("Total additional images processed: " . $additionalImagesProcessed);
+            Response::json([
+                'id' => $subItemId, 
+                'message' => 'Sub-item created successfully',
+                'images_uploaded' => $additionalImagesProcessed
+            ], 201);
         } catch (Exception $e) {
             error_log("Create sub-item error: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
             Response::error('Failed to create sub-item: ' . $e->getMessage(), 500);
         }
     }
 
     public function updateSubItem($id) {
         try {
+            error_log("=== UPDATE SUB-ITEM DEBUG ===");
             error_log("updateSubItem called with ID: " . $id);
             error_log("REQUEST_METHOD: " . $_SERVER['REQUEST_METHOD']);
             error_log("POST data: " . json_encode($_POST));
-            error_log("FILES data: " . json_encode(array_keys($_FILES)));
+            error_log("FILES keys: " . json_encode(array_keys($_FILES)));
+            error_log("FILES structure: " . json_encode($_FILES));
             
-            // For PUT requests with FormData, PHP doesn't populate $_POST
-            // We need to handle this as a POST request instead
             $name = $_POST['name'] ?? null;
 
             if (!$name) {
                 error_log("ERROR: Sub-item name is missing");
-                error_log("All POST keys: " . json_encode(array_keys($_POST)));
                 Response::error('Sub-item name is required', 400);
                 return;
             }
@@ -506,7 +531,7 @@ class CategoryController {
             // Handle file upload if new image is provided
             $image_url = $currentSubItem['image_url'] ?? '';
             if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-                error_log("New image file detected for sub-item");
+                error_log("New primary image file detected");
                 // Delete old image if it exists
                 if ($currentSubItem && $currentSubItem['image_url'] && strpos($currentSubItem['image_url'], 'uploads/') === 0) {
                     $oldImagePath = '../' . $currentSubItem['image_url'];
@@ -515,6 +540,7 @@ class CategoryController {
                     }
                 }
                 $image_url = $this->handleFileUpload('image', 'sub-items');
+                error_log("New primary image uploaded: " . $image_url);
             }
 
             $stmt = $this->db->prepare("UPDATE item_sub_items SET name = ?, description = ?, part_number = ?, price = ?, stock_quantity = ?, image_url = ?, specifications = ?, brand = ?, manufacturer = ?, dtna_classification = ? WHERE id = ?");
@@ -533,7 +559,9 @@ class CategoryController {
             ]);
 
             // Handle multiple images update if provided
+            $additionalImagesProcessed = 0;
             if (isset($_FILES['images']) && is_array($_FILES['images']['name'])) {
+                error_log("Processing additional images array");
                 // Get current max display order
                 $orderStmt = $this->db->prepare("SELECT MAX(display_order) as max_order FROM sub_item_images WHERE sub_item_id = ?");
                 $orderStmt->execute([$id]);
@@ -542,7 +570,6 @@ class CategoryController {
 
                 foreach ($_FILES['images']['name'] as $key => $filename) {
                     if ($_FILES['images']['error'][$key] === UPLOAD_ERR_OK) {
-                        // Temporarily restructure $_FILES for handleFileUpload
                         $tempFile = [
                             'name' => $_FILES['images']['name'][$key],
                             'type' => $_FILES['images']['type'][$key],
@@ -557,6 +584,8 @@ class CategoryController {
                         if ($additionalImageUrl) {
                             $imageStmt = $this->db->prepare("INSERT INTO sub_item_images (sub_item_id, image_url, display_order, is_primary) VALUES (?, ?, ?, ?)");
                             $imageStmt->execute([$id, $additionalImageUrl, $displayOrder++, false]);
+                            $additionalImagesProcessed++;
+                            error_log("Additional image saved: " . $additionalImageUrl);
                         }
                         
                         unset($_FILES['temp_image']);
@@ -566,7 +595,6 @@ class CategoryController {
 
             // Update primary image in sub_item_images if changed
             if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK && $image_url) {
-                // Update or insert primary image
                 $checkStmt = $this->db->prepare("SELECT id FROM sub_item_images WHERE sub_item_id = ? AND is_primary = 1");
                 $checkStmt->execute([$id]);
                 $primaryImage = $checkStmt->fetch();
@@ -574,16 +602,22 @@ class CategoryController {
                 if ($primaryImage) {
                     $updateStmt = $this->db->prepare("UPDATE sub_item_images SET image_url = ? WHERE id = ?");
                     $updateStmt->execute([$image_url, $primaryImage['id']]);
+                    error_log("Primary image updated in sub_item_images");
                 } else {
                     $insertStmt = $this->db->prepare("INSERT INTO sub_item_images (sub_item_id, image_url, display_order, is_primary) VALUES (?, ?, ?, ?)");
                     $insertStmt->execute([$id, $image_url, 0, true]);
+                    error_log("Primary image inserted to sub_item_images");
                 }
             }
 
-            error_log("Sub-item updated successfully: " . $id);
-            Response::json(['message' => 'Sub-item updated successfully']);
+            error_log("Sub-item updated successfully. Additional images: " . $additionalImagesProcessed);
+            Response::json([
+                'message' => 'Sub-item updated successfully',
+                'images_uploaded' => $additionalImagesProcessed
+            ]);
         } catch (Exception $e) {
             error_log("ERROR updating sub-item: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
             Response::error('Failed to update sub-item: ' . $e->getMessage(), 500);
         }
     }

@@ -171,20 +171,31 @@ const ProductCategories = () => {
       // Add primary image
       if (subItemForm.image_file) {
         formData.append('image', subItemForm.image_file);
+        console.log('Added primary image:', subItemForm.image_file.name);
       } else if (subItemForm.image_url && !editingSubItem) {
         formData.append('image_url', subItemForm.image_url);
       }
 
       // Add additional images
       if (additionalImages.length > 0) {
-        additionalImages.forEach((imageFile) => {
+        console.log(`Adding ${additionalImages.length} additional images`);
+        additionalImages.forEach((imageFile, index) => {
           formData.append('images[]', imageFile);
+          console.log(`Added additional image ${index}:`, imageFile.name);
         });
       }
 
+      // Log FormData contents
+      console.log('FormData contents:');
+      for (let [key, value] of formData.entries()) {
+        console.log(key, value instanceof File ? `${value.name} (${value.size} bytes)` : value);
+      }
+
       if (editingSubItem) {
+        console.log('Updating sub-item:', editingSubItem.id);
         await categoryAPI.updateSubItem(editingSubItem.id, formData);
       } else {
+        console.log('Creating new sub-item');
         await categoryAPI.createSubItem(formData);
       }
 
