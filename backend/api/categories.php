@@ -663,6 +663,37 @@ class CategoryController {
             Response::error('Failed to delete sub-item', 500);
         }
     }
+
+    public function deleteSubItemImage($imageId) {
+        try {
+            // Get image info before deletion
+            $stmt = $this->db->prepare("SELECT image_url FROM sub_item_images WHERE id = ?");
+            $stmt->execute([$imageId]);
+            $image = $stmt->fetch();
+
+            if (!$image) {
+                Response::error('Image not found', 404);
+                return;
+            }
+
+            // Delete file from filesystem
+            if ($image['image_url'] && strpos($image['image_url'], 'uploads/') === 0) {
+                $imagePath = '../' . $image['image_url'];
+                if (file_exists($imagePath)) {
+                    unlink($imagePath);
+                }
+            }
+
+            // Delete from database
+            $deleteStmt = $this->db->prepare("DELETE FROM sub_item_images WHERE id = ?");
+            $deleteStmt->execute([$imageId]);
+
+            Response::json(['message' => 'Image deleted successfully']);
+        } catch (Exception $e) {
+            error_log("Error deleting sub-item image: " . $e->getMessage());
+            Response::error('Failed to delete image', 500);
+        }
+    }
 }
 
 // Handle routing
@@ -737,10 +768,14 @@ switch ($method) {
         }
         break;
     case 'DELETE':
-        error_log("DELETE request - path[0]: " . ($path[0] ?? 'empty') . ", path[1]: " . ($path[1] ?? 'empty'));
+        error_log("DELETE request - path[0]: " . ($path[0] ?? 'empty') . ", path[1]: " . ($path[1] ?? 'empty') . ", path[2]: " . ($path[2] ?? 'empty') . ", path[3]: " . ($path[3] ?? 'empty'));
         if ($path[0] === 'items' && isset($path[1]) && is_numeric($path[1])) {
             error_log("Calling deleteCategoryItem({$path[1]})");
             $controller->deleteCategoryItem($path[1]);
+        } elseif ($path[0] === 'sub-items' && $path[1] === 'images' && isset($path[2]) && is_numeric($path[2])) {
+            // DELETE /sub-items/images/{imageId}
+            error_log("Calling deleteSubItemImage({$path[2]})");
+            $controller->deleteSubItemImage($path[2]);
         } elseif ($path[0] === 'sub-items' && isset($path[1]) && is_numeric($path[1])) {
             error_log("Calling deleteSubItem({$path[1]})");
             $controller->deleteSubItem($path[1]);

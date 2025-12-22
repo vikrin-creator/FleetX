@@ -265,6 +265,30 @@ export const categoryAPI = {
     }
   },
 
+  // Delete a sub-item image
+  deleteSubItemImage: async (imageId) => {
+    try {
+      console.log(`Deleting sub-item image ID: ${imageId}`);
+      const response = await fetch(`${API_BASE_URL}/categories/sub-items/images/${imageId}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        console.error(`Delete Image Error: ${response.status} - ${response.statusText}`);
+        const text = await response.text();
+        console.error('Error response body:', text);
+        throw new Error('Failed to delete image');
+      }
+      
+      const data = await response.json();
+      console.log('Delete image response:', data);
+      return data;
+    } catch (error) {
+      console.error('Error deleting image:', error);
+      throw error;
+    }
+  },
+
   // Get single sub-item by ID with images
   getSubItemById: async (subItemId) => {
     try {
