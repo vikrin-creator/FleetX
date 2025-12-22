@@ -28,12 +28,6 @@ function sendOTPEmail($email, $otp_code) {
  */
 function sendOTPWithPHPMailer($email, $otp_code, $smtp_host, $smtp_port, $smtp_username, $smtp_password, $from_email, $from_name) {
     try {
-        // Check if PHPMailer class exists
-        if (!class_exists('PHPMailer\\PHPMailer\\PHPMailer')) {
-            error_log("PHPMailer class not found");
-            return ['success' => false, 'message' => 'Email system not configured'];
-        }
-        
         $mail = new PHPMailer(true);
         
         // Server settings
@@ -76,8 +70,10 @@ function sendOTPWithPHPMailer($email, $otp_code, $smtp_host, $smtp_port, $smtp_u
         $mail->send();
         return ['success' => true, 'message' => 'OTP sent successfully'];
     } catch (Exception $e) {
-        $errorMsg = isset($mail) ? $mail->ErrorInfo : $e->getMessage();
-        error_log("Email sending failed to {$email}: " . $errorMsg);
+        error_log("Email sending failed: " . $mail->ErrorInfo);
+        return ['success' => false, 'message' => 'Failed to send email: ' . $mail->ErrorInfo];
+    }
+}
         return ['success' => false, 'message' => 'Failed to send email: ' . $errorMsg];
     }
 }
