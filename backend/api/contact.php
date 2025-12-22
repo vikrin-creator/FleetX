@@ -76,14 +76,16 @@ if ($result['success']) {
  * Send contact form email to admin
  */
 function sendContactEmail($fullName, $email, $phone, $subject, $message, $uploadedFile = null) {
-    // Email configuration for GoDaddy Direct SMTP
-    $smtp_host = 'smtpout.secureserver.net';
-    $smtp_port = 465;
-    $smtp_username = 'sarwan@fleetxusa.com';
-    $smtp_password = 'Sarwan2005';
-    $from_email = 'sarwan@fleetxusa.com';
+    // Load email configuration from config file
+    $config = require __DIR__ . '/../config/email.php';
+    
+    $smtp_host = $config['smtp_host'];
+    $smtp_port = $config['smtp_port'];
+    $smtp_username = $config['smtp_username'];
+    $smtp_password = $config['smtp_password'];
+    $from_email = $config['from_email'];
     $from_name = 'Fleet X Parts Contact Form';
-    $admin_email = 'sarwan@fleetxusa.com'; // Admin email to receive contact form submissions
+    $admin_email = $config['from_email']; // Admin email to receive contact form submissions
     
     try {
         $mail = new PHPMailer(true);
@@ -94,7 +96,13 @@ function sendContactEmail($fullName, $email, $phone, $subject, $message, $upload
         $mail->SMTPAuth = true;
         $mail->Username = $smtp_username;
         $mail->Password = $smtp_password;
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+        
+        // Set encryption based on config
+        if ($config['smtp_secure'] === 'tls') {
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        } else {
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+        }
         $mail->Port = $smtp_port;
         
         $mail->SMTPOptions = array(
@@ -138,6 +146,9 @@ function sendContactEmail($fullName, $email, $phone, $subject, $message, $upload
  */
 function sendCustomerConfirmation($email, $fullName, $smtp_host, $smtp_port, $smtp_username, $smtp_password, $from_email) {
     try {
+        // Load email configuration from config file
+        $config = require __DIR__ . '/../config/email.php';
+        
         $mail = new PHPMailer(true);
         
         $mail->isSMTP();
@@ -145,7 +156,13 @@ function sendCustomerConfirmation($email, $fullName, $smtp_host, $smtp_port, $sm
         $mail->SMTPAuth = true;
         $mail->Username = $smtp_username;
         $mail->Password = $smtp_password;
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+        
+        // Set encryption based on config
+        if ($config['smtp_secure'] === 'tls') {
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        } else {
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+        }
         $mail->Port = $smtp_port;
         
         $mail->SMTPOptions = array(
