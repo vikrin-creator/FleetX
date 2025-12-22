@@ -9,7 +9,7 @@ return [
     'smtp_port' => 465,
     'smtp_username' => 'sarwan@fleetxusa.com',
     'smtp_password' => 'Sarwan2005',
-    'smtp_secure' => PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS,
+    'smtp_secure' => 'ssl',
     'from_email' => 'sarwan@fleetxusa.com',
     'from_name' => 'Fleet X Parts',
     'reply_to' => 'sarwan@fleetxusa.com'

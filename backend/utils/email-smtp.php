@@ -20,7 +20,7 @@ function sendEmail($to, $subject, $htmlBody, $textBody = '') {
         $mail->SMTPAuth = true;
         $mail->Username = $config['smtp_username'];
         $mail->Password = $config['smtp_password'];
-        $mail->SMTPSecure = $config['smtp_secure'];
+        $mail->SMTPSecure = ($config['smtp_secure'] === 'ssl') ? PHPMailer::ENCRYPTION_SMTPS : PHPMailer::ENCRYPTION_STARTTLS;
         $mail->Port = $config['smtp_port'];
         
         // Additional SMTP settings for better deliverability
