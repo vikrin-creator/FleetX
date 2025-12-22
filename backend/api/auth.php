@@ -287,9 +287,11 @@ function handleForgotPassword() {
             'message' => 'Password reset code sent! Check your inbox.'
         ]);
     } else {
+        $errorMsg = isset($emailResult['message']) ? $emailResult['message'] : 'Unknown error';
+        error_log("Forgot password email failed: " . $errorMsg);
         echo json_encode([
             'success' => false,
-            'message' => 'Failed to send reset email. Please try again.'
+            'message' => 'Failed to send reset email: ' . $errorMsg
         ]);
     }
 }
