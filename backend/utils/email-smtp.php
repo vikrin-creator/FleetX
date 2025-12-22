@@ -30,14 +30,25 @@ function sendOTPWithPHPMailer($email, $otp_code, $smtp_host, $smtp_port, $smtp_u
     try {
         $mail = new PHPMailer(true);
         
+        // Check if OpenSSL is available
+        $hasOpenSSL = extension_loaded('openssl');
+        
         // Server settings
         $mail->isSMTP();
         $mail->Host = $smtp_host;
         $mail->SMTPAuth = true;
         $mail->Username = $smtp_username;
         $mail->Password = $smtp_password;
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS; // SSL for port 465
-        $mail->Port = $smtp_port;
+        
+        if ($hasOpenSSL) {
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS; // SSL for port 465
+            $mail->Port = $smtp_port;
+        } else {
+            // Fallback for local development without OpenSSL
+            error_log("Warning: OpenSSL not available, using non-secure SMTP");
+            $mail->SMTPSecure = false;
+            $mail->Port = 25; // Non-secure port
+        }
         
         // Anti-spam settings
         $mail->SMTPOptions = array(
@@ -153,13 +164,24 @@ function sendPasswordResetWithPHPMailer($email, $otp_code, $smtp_host, $smtp_por
     try {
         $mail = new PHPMailer(true);
         
+        // Check if OpenSSL is available
+        $hasOpenSSL = extension_loaded('openssl');
+        
         $mail->isSMTP();
         $mail->Host = $smtp_host;
         $mail->SMTPAuth = true;
         $mail->Username = $smtp_username;
         $mail->Password = $smtp_password;
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS; // SSL for port 465
-        $mail->Port = $smtp_port;
+        
+        if ($hasOpenSSL) {
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS; // SSL for port 465
+            $mail->Port = $smtp_port;
+        } else {
+            // Fallback for local development without OpenSSL
+            error_log("Warning: OpenSSL not available, using non-secure SMTP");
+            $mail->SMTPSecure = false;
+            $mail->Port = 25; // Non-secure port
+        }
         
         // Anti-spam settings
         $mail->SMTPOptions = array(
