@@ -1,13 +1,13 @@
 const API_BASE_URL = 'https://sandybrown-squirrel-472536.hostingersite.com/backend/api';
 
 export const authAPI = {
-  register: async (email, password) => {
+  register: async (email, password, fullName, phone) => {
     const response = await fetch(`${API_BASE_URL}/auth.php?action=register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ email, password })
+      body: JSON.stringify({ email, password, fullName, phone })
     });
     
     if (!response.ok) {

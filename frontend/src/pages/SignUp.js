@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { authAPI } from '../services/authService.js';
 
 const SignUp = () => {
+  const [fullName, setFullName] = useState('');
+  const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -16,7 +18,7 @@ const SignUp = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!email || !password || !confirmPassword) {
+    if (!fullName || !phone || !email || !password || !confirmPassword) {
       return setError('Please fill in all fields');
     }
 
@@ -31,7 +33,7 @@ const SignUp = () => {
     try {
       setError('');
       setLoading(true);
-      const result = await authAPI.register(email, password);
+      const result = await authAPI.register(email, password, fullName, phone);
       
       if (result.success) {
         setShowOTPModal(true);
@@ -116,6 +118,34 @@ const SignUp = () => {
         React.createElement(
           'div',
           { className: 'rounded-md shadow-sm space-y-4' },
+          React.createElement(
+            'div',
+            null,
+            React.createElement('label', { htmlFor: 'fullName', className: 'block text-sm font-medium text-gray-700 mb-1' }, 'Full Name'),
+            React.createElement('input', {
+              id: 'fullName',
+              type: 'text',
+              required: true,
+              value: fullName,
+              onChange: (e) => setFullName(e.target.value),
+              className: 'appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm',
+              placeholder: 'Enter your full name'
+            })
+          ),
+          React.createElement(
+            'div',
+            null,
+            React.createElement('label', { htmlFor: 'phone', className: 'block text-sm font-medium text-gray-700 mb-1' }, 'Phone Number'),
+            React.createElement('input', {
+              id: 'phone',
+              type: 'tel',
+              required: true,
+              value: phone,
+              onChange: (e) => setPhone(e.target.value),
+              className: 'appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm',
+              placeholder: 'Enter your phone number'
+            })
+          ),
           React.createElement(
             'div',
             null,

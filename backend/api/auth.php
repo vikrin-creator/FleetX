@@ -64,11 +64,18 @@ function handleRegister() {
     
     $email = filter_var($data['email'] ?? '', FILTER_VALIDATE_EMAIL);
     $password = $data['password'] ?? '';
+    $fullName = trim($data['fullName'] ?? '');
+    $phone = trim($data['phone'] ?? '');
     
     error_log("Email: " . $email . ", Password length: " . strlen($password));
     
     if (!$email || !$password) {
         Response::error('Email and password are required', 400);
+        return;
+    }
+    
+    if (!$fullName || !$phone) {
+        Response::error('Full name and phone number are required', 400);
         return;
     }
     
@@ -93,9 +100,9 @@ function handleRegister() {
         // Hash password but don't create user yet
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
         
-        // Generate and send OTP (store password with it)
+        // Generate and send OTP (store password, name, phone with it)
         $otp_code = generateOTP();
-        storeOTP($email, $otp_code, $hashedPassword);
+        storeOTP($email, $otp_code, $hashedPassword, $fullName, $phone);
         $emailResult = sendOTPEmail($email, $otp_code);
         
         if (!$emailResult['success']) {

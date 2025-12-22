@@ -9,9 +9,9 @@ function generateOTP() {
 }
 
 /**
- * Store OTP in database with optional password for registration
+ * Store OTP in database with optional password, name, and phone for registration
  */
-function storeOTP($email, $otp_code, $password_hash = null) {
+function storeOTP($email, $otp_code, $password_hash = null, $fullName = null, $phone = null) {
     $db = Database::getInstance()->getConnection();
     
     // Delete any existing OTPs for this email
@@ -24,17 +24,26 @@ function storeOTP($email, $otp_code, $password_hash = null) {
     // Check if password_hash column exists, if not use old version
     try {
         $insertStmt = $db->prepare("
-            INSERT INTO otp_verification (email, otp_code, expires_at, verified, attempts, password_hash) 
-            VALUES (?, ?, ?, 0, 0, ?)
+            INSERT INTO otp_verification (email, otp_code, expires_at, verified, attempts, password_hash, full_name, phone) 
+            VALUES (?, ?, ?, 0, 0, ?, ?, ?)
         ");
-        return $insertStmt->execute([$email, $otp_code, $expires_at, $password_hash]);
+        return $insertStmt->execute([$email, $otp_code, $expires_at, $password_hash, $fullName, $phone]);
     } catch (PDOException $e) {
-        // Fallback for tables without password_hash column
-        $insertStmt = $db->prepare("
-            INSERT INTO otp_verification (email, otp_code, expires_at, verified, attempts) 
-            VALUES (?, ?, ?, 0, 0)
-        ");
-        return $insertStmt->execute([$email, $otp_code, $expires_at]);
+        // Fallback for tables without new columns - try with just password_hash
+        try {
+            $insertStmt = $db->prepare("
+                INSERT INTO otp_verification (email, otp_code, expires_at, verified, attempts, password_hash) 
+                VALUES (?, ?, ?, 0, 0, ?)
+            ");
+            return $insertStmt->execute([$email, $otp_code, $expires_at, $password_hash]);
+        } catch (PDOException $e2) {
+            // Fallback for tables without password_hash column
+            $insertStmt = $db->prepare("
+                INSERT INTO otp_verification (email, otp_code, expires_at, verified, attempts) 
+                VALUES (?, ?, ?, 0, 0)
+            ");
+            return $insertStmt->execute([$email, $otp_code, $expires_at]);
+        }
     }
 }
 
@@ -88,12 +97,15 @@ function verifyOTP($email, $otp_code) {
         $checkStmt->execute([$email]);
         
         if (!$checkStmt->fetch()) {
-            // Create the user account
+            // Create the user account with name and phone
+            $fullName = $record['full_name'] ?? null;
+            $phone = $record['phone'] ?? null;
+            
             $createStmt = $db->prepare("
-                INSERT INTO users (email, password, email_verified) 
-                VALUES (?, ?, 1)
+                INSERT INTO users (email, password, name, phone, email_verified) 
+                VALUES (?, ?, ?, ?, 1)
             ");
-            $createStmt->execute([$email, $record['password_hash']]);
+            $createStmt->execute([$email, $record['password_hash'], $fullName, $phone]);
         }
     } else {
         // Mark email as verified in existing users table
