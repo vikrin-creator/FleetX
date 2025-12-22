@@ -64,82 +64,13 @@ function sendEmail($to, $subject, $htmlBody, $textBody = '') {
  * Send OTP email using SMTP
  */
 function sendOTPEmail($email, $otp_code) {
-    // Email configuration for GoDaddy Direct SMTP (Proven Working)
-    $smtp_host = 'smtpout.secureserver.net'; // GoDaddy Direct SMTP for inbox delivery
-    $smtp_port = 465; // SSL port
-    $smtp_username = 'sarwan@fleetxusa.com'; // Full email address
-    $smtp_password = 'Sarwan2005'; // GoDaddy email password
-    $from_email = 'sarwan@fleetxusa.com';
-    $from_name = 'Fleet X Parts';
+    $subject = '[Fleet X Parts] Email Verification Code';
     
-    // Use PHPMailer directly (no fallback needed - it's installed)
-    return sendOTPWithPHPMailer($email, $otp_code, $smtp_host, $smtp_port, $smtp_username, $smtp_password, $from_email, $from_name);
-}
-
-/**
- * Send OTP using PHPMailer (recommended)
- */
-function sendOTPWithPHPMailer($email, $otp_code, $smtp_host, $smtp_port, $smtp_username, $smtp_password, $from_email, $from_name) {
-    try {
-        $mail = new PHPMailer(true);
-        
-        // Server settings
-        $mail->isSMTP();
-        $mail->Host = $smtp_host;
-        $mail->SMTPAuth = true;
-        $mail->Username = $smtp_username;
-        $mail->Password = $smtp_password;
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS; // SSL for port 465
-        $mail->Port = $smtp_port;
-        
-        // Anti-spam settings
-        $mail->SMTPOptions = array(
-            'ssl' => array(
-                'verify_peer' => false,
-                'verify_peer_name' => false,
-                'allow_self_signed' => true
-            )
-        );
-        
-        // Recipients
-        $mail->setFrom($from_email, $from_name);
-        $mail->addAddress($email);
-        $mail->addReplyTo($from_email, $from_name);
-        
-        // Anti-spam headers
-        $mail->addCustomHeader('X-Mailer', 'Fleet X Parts System');
-        $mail->addCustomHeader('X-Priority', '3');
-        $mail->addCustomHeader('X-MSMail-Priority', 'Normal');
-        $mail->addCustomHeader('List-Unsubscribe', '<mailto:' . $from_email . '>');
-        $mail->addCustomHeader('Precedence', 'bulk');
-        $mail->Sender = $from_email;
-        
-        // Content
-        $mail->isHTML(true);
-        $mail->Subject = '[Fleet X Parts] Email Verification Code';
-        $mail->Body = getOTPEmailTemplate($otp_code);
-        $mail->AltBody = "Your Fleet X verification code is: $otp_code\n\nThis code will expire in 10 minutes.";
-        
-        $mail->send();
-        return ['success' => true, 'message' => 'OTP sent successfully'];
-    } catch (Exception $e) {
-        error_log("Email sending failed: " . $mail->ErrorInfo);
-        return ['success' => false, 'message' => 'Failed to send email: ' . $mail->ErrorInfo];
-    }
-}
-
-
-
-/**
- * Get HTML email template for OTP
- */
-function getOTPEmailTemplate($otp_code) {
-    return '
+    $htmlBody = '
     <!DOCTYPE html>
     <html>
     <head>
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <style>
             body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
             .container { max-width: 600px; margin: 0 auto; padding: 20px; }
@@ -179,107 +110,44 @@ function getOTPEmailTemplate($otp_code) {
             </div>
         </div>
     </body>
-    </html>
-    ';
+    </html>';
+    
+    $textBody = "Your Fleet X verification code is: $otp_code\n\nThis code will expire in 10 minutes.";
+    
+    return sendEmail($email, $subject, $htmlBody, $textBody);
 }
 
 /**
  * Send password reset email
  */
 function sendPasswordResetEmail($email, $otp_code) {
-    // Email configuration for GoDaddy Direct SMTP
-    $smtp_host = 'smtpout.secureserver.net';
-    $smtp_port = 587;
-    $smtp_username = 'sarwan@fleetxusa.com';
-    $smtp_password = 'Sarwan2005';
-    $from_email = 'sarwan@fleetxusa.com';
-    $from_name = 'Fleet X Parts';
+    $subject = '[Fleet X Parts] Password Reset Request';
     
-    // Use PHPMailer directly (no fallback needed - it's installed)
-    return sendPasswordResetWithPHPMailer($email, $otp_code, $smtp_host, $smtp_port, $smtp_username, $smtp_password, $from_email, $from_name);
-}
-
-/**
- * Send password reset using PHPMailer
- */
-function sendPasswordResetWithPHPMailer($email, $otp_code, $smtp_host, $smtp_port, $smtp_username, $smtp_password, $from_email, $from_name) {
-    try {
-        $mail = new PHPMailer(true);
-        
-        $mail->isSMTP();
-        $mail->Host = $smtp_host;
-        $mail->SMTPAuth = true;
-        $mail->Username = $smtp_username;
-        $mail->Password = $smtp_password;
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS; // SSL for port 465
-        $mail->Port = $smtp_port;
-        
-        // Anti-spam settings
-        $mail->SMTPOptions = array(
-            'ssl' => array(
-                'verify_peer' => false,
-                'verify_peer_name' => false,
-                'allow_self_signed' => true
-            )
-        );
-        
-        $mail->setFrom($from_email, $from_name);
-        $mail->addAddress($email);
-        $mail->addReplyTo($from_email, $from_name);
-        
-        // Anti-spam headers
-        $mail->addCustomHeader('X-Mailer', 'Fleet X Parts System');
-        $mail->addCustomHeader('X-Priority', '3');
-        $mail->addCustomHeader('X-MSMail-Priority', 'Normal');
-        $mail->addCustomHeader('List-Unsubscribe', '<mailto:' . $from_email . '>');
-        $mail->addCustomHeader('Precedence', 'bulk');
-        $mail->Sender = $from_email;
-        
-        $mail->isHTML(true);
-        $mail->Subject = '[Fleet X Parts] Password Reset Request';
-        $mail->Body = getPasswordResetEmailTemplate($otp_code);
-        $mail->AltBody = "Your Fleet X password reset code is: $otp_code\n\nThis code will expire in 10 minutes.\nIf you didn't request this, please ignore this email.";
-        
-        $mail->send();
-        return ['success' => true, 'message' => 'Reset email sent successfully'];
-    } catch (Exception $e) {
-        error_log("Password reset email failed: " . $mail->ErrorInfo);
-        return ['success' => false, 'message' => 'Failed to send email: ' . $mail->ErrorInfo];
-    }
-}
-
-
-
-/**
- * Get password reset email template
- */
-function getPasswordResetEmailTemplate($otp_code) {
-    return '
+    $htmlBody = '
     <!DOCTYPE html>
     <html>
     <head>
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <style>
             body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
             .container { max-width: 600px; margin: 0 auto; padding: 20px; }
             .header { background: linear-gradient(135deg, #2B2A29 0%, #5B5B5B 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
             .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
-            .otp-box { background: white; border: 2px solid #2B2A29; border-radius: 8px; padding: 20px; text-align: center; margin: 20px 0; }
-            .otp-code { font-size: 36px; font-weight: bold; color: #2B2A29; letter-spacing: 8px; margin: 10px 0; }
+            .otp-box { background: white; border: 2px solid #dc3545; border-radius: 8px; padding: 20px; text-align: center; margin: 20px 0; }
+            .otp-code { font-size: 36px; font-weight: bold; color: #dc3545; letter-spacing: 8px; margin: 10px 0; }
             .footer { text-align: center; margin-top: 20px; color: #666; font-size: 12px; }
-            .warning { background: #fff3cd; border-left: 4px solid #ffc107; padding: 12px; margin: 20px 0; }
+            .warning { background: #f8d7da; border-left: 4px solid #dc3545; padding: 12px; margin: 20px 0; }
         </style>
     </head>
     <body>
         <div class="container">
             <div class="header">
                 <h1>Fleet X Parts</h1>
-                <p>Password Reset Request</p>
+                <p>Password Reset</p>
             </div>
             <div class="content">
-                <h2>Reset Your Password</h2>
-                <p>We received a request to reset your password. Use the following code to proceed:</p>
+                <h2>Password Reset Request</h2>
+                <p>You recently requested to reset your password. Use the following code to complete the process:</p>
                 
                 <div class="otp-box">
                     <p style="margin: 0; color: #666;">Your Reset Code</p>
@@ -290,7 +158,7 @@ function getPasswordResetEmailTemplate($otp_code) {
                     <strong>⚠️ Important:</strong> This code will expire in <strong>10 minutes</strong>.
                 </div>
                 
-                <p>If you didn\'t request a password reset, please ignore this email and your password will remain unchanged.</p>
+                <p>If you didn\'t request this password reset, please ignore this email or contact our support team immediately.</p>
                 
                 <div class="footer">
                     <p>© 2024 Fleet X Parts. All rights reserved.</p>
@@ -299,7 +167,10 @@ function getPasswordResetEmailTemplate($otp_code) {
             </div>
         </div>
     </body>
-    </html>
-    ';
+    </html>';
+    
+    $textBody = "Your Fleet X password reset code is: $otp_code\n\nThis code will expire in 10 minutes.\nIf you didn't request this, please ignore this email.";
+    
+    return sendEmail($email, $subject, $htmlBody, $textBody);
 }
 ?>
