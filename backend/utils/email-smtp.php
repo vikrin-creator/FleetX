@@ -2,18 +2,71 @@
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-// Load PHPMailer via autoload (only if available)
-if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
-    require_once __DIR__ . '/../vendor/autoload.php';
+// Load PHPMailer via autoload
+require_once __DIR__ . '/../vendor/autoload.php';
+
+/**
+ * Send email using SMTP
+ */
+function sendEmail($to, $subject, $htmlBody, $textBody = '') {
+    $config = require __DIR__ . '/../config/email.php';
+    
+    $mail = new PHPMailer(true);
+    
+    try {
+        // Server settings
+        $mail->isSMTP();
+        $mail->Host = $config['smtp_host'];
+        $mail->SMTPAuth = true;
+        $mail->Username = $config['smtp_username'];
+        $mail->Password = $config['smtp_password'];
+        $mail->SMTPSecure = $config['smtp_secure'];
+        $mail->Port = $config['smtp_port'];
+        
+        // Additional SMTP settings for better deliverability
+        $mail->SMTPOptions = array(
+            'ssl' => array(
+                'verify_peer' => false,
+                'verify_peer_name' => false,
+                'allow_self_signed' => true
+            )
+        );
+        
+        // Recipients
+        $mail->setFrom($config['from_email'], $config['from_name']);
+        $mail->addAddress($to);
+        $mail->addReplyTo($config['reply_to'], $config['from_name']);
+        
+        // Anti-spam headers
+        $mail->addCustomHeader('X-Mailer', 'PHPMailer');
+        $mail->addCustomHeader('X-Priority', '3');
+        $mail->addCustomHeader('X-MSMail-Priority', 'Normal');
+        $mail->addCustomHeader('List-Unsubscribe', '<mailto:' . $config['from_email'] . '>');
+        $mail->addCustomHeader('Precedence', 'bulk');
+        $mail->Sender = $config['from_email'];
+        
+        // Content
+        $mail->isHTML(true);
+        $mail->CharSet = 'UTF-8';
+        $mail->Subject = $subject;
+        $mail->Body = $htmlBody;
+        $mail->AltBody = $textBody ?: strip_tags($htmlBody);
+        
+        $mail->send();
+        return ['success' => true, 'message' => 'Email sent successfully'];
+    } catch (Exception $e) {
+        error_log("Email send failed: {$mail->ErrorInfo}");
+        return ['success' => false, 'message' => 'Failed to send email: ' . $mail->ErrorInfo];
+    }
 }
 
 /**
  * Send OTP email using SMTP
  */
 function sendOTPEmail($email, $otp_code) {
-    // Email configuration for GoDaddy Direct SMTP
+    // Email configuration for GoDaddy Direct SMTP (Proven Working)
     $smtp_host = 'smtpout.secureserver.net'; // GoDaddy Direct SMTP for inbox delivery
-    $smtp_port = 587; // TLS port (alternative to 465)
+    $smtp_port = 465; // SSL port
     $smtp_username = 'sarwan@fleetxusa.com'; // Full email address
     $smtp_password = 'Sarwan2005'; // GoDaddy email password
     $from_email = 'sarwan@fleetxusa.com';
@@ -36,7 +89,7 @@ function sendOTPWithPHPMailer($email, $otp_code, $smtp_host, $smtp_port, $smtp_u
         $mail->SMTPAuth = true;
         $mail->Username = $smtp_username;
         $mail->Password = $smtp_password;
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // TLS for port 587
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS; // SSL for port 465
         $mail->Port = $smtp_port;
         
         // Anti-spam settings
