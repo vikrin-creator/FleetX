@@ -74,9 +74,6 @@ function sendOTPWithPHPMailer($email, $otp_code, $smtp_host, $smtp_port, $smtp_u
         return ['success' => false, 'message' => 'Failed to send email: ' . $mail->ErrorInfo];
     }
 }
-        return ['success' => false, 'message' => 'Failed to send email: ' . $errorMsg];
-    }
-}
 
 
 
