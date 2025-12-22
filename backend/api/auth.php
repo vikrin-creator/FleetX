@@ -99,9 +99,7 @@ function handleRegister() {
         $emailResult = sendOTPEmail($email, $otp_code);
         
         if (!$emailResult['success']) {
-            $errorMsg = isset($emailResult['message']) ? $emailResult['message'] : 'Unknown error';
-            error_log("OTP Email failed: " . $errorMsg);
-            Response::error('Failed to send verification email: ' . $errorMsg, 500);
+            Response::error('Failed to send verification email. Please try again.', 500);
             return;
         }
         
