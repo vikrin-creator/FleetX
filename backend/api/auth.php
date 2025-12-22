@@ -275,23 +275,34 @@ function handleForgotPassword() {
         return;
     }
     
-    // Use the EXACT same approach as registration (which works)
-    $otp_code = str_pad(random_int(100000, 999999), 6, '0', STR_PAD_LEFT);
-    
-    // Use the same sendOTPEmail function that works for registration
-    $emailResult = sendOTPEmail($email, $otp_code);
-    
-    if ($emailResult['success']) {
-        echo json_encode([
-            'success' => true,
-            'message' => 'Password reset code sent! Check your inbox.'
-        ]);
-    } else {
-        $errorMsg = isset($emailResult['message']) ? $emailResult['message'] : 'Unknown error';
-        error_log("Forgot password email failed: " . $errorMsg);
+    try {
+        // Generate OTP
+        $otp_code = generateOTP();
+        
+        // Store OTP in database
+        storeOTP($email, $otp_code);
+        
+        // Send email using the same function as registration
+        $emailResult = sendOTPEmail($email, $otp_code);
+        
+        if ($emailResult['success']) {
+            echo json_encode([
+                'success' => true,
+                'message' => 'Password reset code sent! Check your inbox.'
+            ]);
+        } else {
+            $errorMsg = isset($emailResult['message']) ? $emailResult['message'] : 'Unknown error';
+            error_log("Forgot password email failed: " . $errorMsg);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Failed to send reset email: ' . $errorMsg
+            ]);
+        }
+    } catch (Exception $e) {
+        error_log("Forgot password error: " . $e->getMessage());
         echo json_encode([
             'success' => false,
-            'message' => 'Failed to send reset email: ' . $errorMsg
+            'message' => 'Failed to process password reset: ' . $e->getMessage()
         ]);
     }
 }
