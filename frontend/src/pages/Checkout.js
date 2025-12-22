@@ -161,7 +161,7 @@ const Checkout = () => {
       } else {
         // For other payment methods, just clear cart and redirect
         localStorage.removeItem('cart');
-        window.dispatchEvent(new Event('storage'));
+        window.dispatchEvent(new Event('cartUpdate'));
         alert(`Order placed successfully! Your order number is ${orderResult.orderNumber}`);
         navigate('/my-orders');
       }

@@ -23,12 +23,19 @@ const Header = () => {
       updateCartCount();
     };
     
+    // Listen for custom cart update events
+    const handleCartUpdate = () => {
+      updateCartCount();
+    };
+    
     window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('cartUpdate', handleCartUpdate);
     // Also check cart on location change
     updateCartCount();
     
     return () => {
       window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('cartUpdate', handleCartUpdate);
     };
   }, [location]);
 

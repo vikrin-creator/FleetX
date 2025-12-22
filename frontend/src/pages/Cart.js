@@ -29,17 +29,20 @@ const Cart = () => {
     updatedCart[index].quantity = newQuantity;
     localStorage.setItem('cart', JSON.stringify(updatedCart));
     setCartItems(updatedCart);
+    window.dispatchEvent(new Event('cartUpdate'));
   };
 
   const removeItem = (index) => {
     const updatedCart = cartItems.filter((_, i) => i !== index);
     localStorage.setItem('cart', JSON.stringify(updatedCart));
     setCartItems(updatedCart);
+    window.dispatchEvent(new Event('cartUpdate'));
   };
 
   const clearCart = () => {
     localStorage.removeItem('cart');
     setCartItems([]);
+    window.dispatchEvent(new Event('cartUpdate'));
   };
 
   const getTotalPrice = () => {
