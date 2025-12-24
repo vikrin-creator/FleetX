@@ -127,10 +127,10 @@ const SubItemDetail = () => {
     // Breadcrumb
     React.createElement(
       'div',
-      { className: 'container mx-auto px-4 py-4 border-b' },
+      { className: 'container mx-auto px-3 sm:px-4 py-3 sm:py-4 border-b' },
       React.createElement(
         'ol',
-        { className: 'flex items-center space-x-2 text-sm text-gray-500' },
+        { className: 'flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm text-gray-500 overflow-x-auto' },
         React.createElement(
           'li',
           null,
@@ -185,28 +185,28 @@ const SubItemDetail = () => {
     // Main Content
     React.createElement(
       'div',
-      { className: 'container mx-auto px-4 py-8' },
+      { className: 'container mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-8' },
       React.createElement(
         'div',
-        { className: 'grid grid-cols-1 lg:grid-cols-2 gap-8' },
+        { className: 'grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8' },
         
         // Left Side - Images
         React.createElement(
           'div',
-          { className: 'space-y-4' },
+          { className: 'space-y-3 sm:space-y-4' },
           
           // Main Image
           React.createElement(
             'div',
             {
-              className: 'bg-white border border-gray-200 rounded-lg p-4 flex items-center justify-center w-96 h-96 overflow-hidden',
+              className: 'bg-white border border-gray-200 rounded-lg p-2 sm:p-3 lg:p-4 flex items-center justify-center w-full max-w-md mx-auto lg:max-w-none aspect-square overflow-hidden',
               style: { position: 'relative' }
             },
             React.createElement('img', {
               ref: imageRef,
               src: currentImage.image_url,
               alt: subItem.name,
-              className: 'w-80 h-80 object-contain',
+              className: 'w-full h-full max-w-sm sm:max-w-md lg:max-w-lg object-contain',
               style: {
                 transform: 'scale(1) translate(0, 0)',
                 willChange: 'transform',
@@ -222,14 +222,14 @@ const SubItemDetail = () => {
           // Thumbnail Images
           images.length > 1 && React.createElement(
             'div',
-            { className: 'flex gap-2 overflow-x-auto' },
+            { className: 'flex gap-1 sm:gap-2 overflow-x-auto pb-2' },
             images.map((image, index) =>
               React.createElement(
                 'button',
                 {
                   key: image.id || index,
                   onClick: () => setSelectedImageIndex(index),
-                  className: `flex-shrink-0 w-16 h-16 border-2 rounded-lg overflow-hidden transition-all ${
+                  className: `flex-shrink-0 w-12 h-12 sm:w-16 sm:h-16 border-2 rounded-lg overflow-hidden transition-all ${
                     selectedImageIndex === index ? 'border-blue-600' : 'border-gray-200 hover:border-gray-400'
                   }`
                 },
@@ -247,7 +247,7 @@ const SubItemDetail = () => {
         // Right Side - Details
         React.createElement(
           'div',
-          { className: 'space-y-6' },
+          { className: 'space-y-4 sm:space-y-6' },
           
           // Complete Badge
           React.createElement(
@@ -268,15 +268,15 @@ const SubItemDetail = () => {
             null,
             React.createElement(
               'h1',
-              { className: 'text-2xl md:text-3xl font-bold text-gray-900 mb-2 flex items-center gap-2' },
+              { className: 'text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-2 flex items-center gap-2' },
               subItem.part_number || subItem.name,
               React.createElement(
                 'span',
-                { className: 'inline-flex items-center justify-center w-6 h-6 border-2 border-gray-700 rounded-full text-sm font-bold' },
+                { className: 'inline-flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 border-2 border-gray-700 rounded-full text-xs sm:text-sm font-bold' },
                 '©'
               )
             ),
-            React.createElement('h2', { className: 'text-lg text-gray-700 font-medium' }, subItem.name)
+            React.createElement('h2', { className: 'text-base sm:text-lg text-gray-700 font-medium' }, subItem.name)
           ),
           
 
@@ -294,12 +294,12 @@ const SubItemDetail = () => {
           // Product Details
           React.createElement(
             'div',
-            { className: 'border-t border-gray-200 pt-6 space-y-4' },
+            { className: 'border-t border-gray-200 pt-4 sm:pt-6 space-y-3 sm:space-y-4' },
             
             // Brand & Manufacturer
             (subItem.brand || subItem.manufacturer) && React.createElement(
               'div',
-              { className: 'flex gap-3' },
+              { className: 'flex flex-col sm:flex-row gap-2 sm:gap-3' },
               subItem.brand && React.createElement(
                 'div',
                 null,
@@ -329,7 +329,7 @@ const SubItemDetail = () => {
             // Price
             subItem.price && React.createElement(
               'div',
-              { className: 'text-3xl font-bold text-gray-900' },
+              { className: 'text-2xl sm:text-3xl font-bold text-gray-900' },
               `$${parseFloat(subItem.price).toFixed(2)}`
             ),
             
@@ -358,7 +358,7 @@ const SubItemDetail = () => {
             // Quantity & Add to Cart
             subItem.status === 'active' && subItem.stock_quantity > 0 && React.createElement(
               'div',
-              { className: 'flex gap-4 items-center' },
+              { className: 'flex flex-col sm:flex-row gap-3 sm:gap-4 items-start sm:items-center' },
               React.createElement(
                 'div',
                 null,
@@ -369,14 +369,14 @@ const SubItemDetail = () => {
                   max: subItem.stock_quantity,
                   value: quantity,
                   onChange: (e) => setQuantity(parseInt(e.target.value) || 1),
-                  className: 'w-24 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
+                  className: 'w-20 sm:w-24 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
                 })
               ),
               React.createElement(
                 'button',
                 {
                   onClick: addToCart,
-                  className: 'mt-6 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors'
+                  className: 'w-full sm:w-auto sm:mt-6 px-4 sm:px-6 py-2 sm:py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors'
                 },
                 'Add to Cart'
               )

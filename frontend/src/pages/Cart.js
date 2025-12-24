@@ -51,23 +51,23 @@ const Cart = () => {
 
   return React.createElement(
     'div',
-    { className: 'container mx-auto px-4 py-8' },
+    { className: 'container mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-8' },
     
     // Header
     React.createElement(
       'div',
-      { className: 'mb-8' },
-      React.createElement('h1', { className: 'text-3xl font-bold text-gray-900 mb-2' }, 'Shopping Cart'),
-      React.createElement('p', { className: 'text-gray-600' }, `${cartItems.length} item${cartItems.length !== 1 ? 's' : ''} in your cart`)
+      { className: 'mb-6 sm:mb-8' },
+      React.createElement('h1', { className: 'text-2xl sm:text-3xl font-bold text-gray-900 mb-2' }, 'Shopping Cart'),
+      React.createElement('p', { className: 'text-sm sm:text-base text-gray-600' }, `${cartItems.length} item${cartItems.length !== 1 ? 's' : ''} in your cart`)
     ),
 
     // Cart Content
     cartItems.length === 0 ? React.createElement(
       'div',
-      { className: 'text-center py-16' },
+      { className: 'text-center py-12 sm:py-16' },
       React.createElement(
         'svg',
-        { className: 'w-24 h-24 mx-auto text-gray-300 mb-4', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' },
+        { className: 'w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 mx-auto text-gray-300 mb-4', fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' },
         React.createElement('path', { 
           strokeLinecap: 'round', 
           strokeLinejoin: 'round', 
@@ -75,19 +75,19 @@ const Cart = () => {
           d: 'M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z'
         })
       ),
-      React.createElement('h2', { className: 'text-2xl font-semibold text-gray-800 mb-2' }, 'Your cart is empty'),
-      React.createElement('p', { className: 'text-gray-600 mb-6' }, 'Add some items to get started'),
+      React.createElement('h2', { className: 'text-xl sm:text-2xl font-semibold text-gray-800 mb-2' }, 'Your cart is empty'),
+      React.createElement('p', { className: 'text-sm sm:text-base text-gray-600 mb-6' }, 'Add some items to get started'),
       React.createElement(
         'button',
         { 
           onClick: () => navigate('/products'),
-          className: 'bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors'
+          className: 'bg-blue-600 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base'
         },
         'Continue Shopping'
       )
     ) : React.createElement(
       'div',
-      { className: 'flex flex-col lg:flex-row gap-8' },
+      { className: 'flex flex-col xl:flex-row gap-4 sm:gap-6 lg:gap-8' },
       
       // Cart Items List
       React.createElement(
@@ -101,13 +101,13 @@ const Cart = () => {
               'div',
               { 
                 key: index,
-                className: 'flex gap-4 p-4 border-b last:border-b-0 hover:bg-gray-50 transition-colors'
+                className: 'flex flex-col sm:flex-row gap-3 sm:gap-4 p-3 sm:p-4 border-b last:border-b-0 hover:bg-gray-50 transition-colors'
               },
               
               // Item Image
               React.createElement(
                 'div',
-                { className: 'w-24 h-24 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden' },
+                { className: 'w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden mx-auto sm:mx-0' },
                 (item.image_url) ? React.createElement('img', {
                   src: item.image_url,
                   alt: item.name,
@@ -135,33 +135,33 @@ const Cart = () => {
               // Item Details
               React.createElement(
                 'div',
-                { className: 'flex-1 min-w-0' },
-                React.createElement('h3', { className: 'font-semibold text-gray-900 mb-1' }, item.name),
-                item.part_number && React.createElement('p', { className: 'text-sm text-gray-600 mb-2' }, `Part #: ${item.part_number}`),
-                React.createElement('p', { className: 'text-lg font-bold text-blue-600' }, `$${parseFloat(item.price || 0).toFixed(2)}`)
+                { className: 'flex-1 min-w-0 text-center sm:text-left' },
+                React.createElement('h3', { className: 'font-semibold text-gray-900 mb-1 text-sm sm:text-base' }, item.name),
+                item.part_number && React.createElement('p', { className: 'text-xs sm:text-sm text-gray-600 mb-2' }, `Part #: ${item.part_number}`),
+                React.createElement('p', { className: 'text-base sm:text-lg font-bold text-blue-600' }, `$${parseFloat(item.price || 0).toFixed(2)}`)
               ),
               
               // Quantity Controls
               React.createElement(
                 'div',
-                { className: 'flex flex-col items-end gap-2' },
+                { className: 'flex flex-row sm:flex-col items-center sm:items-end gap-2 sm:gap-2 justify-between sm:justify-start w-full sm:w-auto' },
                 React.createElement(
                   'div',
-                  { className: 'flex items-center gap-2 border border-gray-300 rounded' },
+                  { className: 'flex items-center gap-1 sm:gap-2 border border-gray-300 rounded' },
                   React.createElement(
                     'button',
                     {
                       onClick: () => updateQuantity(index, item.quantity - 1),
-                      className: 'px-3 py-1 hover:bg-gray-100 transition-colors'
+                      className: 'px-2 sm:px-3 py-1 hover:bg-gray-100 transition-colors text-sm sm:text-base'
                     },
                     '−'
                   ),
-                  React.createElement('span', { className: 'px-3 py-1 min-w-[40px] text-center' }, item.quantity),
+                  React.createElement('span', { className: 'px-2 sm:px-3 py-1 min-w-[30px] sm:min-w-[40px] text-center text-sm sm:text-base' }, item.quantity),
                   React.createElement(
                     'button',
                     {
                       onClick: () => updateQuantity(index, item.quantity + 1),
-                      className: 'px-3 py-1 hover:bg-gray-100 transition-colors'
+                      className: 'px-2 sm:px-3 py-1 hover:bg-gray-100 transition-colors text-sm sm:text-base'
                     },
                     '+'
                   )
@@ -170,7 +170,7 @@ const Cart = () => {
                   'button',
                   {
                     onClick: () => removeItem(index),
-                    className: 'text-red-600 text-sm hover:text-red-700 transition-colors'
+                    className: 'text-red-600 text-xs sm:text-sm hover:text-red-700 transition-colors'
                   },
                   'Remove'
                 )
@@ -193,11 +193,11 @@ const Cart = () => {
       // Order Summary
       React.createElement(
         'div',
-        { className: 'lg:w-96' },
+        { className: 'w-full xl:w-96 xl:flex-shrink-0' },
         React.createElement(
           'div',
-          { className: 'bg-white rounded-lg shadow-sm p-6 sticky top-4' },
-          React.createElement('h2', { className: 'text-xl font-bold mb-4' }, 'Order Summary'),
+          { className: 'bg-white rounded-lg shadow-sm p-4 sm:p-6 sticky top-4' },
+          React.createElement('h2', { className: 'text-lg sm:text-xl font-bold mb-4' }, 'Order Summary'),
           
           // Summary Details
           React.createElement(
@@ -205,20 +205,20 @@ const Cart = () => {
             { className: 'space-y-3 mb-6' },
             React.createElement(
               'div',
-              { className: 'flex justify-between text-gray-600' },
+              { className: 'flex justify-between text-sm sm:text-base text-gray-600' },
               React.createElement('span', null, 'Subtotal'),
               React.createElement('span', null, `$${getTotalPrice().toFixed(2)}`)
             ),
             React.createElement(
               'div',
-              { className: 'flex justify-between text-gray-600' },
+              { className: 'flex justify-between text-sm sm:text-base text-gray-600' },
               React.createElement('span', null, 'Shipping'),
               React.createElement('span', null, 'Calculated at checkout')
             ),
             React.createElement('div', { className: 'border-t pt-3' }),
             React.createElement(
               'div',
-              { className: 'flex justify-between text-xl font-bold' },
+              { className: 'flex justify-between text-lg sm:text-xl font-bold' },
               React.createElement('span', null, 'Total'),
               React.createElement('span', null, `$${getTotalPrice().toFixed(2)}`)
             )
@@ -229,7 +229,7 @@ const Cart = () => {
             'button',
             { 
               onClick: () => navigate('/checkout'),
-              className: 'w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold mb-3'
+              className: 'w-full bg-blue-600 text-white py-2 sm:py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold mb-3 text-sm sm:text-base'
             },
             'Proceed to Checkout'
           ),
@@ -239,7 +239,7 @@ const Cart = () => {
             'button',
             { 
               onClick: () => navigate('/products'),
-              className: 'w-full border border-gray-300 text-gray-700 py-3 rounded-lg hover:bg-gray-50 transition-colors'
+              className: 'w-full border border-gray-300 text-gray-700 py-2 sm:py-3 rounded-lg hover:bg-gray-50 transition-colors text-sm sm:text-base'
             },
             'Continue Shopping'
           )

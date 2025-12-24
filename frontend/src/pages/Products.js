@@ -379,7 +379,7 @@ const Products = () => {
             viewMode === 'categories' ?
             React.createElement(
               'div',
-              { className: 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6' },
+              { className: 'grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6' },
               (filteredCategories.length > 0 ? filteredCategories : categories).map((category, index) =>
                 React.createElement(
                   'div',
@@ -411,7 +411,7 @@ const Products = () => {
             // Items view
             React.createElement(
               'div',
-              { className: 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6' },
+              { className: 'grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6' },
               (categoryItems[selectedCategoryId] || []).map((item) =>
                 React.createElement(
                   'div',

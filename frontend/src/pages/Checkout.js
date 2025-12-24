@@ -173,18 +173,18 @@ const Checkout = () => {
 
   return React.createElement(
     'div',
-    { className: 'container mx-auto px-4 py-8' },
+    { className: 'container mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-8' },
     
     // Header
     React.createElement(
       'div',
-      { className: 'mb-8' },
-      React.createElement('h1', { className: 'text-3xl font-bold text-gray-900 mb-2' }, 'Checkout'),
+      { className: 'mb-6 sm:mb-8' },
+      React.createElement('h1', { className: 'text-2xl sm:text-3xl font-bold text-gray-900 mb-2' }, 'Checkout'),
       React.createElement(
         'button',
         {
           onClick: () => navigate('/cart'),
-          className: 'text-blue-600 hover:text-blue-700 text-sm flex items-center gap-1'
+          className: 'text-blue-600 hover:text-blue-700 text-xs sm:text-sm flex items-center gap-1'
         },
         React.createElement(
           'svg',
@@ -203,33 +203,33 @@ const Checkout = () => {
     // Main Content
     React.createElement(
       'div',
-      { className: 'grid grid-cols-1 lg:grid-cols-3 gap-8' },
+      { className: 'grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6 lg:gap-8' },
       
       // Left Column - Forms
       React.createElement(
         'div',
-        { className: 'lg:col-span-2 space-y-6' },
+        { className: 'xl:col-span-2 space-y-4 sm:space-y-6' },
         
         // Shipping Address
         React.createElement(
           'div',
-          { className: 'bg-white rounded-lg shadow-sm p-6' },
-          React.createElement('h2', { className: 'text-xl font-bold mb-4' }, 'Shipping Address'),
+          { className: 'bg-white rounded-lg shadow-sm p-4 sm:p-6' },
+          React.createElement('h2', { className: 'text-lg sm:text-xl font-bold mb-4' }, 'Shipping Address'),
           React.createElement(
             'div',
-            { className: 'grid grid-cols-1 md:grid-cols-2 gap-4' },
+            { className: 'grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4' },
             
             // Full Name
             React.createElement(
               'div',
-              { className: 'md:col-span-2' },
-              React.createElement('label', { className: 'block text-sm font-medium text-gray-700 mb-1' }, 'Full Name *'),
+              { className: 'sm:col-span-2' },
+              React.createElement('label', { className: 'block text-xs sm:text-sm font-medium text-gray-700 mb-1' }, 'Full Name *'),
               React.createElement('input', {
                 type: 'text',
                 name: 'fullName',
                 value: shippingAddress.fullName,
                 onChange: handleInputChange,
-                className: 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500' + (errors.fullName ? ' border-red-500' : '')
+                className: 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base' + (errors.fullName ? ' border-red-500' : '')
               }),
               errors.fullName && React.createElement('p', { className: 'text-red-500 text-xs mt-1' }, errors.fullName)
             ),
@@ -237,14 +237,14 @@ const Checkout = () => {
             // Phone
             React.createElement(
               'div',
-              { className: 'md:col-span-2' },
-              React.createElement('label', { className: 'block text-sm font-medium text-gray-700 mb-1' }, 'Phone Number *'),
+              { className: 'sm:col-span-2' },
+              React.createElement('label', { className: 'block text-xs sm:text-sm font-medium text-gray-700 mb-1' }, 'Phone Number *'),
               React.createElement('input', {
                 type: 'tel',
                 name: 'phone',
                 value: shippingAddress.phone,
                 onChange: handleInputChange,
-                className: 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500' + (errors.phone ? ' border-red-500' : '')
+                className: 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base' + (errors.phone ? ' border-red-500' : '')
               }),
               errors.phone && React.createElement('p', { className: 'text-red-500 text-xs mt-1' }, errors.phone)
             ),
@@ -252,14 +252,14 @@ const Checkout = () => {
             // Address Line 1
             React.createElement(
               'div',
-              { className: 'md:col-span-2' },
-              React.createElement('label', { className: 'block text-sm font-medium text-gray-700 mb-1' }, 'Address Line 1 *'),
+              { className: 'sm:col-span-2' },
+              React.createElement('label', { className: 'block text-xs sm:text-sm font-medium text-gray-700 mb-1' }, 'Address Line 1 *'),
               React.createElement('input', {
                 type: 'text',
                 name: 'addressLine1',
                 value: shippingAddress.addressLine1,
                 onChange: handleInputChange,
-                className: 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500' + (errors.addressLine1 ? ' border-red-500' : '')
+                className: 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base' + (errors.addressLine1 ? ' border-red-500' : '')
               }),
               errors.addressLine1 && React.createElement('p', { className: 'text-red-500 text-xs mt-1' }, errors.addressLine1)
             ),
@@ -267,14 +267,14 @@ const Checkout = () => {
             // Address Line 2
             React.createElement(
               'div',
-              { className: 'md:col-span-2' },
-              React.createElement('label', { className: 'block text-sm font-medium text-gray-700 mb-1' }, 'Address Line 2 (Optional)'),
+              { className: 'sm:col-span-2' },
+              React.createElement('label', { className: 'block text-xs sm:text-sm font-medium text-gray-700 mb-1' }, 'Address Line 2 (Optional)'),
               React.createElement('input', {
                 type: 'text',
                 name: 'addressLine2',
                 value: shippingAddress.addressLine2,
                 onChange: handleInputChange,
-                className: 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+                className: 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base'
               })
             ),
             
@@ -282,13 +282,13 @@ const Checkout = () => {
             React.createElement(
               'div',
               null,
-              React.createElement('label', { className: 'block text-sm font-medium text-gray-700 mb-1' }, 'City *'),
+              React.createElement('label', { className: 'block text-xs sm:text-sm font-medium text-gray-700 mb-1' }, 'City *'),
               React.createElement('input', {
                 type: 'text',
                 name: 'city',
                 value: shippingAddress.city,
                 onChange: handleInputChange,
-                className: 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500' + (errors.city ? ' border-red-500' : '')
+                className: 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base' + (errors.city ? ' border-red-500' : '')
               }),
               errors.city && React.createElement('p', { className: 'text-red-500 text-xs mt-1' }, errors.city)
             ),
@@ -297,13 +297,13 @@ const Checkout = () => {
             React.createElement(
               'div',
               null,
-              React.createElement('label', { className: 'block text-sm font-medium text-gray-700 mb-1' }, 'State *'),
+              React.createElement('label', { className: 'block text-xs sm:text-sm font-medium text-gray-700 mb-1' }, 'State *'),
               React.createElement('input', {
                 type: 'text',
                 name: 'state',
                 value: shippingAddress.state,
                 onChange: handleInputChange,
-                className: 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500' + (errors.state ? ' border-red-500' : '')
+                className: 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base' + (errors.state ? ' border-red-500' : '')
               }),
               errors.state && React.createElement('p', { className: 'text-red-500 text-xs mt-1' }, errors.state)
             ),
@@ -312,13 +312,13 @@ const Checkout = () => {
             React.createElement(
               'div',
               null,
-              React.createElement('label', { className: 'block text-sm font-medium text-gray-700 mb-1' }, 'ZIP Code *'),
+              React.createElement('label', { className: 'block text-xs sm:text-sm font-medium text-gray-700 mb-1' }, 'ZIP Code *'),
               React.createElement('input', {
                 type: 'text',
                 name: 'zipCode',
                 value: shippingAddress.zipCode,
                 onChange: handleInputChange,
-                className: 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500' + (errors.zipCode ? ' border-red-500' : '')
+                className: 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base' + (errors.zipCode ? ' border-red-500' : '')
               }),
               errors.zipCode && React.createElement('p', { className: 'text-red-500 text-xs mt-1' }, errors.zipCode)
             ),
@@ -327,13 +327,13 @@ const Checkout = () => {
             React.createElement(
               'div',
               null,
-              React.createElement('label', { className: 'block text-sm font-medium text-gray-700 mb-1' }, 'Country'),
+              React.createElement('label', { className: 'block text-xs sm:text-sm font-medium text-gray-700 mb-1' }, 'Country'),
               React.createElement('input', {
                 type: 'text',
                 name: 'country',
                 value: shippingAddress.country,
                 onChange: handleInputChange,
-                className: 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+                className: 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base'
               })
             )
           )
@@ -342,8 +342,8 @@ const Checkout = () => {
         // Payment Method
         React.createElement(
           'div',
-          { className: 'bg-white rounded-lg shadow-sm p-6' },
-          React.createElement('h2', { className: 'text-xl font-bold mb-4' }, 'Payment Method'),
+          { className: 'bg-white rounded-lg shadow-sm p-4 sm:p-6' },
+          React.createElement('h2', { className: 'text-lg sm:text-xl font-bold mb-4' }, 'Payment Method'),
           React.createElement(
             'div',
             { className: 'space-y-3' },
@@ -351,7 +351,7 @@ const Checkout = () => {
             // Credit/Debit Card via Stripe
             React.createElement(
               'label',
-              { className: 'flex items-center p-4 border-2 rounded-lg cursor-pointer ' + (paymentMethod === 'card' ? 'border-blue-600 bg-blue-50' : 'border-gray-200 hover:border-gray-300') },
+              { className: 'flex items-center p-3 sm:p-4 border-2 rounded-lg cursor-pointer ' + (paymentMethod === 'card' ? 'border-blue-600 bg-blue-50' : 'border-gray-200 hover:border-gray-300') },
               React.createElement('input', {
                 type: 'radio',
                 name: 'paymentMethod',
@@ -363,8 +363,8 @@ const Checkout = () => {
               React.createElement(
                 'div',
                 { className: 'ml-3' },
-                React.createElement('p', { className: 'font-medium text-gray-900' }, 'Credit/Debit Card'),
-                React.createElement('p', { className: 'text-sm text-gray-500' }, 'Pay securely with Stripe')
+                React.createElement('p', { className: 'font-medium text-gray-900 text-sm sm:text-base' }, 'Credit/Debit Card'),
+                React.createElement('p', { className: 'text-xs sm:text-sm text-gray-500' }, 'Pay securely with Stripe')
               )
             )
           )
@@ -374,23 +374,23 @@ const Checkout = () => {
       // Right Column - Order Summary
       React.createElement(
         'div',
-        { className: 'lg:col-span-1' },
+        { className: 'xl:col-span-1 w-full' },
         React.createElement(
           'div',
-          { className: 'bg-white rounded-lg shadow-sm p-6 sticky top-4' },
-          React.createElement('h2', { className: 'text-xl font-bold mb-4' }, 'Order Summary'),
+          { className: 'bg-white rounded-lg shadow-sm p-4 sm:p-6 sticky top-4' },
+          React.createElement('h2', { className: 'text-lg sm:text-xl font-bold mb-4' }, 'Order Summary'),
           
           // Items
           React.createElement(
             'div',
-            { className: 'space-y-3 mb-4 max-h-60 overflow-y-auto' },
+            { className: 'space-y-3 mb-4 max-h-48 sm:max-h-60 overflow-y-auto' },
             cartItems.map((item, index) =>
               React.createElement(
                 'div',
-                { key: index, className: 'flex gap-3 pb-3 border-b border-gray-200' },
+                { key: index, className: 'flex gap-2 sm:gap-3 pb-3 border-b border-gray-200' },
                 React.createElement(
                   'div',
-                  { className: 'w-16 h-16 flex-shrink-0 bg-gray-100 rounded' },
+                  { className: 'w-12 h-12 sm:w-16 sm:h-16 flex-shrink-0 bg-gray-100 rounded' },
                   item.image && React.createElement('img', {
                     src: item.image,
                     alt: item.name,
@@ -400,9 +400,9 @@ const Checkout = () => {
                 React.createElement(
                   'div',
                   { className: 'flex-1 min-w-0' },
-                  React.createElement('p', { className: 'text-sm font-medium text-gray-900 truncate' }, item.name),
+                  React.createElement('p', { className: 'text-xs sm:text-sm font-medium text-gray-900 truncate' }, item.name),
                   React.createElement('p', { className: 'text-xs text-gray-500' }, `Qty: ${item.quantity}`),
-                  React.createElement('p', { className: 'text-sm font-semibold text-gray-900' }, `$${(item.price * item.quantity).toFixed(2)}`)
+                  React.createElement('p', { className: 'text-xs sm:text-sm font-semibold text-gray-900' }, `$${(item.price * item.quantity).toFixed(2)}`)
                 )
               )
             )
@@ -414,20 +414,20 @@ const Checkout = () => {
             { className: 'space-y-2 mb-4' },
             React.createElement(
               'div',
-              { className: 'flex justify-between text-sm' },
+              { className: 'flex justify-between text-xs sm:text-sm' },
               React.createElement('span', { className: 'text-gray-600' }, 'Subtotal'),
               React.createElement('span', { className: 'font-medium' }, `$${calculateSubtotal().toFixed(2)}`)
             ),
             React.createElement(
               'div',
-              { className: 'flex justify-between text-sm' },
+              { className: 'flex justify-between text-xs sm:text-sm' },
               React.createElement('span', { className: 'text-gray-600' }, 'Shipping'),
               React.createElement('span', { className: 'font-medium' }, `$${calculateShipping().toFixed(2)}`)
             ),
             React.createElement('div', { className: 'border-t pt-2' }),
             React.createElement(
               'div',
-              { className: 'flex justify-between text-lg font-bold' },
+              { className: 'flex justify-between text-base sm:text-lg font-bold' },
               React.createElement('span', null, 'Total'),
               React.createElement('span', { className: 'text-blue-600' }, `$${calculateTotal().toFixed(2)}`)
             )
@@ -438,7 +438,7 @@ const Checkout = () => {
             'button',
             {
               onClick: handlePlaceOrder,
-              className: 'w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold'
+              className: 'w-full bg-blue-600 text-white py-2 sm:py-3 rounded-lg hover:bg-blue-700 transition-colors font-semibold text-sm sm:text-base'
             },
             'Place Order'
           ),

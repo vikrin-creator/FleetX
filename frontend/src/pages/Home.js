@@ -184,22 +184,22 @@ const Home = () => {
       // Search Dropdown
       showSearchModal && React.createElement(
         'div',
-        { className: 'absolute top-full left-0 right-0 mt-3 mx-4 bg-white rounded-2xl shadow-2xl border border-slate-200 z-50 max-h-[70vh] overflow-hidden backdrop-blur-sm' },
+        { className: 'absolute top-full left-0 right-0 mt-2 sm:mt-3 mx-2 sm:mx-4 bg-white rounded-xl sm:rounded-2xl shadow-2xl border border-slate-200 z-50 overflow-hidden backdrop-blur-sm flex flex-col max-h-[80vh] sm:max-h-[75vh]' },
         React.createElement(
           'div',
-          { className: 'p-5 border-b border-slate-100' },
+          { className: 'p-3 sm:p-4 lg:p-5 border-b border-slate-100 flex-shrink-0' },
           React.createElement(
             'div',
             { className: 'flex items-center justify-between' },
-            React.createElement('h3', { className: 'text-sm font-semibold text-slate-700 flex items-center gap-2' }, 
-              React.createElement('span', { className: 'material-symbols-outlined text-primary text-base' }, 'search'),
+            React.createElement('h3', { className: 'text-xs sm:text-sm font-semibold text-slate-700 flex items-center gap-1 sm:gap-2 truncate' }, 
+              React.createElement('span', { className: 'material-symbols-outlined text-primary text-sm sm:text-base' }, 'search'),
               `Search Results for "${searchQuery}"`
             ),
             React.createElement(
               'button',
               {
                 onClick: closeSearchModal,
-                className: 'p-2 hover:bg-slate-100 rounded-full transition-colors'
+                className: 'p-1 sm:p-2 hover:bg-slate-100 rounded-full transition-colors flex-shrink-0'
               },
               React.createElement('span', { className: 'material-symbols-outlined text-slate-400 text-sm' }, 'close')
             )
@@ -207,7 +207,13 @@ const Home = () => {
         ),
         React.createElement(
           'div',
-          { className: 'p-4 overflow-y-auto max-h-[60vh]' },
+          { 
+            className: 'flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-4 min-h-0',
+            style: {
+              scrollbarWidth: 'thin',
+              scrollbarColor: '#cbd5e1 #f1f5f9'
+            }
+          },
           searchLoading ?
           React.createElement(
             'div',
@@ -226,40 +232,36 @@ const Home = () => {
           ) :
           React.createElement(
             'div',
-            { className: `grid gap-6 ${
-              [searchResults.categories.length > 0, searchResults.items.length > 0, searchResults.sub_items.length > 0].filter(Boolean).length === 1 ? 'grid-cols-1' :
-              [searchResults.categories.length > 0, searchResults.items.length > 0, searchResults.sub_items.length > 0].filter(Boolean).length === 2 ? 'grid-cols-1 md:grid-cols-2' :
-              'grid-cols-1 md:grid-cols-3'
-            }` },
+            { className: 'space-y-4 sm:space-y-6' },
             // Categories section - only show if has results
             searchResults.categories.length > 0 && React.createElement(
               'div',
-              { className: 'flex flex-col h-full' },
-              React.createElement('h4', { className: 'text-xs font-semibold text-slate-600 dark:text-slate-400 mb-3 uppercase tracking-wide flex items-center gap-2' }, 
-                React.createElement('span', { className: 'material-symbols-outlined text-sm' }, 'category'),
+              null,
+              React.createElement('h4', { className: 'text-xs font-semibold text-slate-600 dark:text-slate-400 mb-2 sm:mb-3 uppercase tracking-wide flex items-center gap-1 sm:gap-2' }, 
+                React.createElement('span', { className: 'material-symbols-outlined text-xs sm:text-sm' }, 'category'),
                 `Categories (${searchResults.categories.length})`
               ),
               React.createElement(
                 'div',
-                { className: 'space-y-2 flex-1' },
+                { className: 'grid grid-cols-2 gap-2 sm:gap-3' },
                 searchResults.categories.map((category, index) =>
                   React.createElement(
                     'div',
                     {
                       key: index,
                       onClick: () => handleCategoryClick(category),
-                      className: 'flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-700 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-600 cursor-pointer transition-colors'
-                    },
-                    React.createElement('img', {
-                      src: category.image_url || 'https://via.placeholder.com/32',
-                      alt: category.name,
-                      className: 'w-8 h-8 rounded object-cover flex-shrink-0',
+                        className: 'flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-slate-50 dark:bg-slate-700 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-600 cursor-pointer transition-colors'
+                      },
+                      React.createElement('img', {
+                        src: category.image_url || 'https://via.placeholder.com/32',
+                        alt: category.name,
+                        className: 'w-6 h-6 sm:w-8 sm:h-8 rounded object-cover flex-shrink-0',
                       onError: (e) => { e.target.src = 'https://via.placeholder.com/32?text=No+Image'; }
                     }),
                     React.createElement(
                       'div',
                       { className: 'flex-1 min-w-0' },
-                      React.createElement('div', { className: 'text-sm font-medium text-slate-900 dark:text-slate-50 truncate' }, category.name),
+                        React.createElement('div', { className: 'text-xs sm:text-sm font-medium text-slate-900 dark:text-slate-50 truncate' }, category.name),
                       React.createElement('div', { className: 'text-xs text-slate-500 dark:text-slate-400' }, 'Category')
                     )
                   )
@@ -269,32 +271,32 @@ const Home = () => {
             // Items section - only show if has results
             searchResults.items.length > 0 && React.createElement(
               'div',
-              { className: 'flex flex-col h-full' },
-              React.createElement('h4', { className: 'text-xs font-semibold text-slate-600 dark:text-slate-400 mb-3 uppercase tracking-wide flex items-center gap-2' }, 
-                React.createElement('span', { className: 'material-symbols-outlined text-sm' }, 'inventory'),
+              null,
+              React.createElement('h4', { className: 'text-xs font-semibold text-slate-600 dark:text-slate-400 mb-2 sm:mb-3 uppercase tracking-wide flex items-center gap-1 sm:gap-2' }, 
+                React.createElement('span', { className: 'material-symbols-outlined text-xs sm:text-sm' }, 'inventory'),
                 `Items (${searchResults.items.length})`
               ),
               React.createElement(
                 'div',
-                { className: 'space-y-2 flex-1' },
+                { className: 'grid grid-cols-2 gap-2 sm:gap-3' },
                 searchResults.items.map((item, index) =>
                   React.createElement(
                     'div',
                     {
                       key: index,
                       onClick: () => handleItemClick(item),
-                      className: 'flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-700 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-600 cursor-pointer transition-colors'
+                      className: 'flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-slate-50 dark:bg-slate-700 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-600 cursor-pointer transition-colors'
                     },
                     React.createElement('img', {
                       src: item.image_url || 'https://via.placeholder.com/32',
                       alt: item.name,
-                      className: 'w-8 h-8 rounded object-cover flex-shrink-0',
+                      className: 'w-6 h-6 sm:w-8 sm:h-8 rounded object-cover flex-shrink-0',
                       onError: (e) => { e.target.src = 'https://via.placeholder.com/32?text=No+Image'; }
                     }),
                     React.createElement(
                       'div',
                       { className: 'flex-1 min-w-0' },
-                      React.createElement('div', { className: 'text-sm font-medium text-slate-900 dark:text-slate-50 truncate' }, item.name),
+                      React.createElement('div', { className: 'text-xs sm:text-sm font-medium text-slate-900 dark:text-slate-50 truncate' }, item.name),
                       item.part_number && React.createElement('div', { className: 'text-xs text-blue-600 dark:text-blue-400 truncate' }, `Part #: ${item.part_number}`),
                       React.createElement('div', { className: 'text-xs text-slate-500 dark:text-slate-400 truncate' }, item.categoryName),
                       item.price && React.createElement('div', { className: 'text-xs font-semibold text-primary' }, `$${parseFloat(item.price).toFixed(2)}`)
@@ -306,39 +308,39 @@ const Home = () => {
             // Sub-Items section - only show if has results
             searchResults.sub_items.length > 0 && React.createElement(
               'div',
-              { className: 'flex flex-col h-full' },
-              React.createElement('h4', { className: 'text-xs font-semibold text-slate-600 dark:text-slate-400 mb-3 uppercase tracking-wide flex items-center gap-2' }, 
-                React.createElement('span', { className: 'material-symbols-outlined text-sm' }, 'widgets'),
+              null,
+              React.createElement('h4', { className: 'text-xs font-semibold text-slate-600 dark:text-slate-400 mb-2 sm:mb-3 uppercase tracking-wide flex items-center gap-1 sm:gap-2' }, 
+                React.createElement('span', { className: 'material-symbols-outlined text-xs sm:text-sm' }, 'widgets'),
                 `Sub-Items (${searchResults.sub_items.length})`
               ),
               React.createElement(
                 'div',
-                { className: 'space-y-2 flex-1' },
+                { className: 'grid grid-cols-2 gap-2 sm:gap-3' },
                 searchResults.sub_items.map((subItem, index) =>
                   React.createElement(
                     'div',
                     {
                       key: index,
                       onClick: () => handleSubItemClick(subItem),
-                      className: 'flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-700 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-600 cursor-pointer transition-colors'
+                      className: 'flex items-start gap-2 sm:gap-3 p-2 sm:p-3 bg-slate-50 dark:bg-slate-700 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-600 cursor-pointer transition-colors'
                     },
                     React.createElement('img', {
                       src: subItem.image_url || 'https://via.placeholder.com/32',
                       alt: subItem.name,
-                      className: 'w-8 h-8 rounded object-cover flex-shrink-0',
+                      className: 'w-6 h-6 sm:w-8 sm:h-8 rounded object-cover flex-shrink-0',
                       onError: (e) => { e.target.src = 'https://via.placeholder.com/32?text=No+Image'; }
                     }),
                     React.createElement(
                       'div',
                       { className: 'flex-1 min-w-0' },
-                      React.createElement('div', { className: 'text-sm font-medium text-slate-900 dark:text-slate-50 truncate' }, subItem.name),
+                      React.createElement('div', { className: 'text-xs sm:text-sm font-medium text-slate-900 dark:text-slate-50 truncate' }, subItem.name),
                       subItem.part_number && React.createElement('div', { className: 'text-xs text-blue-600 dark:text-blue-400 truncate' }, `Part #: ${subItem.part_number}`),
                       React.createElement('div', { className: 'text-xs text-slate-500 dark:text-slate-400 truncate' }, `${subItem.categoryName} › ${subItem.item_name}`),
                       (subItem.brand || subItem.manufacturer) && React.createElement(
                         'div',
                         { className: 'flex gap-1 mt-0.5' },
-                        subItem.brand && React.createElement('span', { className: 'text-xs bg-gray-200 dark:bg-gray-600 px-1.5 py-0.5 rounded truncate' }, subItem.brand),
-                        subItem.manufacturer && React.createElement('span', { className: 'text-xs bg-gray-200 dark:bg-gray-600 px-1.5 py-0.5 rounded truncate' }, subItem.manufacturer)
+                        subItem.brand && React.createElement('span', { className: 'text-xs bg-gray-200 dark:bg-gray-600 px-1 sm:px-1.5 py-0.5 rounded truncate' }, subItem.brand),
+                        subItem.manufacturer && React.createElement('span', { className: 'text-xs bg-gray-200 dark:bg-gray-600 px-1 sm:px-1.5 py-0.5 rounded truncate' }, subItem.manufacturer)
                       ),
                       subItem.price && React.createElement('div', { className: 'text-xs font-semibold text-primary mt-0.5' }, `$${parseFloat(subItem.price).toFixed(2)}`)
                     )
@@ -385,16 +387,16 @@ const Home = () => {
     // Product Categories
     React.createElement(
       'div',
-      { className: 'bg-white rounded-lg md:rounded-xl shadow-lg p-4 md:p-6 mt-4' },
+      { className: 'bg-white rounded-lg md:rounded-xl shadow-lg p-3 sm:p-4 md:p-6 mt-4' },
       React.createElement(
         'div',
-        { className: 'flex items-center justify-between px-2 md:px-4 pb-3 pt-3 md:pt-5' },
-        React.createElement('h2', { className: 'text-slate-900 text-xl md:text-2xl font-bold leading-tight tracking-[-0.015em]' }, 'PRODUCT CATEGORIES'),
+        { className: 'flex items-center justify-between px-1 sm:px-2 md:px-4 pb-2 sm:pb-3 pt-2 sm:pt-3 md:pt-5' },
+        React.createElement('h2', { className: 'text-slate-900 text-lg sm:text-xl md:text-2xl font-bold leading-tight tracking-[-0.015em]' }, 'PRODUCT CATEGORIES'),
         React.createElement(
           'button',
           {
             onClick: () => navigate('/products'),
-            className: 'text-blue-600 hover:text-blue-700 font-medium text-sm md:text-base'
+            className: 'text-blue-600 hover:text-blue-700 font-medium text-xs sm:text-sm md:text-base whitespace-nowrap'
           },
           'View All Categories →'
         )
@@ -407,20 +409,20 @@ const Home = () => {
           )
         : React.createElement(
             'div',
-            { className: 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 p-2 md:p-4' },
+            { className: 'grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4 md:gap-6 p-1 sm:p-2 md:p-4' },
             categories.slice(0, 6).map((category, index) =>
               React.createElement(
                 'div',
                 { 
                   key: index, 
-                  className: 'flex flex-col gap-2 md:gap-3 pb-3 group cursor-pointer',
+                  className: 'flex flex-col gap-1 sm:gap-2 md:gap-3 pb-2 sm:pb-3 group cursor-pointer',
                   onClick: () => handleCategoryClick(category)
                 },
                 React.createElement('div', {
                   className: 'w-full bg-center bg-no-repeat aspect-video bg-cover rounded-lg overflow-hidden transform group-hover:scale-95 transition-transform duration-300',
                   style: { backgroundImage: `url('${category.image_url}')` }
                 }),
-                React.createElement('p', { className: 'text-slate-900 text-sm md:text-base font-medium leading-normal pt-1 md:pt-2 text-center' }, category.name)
+                React.createElement('p', { className: 'text-slate-900 text-xs sm:text-sm md:text-base font-medium leading-normal pt-1 md:pt-2 text-center px-1' }, category.name)
               )
             )
           )

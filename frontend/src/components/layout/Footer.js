@@ -9,7 +9,7 @@ const Footer = () => {
       { className: 'w-full px-4 sm:px-6 md:px-8 lg:px-10 py-8 md:py-12' },
       React.createElement(
         'div',
-        { className: 'max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8' },
+        { className: 'max-w-7xl mx-auto grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-8' },
         
         // About Section
         React.createElement(

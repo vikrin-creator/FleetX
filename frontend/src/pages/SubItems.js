@@ -532,7 +532,7 @@ const SubItems = () => {
           React.createElement('p', { className: 'text-gray-500' }, 'Check back later for new items')
         ) : React.createElement(
           'div',
-          { className: 'space-y-4' },
+          { className: 'grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4' },
           ...filteredSubItems.map(subItem =>
             React.createElement(
               'div',
