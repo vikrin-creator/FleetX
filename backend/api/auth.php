@@ -5,8 +5,13 @@ ini_set('display_errors', 0);
 
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type');
+header('Access-Control-Allow-Headers: Content-Type, Authorization');
 header('Content-Type: application/json');
+
+// JWT Configuration constants
+define('JWT_SECRET', 'fleetx-super-secret-jwt-key-change-in-production-2024-secure');
+define('JWT_EXPIRE_TIME', 24 * 60 * 60); // 24 hours
+define('JWT_REFRESH_TIME', 7 * 24 * 60 * 60); // 7 days
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
@@ -18,11 +23,71 @@ try {
     require_once __DIR__ . '/../utils/otp.php';
     require_once __DIR__ . '/../utils/email-smtp.php';
     require_once __DIR__ . '/../utils/Response.php';
-    require_once __DIR__ . '/../utils/JWT.php';
-    require_once __DIR__ . '/../middleware/AuthMiddleware.php';
+    
+    // Include JWT files if they exist, otherwise define inline
+    if (file_exists(__DIR__ . '/../utils/JWT.php')) {
+        require_once __DIR__ . '/../utils/JWT.php';
+    } else {
+        // Inline JWT class definition
+        class JWT {
+            private $secret;
+            public function __construct($secret) { $this->secret = $secret; }
+            public function encode($payload) {
+                $header = json_encode(['typ' => 'JWT', 'alg' => 'HS256']);
+                $payload = json_encode($payload);
+                $base64Header = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($header));
+                $base64Payload = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($payload));
+                $signature = hash_hmac('sha256', $base64Header . "." . $base64Payload, $this->secret, true);
+                $base64Signature = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($signature));
+                return $base64Header . "." . $base64Payload . "." . $base64Signature;
+            }
+            public function decode($jwt) {
+                if (empty($jwt)) return null;
+                $tokenParts = explode('.', $jwt);
+                if (count($tokenParts) !== 3) return null;
+                $signature = base64_decode(str_replace(['-', '_'], ['+', '/'], $tokenParts[2]));
+                $expectedSignature = hash_hmac('sha256', $tokenParts[0] . "." . $tokenParts[1], $this->secret, true);
+                if (!hash_equals($expectedSignature, $signature)) return null;
+                $decodedPayload = json_decode(base64_decode(str_replace(['-', '_'], ['+', '/'], $tokenParts[1])), true);
+                if (isset($decodedPayload['exp']) && $decodedPayload['exp'] < time()) return null;
+                return $decodedPayload;
+            }
+        }
+    }
+    
+    if (file_exists(__DIR__ . '/../middleware/AuthMiddleware.php')) {
+        require_once __DIR__ . '/../middleware/AuthMiddleware.php';
+    } else {
+        // Inline AuthMiddleware class definition
+        class AuthMiddleware {
+            private $jwt;
+            public function __construct() { $this->jwt = new JWT(JWT_SECRET); }
+            public function authenticate() {
+                $headers = $this->getAuthorizationHeader();
+                if (!$headers) { Response::error('Authorization header not found', 401); exit(); }
+                $token = null;
+                if (preg_match('/Bearer\s(\S+)/', $headers, $matches)) { $token = $matches[1]; }
+                if (!$token) { Response::error('Token not found', 401); exit(); }
+                $payload = $this->jwt->decode($token);
+                if (!$payload) { Response::error('Invalid or expired token', 401); exit(); }
+                $GLOBALS['current_user'] = $payload;
+                return $payload;
+            }
+            private function getAuthorizationHeader() {
+                if (isset($_SERVER['Authorization'])) return trim($_SERVER["Authorization"]);
+                if (isset($_SERVER['HTTP_AUTHORIZATION'])) return trim($_SERVER["HTTP_AUTHORIZATION"]);
+                if (function_exists('apache_request_headers')) {
+                    $requestHeaders = apache_request_headers();
+                    $requestHeaders = array_combine(array_map('ucwords', array_keys($requestHeaders)), array_values($requestHeaders));
+                    if (isset($requestHeaders['Authorization'])) return trim($requestHeaders['Authorization']);
+                }
+                return null;
+            }
+        }
+    }
 } catch (Exception $e) {
     http_response_code(500);
-    echo json_encode(['success' => false, 'message' => 'File loading error: ' . $e->getMessage()]);
+    echo json_encode(['success' => false, 'message' => 'Server configuration error']);
     exit();
 }
 
