@@ -55,7 +55,6 @@ const Home = () => {
         setCategories(fallbackCategories);
       }
     } catch (error) {
-      console.error('Failed to fetch categories, using fallback:', error);
       // Use fallback categories if API fails
       setCategories(fallbackCategories);
     } finally {
@@ -73,20 +72,14 @@ const Home = () => {
     try {
       // Use backend search API that searches across categories, items, and sub-items
       // Includes: names, descriptions, part numbers, brand, manufacturer
-      console.log('Searching for:', query);
       const response = await searchService.search(query);
-      console.log('Search response:', response);
       
       if (response.success && response.results) {
-        console.log('Setting search results:', response.results);
         setSearchResults(response.results);
       } else {
-        console.log('No results or unsuccessful response');
         setSearchResults({ categories: [], items: [], sub_items: [] });
       }
     } catch (error) {
-      console.error('Search error:', error);
-      console.error('Error details:', error.response?.data);
       setSearchResults({ categories: [], items: [], sub_items: [] });
     }
     setSearchLoading(false);

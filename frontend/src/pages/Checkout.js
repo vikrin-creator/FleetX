@@ -166,7 +166,6 @@ const Checkout = () => {
         navigate('/my-orders');
       }
     } catch (error) {
-      console.error('Order placement error:', error);
       alert('Failed to place order. Please try again.');
     }
   };

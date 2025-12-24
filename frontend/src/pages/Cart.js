@@ -19,7 +19,6 @@ const Cart = () => {
 
   const loadCart = () => {
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
-    console.log('Loading cart:', cart);
     setCartItems(cart);
   };
 
@@ -113,7 +112,6 @@ const Cart = () => {
                   alt: item.name,
                   className: 'w-full h-full object-cover',
                   onError: (e) => {
-                    console.error('Image failed to load:', item.image_url);
                     e.target.style.display = 'none';
                   }
                 }) : React.createElement(

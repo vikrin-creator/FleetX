@@ -12,9 +12,30 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  // Initialize authentication state from localStorage immediately
+  const [user, setUser] = useState(() => {
+    const token = tokenManager.getToken();
+    if (token && !tokenManager.isTokenExpired(token)) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        return {
+          id: payload.user_id,
+          email: payload.email
+        };
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
+  });
+  
   const [loading, setLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    const token = tokenManager.getToken();
+    const authenticated = token && !tokenManager.isTokenExpired(token);
+    return authenticated;
+  });
 
   useEffect(() => {
     checkAuthStatus();
@@ -24,26 +45,43 @@ export const AuthProvider = ({ children }) => {
     try {
       setLoading(true);
       
-      if (!tokenManager.isAuthenticated()) {
+      // Check if we have a valid token
+      const token = tokenManager.getToken();
+      
+      if (!token) {
         setIsAuthenticated(false);
         setUser(null);
+        return; // Don't clear tokens here - they're already null
+      }
+
+      if (tokenManager.isTokenExpired(token)) {
+        setIsAuthenticated(false);
+        setUser(null);
+        tokenManager.clearTokens();
         return;
       }
 
-      // Verify token with server
-      const response = await authAPI.verifyToken();
-      if (response.success) {
+      // If we already have user data and are authenticated, skip
+      if (isAuthenticated && user) {
+        setLoading(false);
+        return;
+      }
+
+      // Decode token to get user info
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
         setIsAuthenticated(true);
-        setUser(response.user);
-      } else {
-        // Token is invalid
+        setUser({
+          id: payload.user_id,
+          email: payload.email
+        });
+      } catch (tokenError) {
         tokenManager.clearTokens();
         setIsAuthenticated(false);
         setUser(null);
       }
     } catch (error) {
-      console.error('Auth check failed:', error);
-      tokenManager.clearTokens();
+      // Don't clear tokens on general errors - just log and continue
       setIsAuthenticated(false);
       setUser(null);
     } finally {
@@ -54,6 +92,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       const response = await authAPI.login(email, password);
+      
       if (response.success) {
         setIsAuthenticated(true);
         setUser(response.user);
@@ -93,7 +132,6 @@ export const AuthProvider = ({ children }) => {
     try {
       await authAPI.logout();
     } catch (error) {
-      console.error('Logout error:', error);
     } finally {
       setIsAuthenticated(false);
       setUser(null);

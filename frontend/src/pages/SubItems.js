@@ -23,9 +23,6 @@ const SubItems = () => {
   const categoryId = location.state?.categoryId;
 
   const addToCart = (subItem) => {
-    console.log('Adding to cart from SubItems page:', subItem);
-    console.log('Image URL:', subItem.image_url);
-    
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
     
     // Check if item already exists in cart
@@ -45,12 +42,10 @@ const SubItems = () => {
         image_url: subItem.image_url,
         quantity: 1
       };
-      console.log('Cart item being added:', cartItem);
       cart.push(cartItem);
     }
     
     localStorage.setItem('cart', JSON.stringify(cart));
-    console.log('Cart updated from SubItems:', cart);
     
     // Trigger cart update event
     window.dispatchEvent(new Event('cartUpdate'));
@@ -71,7 +66,6 @@ const SubItems = () => {
       const data = await categoryAPI.getSubItems(itemId);
       setSubItems(data);
     } catch (error) {
-      console.error('Error fetching sub-items:', error);
     } finally {
       setLoading(false);
     }

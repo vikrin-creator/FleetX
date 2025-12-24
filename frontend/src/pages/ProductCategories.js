@@ -63,7 +63,6 @@ const ProductCategories = () => {
       
       setCategories(data);
     } catch (error) {
-      console.error('Failed to fetch categories:', error);
     } finally {
       setLoading(false);
     }
@@ -95,7 +94,6 @@ const ProductCategories = () => {
       const items = await categoryAPI.getCategoryItems(category.id);
       setCategoryItems(items);
     } catch (error) {
-      console.error('Failed to fetch items:', error);
       setCategoryItems([]);
     } finally {
       setLoadingItems(false);
@@ -111,7 +109,6 @@ const ProductCategories = () => {
       const subItemsData = await categoryAPI.getSubItems(item.id);
       setSubItems(subItemsData);
     } catch (error) {
-      console.error('Failed to fetch sub-items:', error);
       setSubItems([]);
     } finally {
       setLoadingSubItems(false);
@@ -182,31 +179,18 @@ const ProductCategories = () => {
       // Add primary image
       if (subItemForm.image_file) {
         formData.append('image', subItemForm.image_file);
-        console.log('Added primary image:', subItemForm.image_file.name);
       } else if (subItemForm.image_url && !editingSubItem) {
         formData.append('image_url', subItemForm.image_url);
       }
 
       // Add additional images
       if (additionalImages.length > 0) {
-        console.log(`Adding ${additionalImages.length} additional images`);
         additionalImages.forEach((imageFile, index) => {
           formData.append('images[]', imageFile);
-          console.log(`Added additional image ${index}:`, imageFile.name);
         });
       }
 
-      // Log FormData contents
-      console.log('FormData contents:');
-      for (let [key, value] of formData.entries()) {
-        console.log(key, value instanceof File ? `${value.name} (${value.size} bytes)` : value);
-      }
-
       if (editingSubItem) {
-        console.log('Updating sub-item:', editingSubItem.id);
-        await categoryAPI.updateSubItem(editingSubItem.id, formData);
-      } else {
-        console.log('Creating new sub-item');
         await categoryAPI.createSubItem(formData);
       }
 
@@ -214,7 +198,6 @@ const ProductCategories = () => {
       setAdditionalImages([]);
       handleManageSubItems(selectedItem); // Refresh sub-items
     } catch (error) {
-      console.error('Error saving sub-item:', error);
       alert('Failed to save sub-item. Please try again.');
     }
   };
@@ -231,24 +214,13 @@ const ProductCategories = () => {
   };
 
   const handleAdditionalImagesChange = (e) => {
-    console.log('=== Additional Images Change ===');
-    console.log('Event target:', e.target);
-    console.log('Files selected:', e.target.files);
-    console.log('Number of files:', e.target.files.length);
-    console.log('Multiple attribute:', e.target.multiple);
-    
     const files = Array.from(e.target.files);
-    console.log('Files array:', files);
     
     if (files.length > 0) {
       setAdditionalImages(prev => {
         const newImages = [...prev, ...files];
-        console.log('Updated additional images count:', newImages.length);
-        console.log('Updated additional images:', newImages.map(f => f.name));
         return newImages;
       });
-    } else {
-      console.log('No files selected');
     }
   };
 
@@ -267,7 +239,6 @@ const ProductCategories = () => {
       setExistingAdditionalImages(prev => prev.filter(img => img.id !== imageId));
       alert('Image deleted successfully');
     } catch (error) {
-      console.error('Error deleting image:', error);
       alert('Failed to delete image. Please try again.');
     }
   };
@@ -278,7 +249,6 @@ const ProductCategories = () => {
         await categoryAPI.deleteSubItem(subItemId);
         handleManageSubItems(selectedItem); // Refresh
       } catch (error) {
-        console.error('Error deleting sub-item:', error);
         alert('Failed to delete sub-item. Please try again.');
       }
     }
@@ -308,7 +278,6 @@ const ProductCategories = () => {
       setCategoryForm({ name: '', description: '', image_url: '', image_file: null });
       setEditingCategory(null);
     } catch (error) {
-      console.error('Failed to save category:', error);
     }
   };
 
@@ -329,7 +298,6 @@ const ProductCategories = () => {
         await categoryAPI.deleteCategory(id);
         fetchCategories();
       } catch (error) {
-        console.error('Failed to delete category:', error);
       }
     }
   };

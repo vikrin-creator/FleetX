@@ -24,6 +24,7 @@ import CancellationRefundPolicy from './pages/CancellationRefundPolicy.js';
 import TermsConditions from './pages/TermsConditions.js';
 import ContactUs from './pages/ContactUs.js';
 import TestJWT from './pages/TestJWT.js';
+import AuthDebug from './pages/AuthDebug.js';
 
 function App() {
   return React.createElement(
@@ -122,6 +123,10 @@ function App() {
       React.createElement(Route, { 
         path: '/test-jwt', 
         element: React.createElement(Layout, null, React.createElement(ProtectedRoute, null, React.createElement(TestJWT))) 
+      }),
+      React.createElement(Route, { 
+        path: '/auth-debug', 
+        element: React.createElement(Layout, null, React.createElement(AuthDebug)) 
       })
       )
     )

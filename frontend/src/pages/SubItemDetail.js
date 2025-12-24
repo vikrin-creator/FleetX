@@ -65,7 +65,6 @@ const SubItemDetail = () => {
         setImages([]);
       }
     } catch (error) {
-      console.error('Failed to fetch sub-item details:', error);
     } finally {
       setLoading(false);
     }
@@ -75,7 +74,6 @@ const SubItemDetail = () => {
     if (!subItem) return;
     
     const imageUrl = images[0]?.image_url || subItem.image_url;
-    console.log('Adding to cart with image:', imageUrl);
     
     const cart = JSON.parse(localStorage.getItem('cart') || '[]');
     const existingItemIndex = cart.findIndex(item => item.id === subItem.id && item.type === 'sub_item');
@@ -95,7 +93,6 @@ const SubItemDetail = () => {
     }
     
     localStorage.setItem('cart', JSON.stringify(cart));
-    console.log('Cart updated:', cart);
     window.dispatchEvent(new Event('cartUpdate'));
     alert('Added to cart!');
   };

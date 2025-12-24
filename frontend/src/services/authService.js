@@ -13,11 +13,13 @@ export const tokenManager = {
   },
 
   getToken: () => {
-    return localStorage.getItem(TOKEN_KEY);
+    const token = localStorage.getItem(TOKEN_KEY);
+    return token;
   },
 
   getRefreshToken: () => {
-    return localStorage.getItem(REFRESH_TOKEN_KEY);
+    const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
+    return refreshToken;
   },
 
   clearTokens: () => {
@@ -26,11 +28,23 @@ export const tokenManager = {
   },
 
   isTokenExpired: (token) => {
-    if (!token) return true;
+    if (!token) {
+      return true;
+    }
     
     try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      return payload.exp * 1000 < Date.now();
+      const parts = token.split('.');
+      if (parts.length !== 3) {
+        return true;
+      }
+      
+      const payload = JSON.parse(atob(parts[1]));
+      if (!payload.exp) {
+        return false;
+      }
+      
+      const isExpired = (payload.exp * 1000) < (Date.now() + 60000);
+      return isExpired;
     } catch (error) {
       return true;
     }
@@ -38,7 +52,8 @@ export const tokenManager = {
 
   isAuthenticated: () => {
     const token = tokenManager.getToken();
-    return token && !tokenManager.isTokenExpired(token);
+    const authenticated = token && !tokenManager.isTokenExpired(token);
+    return authenticated;
   }
 };
 
@@ -52,9 +67,11 @@ export const authenticatedFetch = async (url, options = {}) => {
       await authAPI.refreshToken();
       token = tokenManager.getToken();
     } catch (error) {
-      tokenManager.clearTokens();
-      window.location.href = '/login';
-      throw new Error('Session expired');
+      console.warn('Token refresh failed:', error);
+      // Don't automatically redirect - let the component handle it
+      // tokenManager.clearTokens();
+      // window.location.href = '/login';
+      // Just proceed with the existing token
     }
   }
 
@@ -107,12 +124,22 @@ export const authAPI = {
     
     const data = await response.json();
     
-    // Store tokens if login successful
-    if (data.success && data.token) {
-      tokenManager.setTokens(data.token, data.refresh_token);
+    // Store tokens if login successful - tokens are nested in data.data
+    const tokenData = data.data || data; // Handle both nested and flat response structures
+    if (data.success && tokenData.token) {
+      tokenManager.setTokens(tokenData.token, tokenData.refresh_token);
     }
     
-    return data;
+    // Return the nested data structure for compatibility
+    return {
+      success: data.success,
+      message: tokenData.message || data.message,
+      token: tokenData.token,
+      refresh_token: tokenData.refresh_token,
+      expires_in: tokenData.expires_in,
+      user: tokenData.user,
+      requiresOTP: tokenData.requiresOTP
+    };
   },
 
   verifyOTP: async (email, otp_code) => {
