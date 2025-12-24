@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { authAPI } from '../services/authService.js';
+import { useAuth } from '../context/AuthContext';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -11,6 +11,7 @@ const Login = () => {
   const [otpCode, setOtpCode] = useState('');
   const [otpLoading, setOtpLoading] = useState(false);
   const navigate = useNavigate();
+  const { login, verifyOTP } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -22,14 +23,13 @@ const Login = () => {
     try {
       setError('');
       setLoading(true);
-      const result = await authAPI.login(email, password);
+      const result = await login(email, password);
       
       if (result.success) {
-        if (result.data.requiresOTP) {
+        if (result.requiresOTP) {
           setShowOTPModal(true);
           setLoading(false);
         } else {
-          localStorage.setItem('user', JSON.stringify(result.data.user));
           navigate('/');
         }
       } else {
@@ -38,7 +38,7 @@ const Login = () => {
       }
     } catch (err) {
       console.error('Login error:', err);
-      setError('Failed to log in. Please try again.');
+      setError(err.message || 'Failed to log in. Please try again.');
       setLoading(false);
     }
   };
@@ -54,10 +54,9 @@ const Login = () => {
     try {
       setError('');
       setOtpLoading(true);
-      const result = await authAPI.verifyOTP(email, otpCode);
+      const result = await verifyOTP(email, otpCode);
       
       if (result.success) {
-        localStorage.setItem('user', JSON.stringify(result.data.user));
         navigate('/');
       } else {
         setError(result.message || 'Invalid OTP');
@@ -65,7 +64,7 @@ const Login = () => {
       }
     } catch (err) {
       console.error('OTP verification error:', err);
-      setError('Verification failed. Please try again.');
+      setError(err.message || 'Verification failed. Please try again.');
       setOtpLoading(false);
     }
   };

@@ -10,23 +10,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 require_once '../config/database.php';
+require_once '../middleware/AuthMiddleware.php';
+require_once '../utils/Response.php';
 
 $action = $_GET['action'] ?? '';
+
+// Initialize authentication middleware
+$authMiddleware = new AuthMiddleware();
 
 try {
     $pdo = getDBConnection();
     
     switch ($action) {
         case 'save_order':
-            saveOrder($pdo);
+            // Require authentication for creating orders
+            $user = $authMiddleware->authenticate();
+            saveOrder($pdo, $user);
             break;
             
         case 'get_user_orders':
-            getUserOrders($pdo);
+            // Require authentication for getting user orders
+            $user = $authMiddleware->authenticate();
+            getUserOrders($pdo, $user);
             break;
             
         case 'get_all_orders':
-            getAllOrders($pdo);
+            // Require authentication for admin access
+            $user = $authMiddleware->authenticate();
+            getAllOrders($pdo, $user);
             break;
             
         case 'get_order_details':

@@ -1,6 +1,8 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
 import Layout from './components/layout/Layout.js';
+import ProtectedRoute from './components/common/ProtectedRoute.js';
 import Home from './pages/Home.js';
 import Products from './pages/Products.js';
 import ProductCategories from './pages/ProductCategories.js';
@@ -21,13 +23,17 @@ import ShippingReturnPolicy from './pages/ShippingReturnPolicy.js';
 import CancellationRefundPolicy from './pages/CancellationRefundPolicy.js';
 import TermsConditions from './pages/TermsConditions.js';
 import ContactUs from './pages/ContactUs.js';
+import TestJWT from './pages/TestJWT.js';
 
 function App() {
   return React.createElement(
-    Router,
+    AuthProvider,
     null,
     React.createElement(
-      Routes,
+      Router,
+      null,
+      React.createElement(
+        Routes,
       null,
       React.createElement(Route, { 
         path: '/', 
@@ -59,19 +65,19 @@ function App() {
       }),
       React.createElement(Route, { 
         path: '/my-orders', 
-        element: React.createElement(Layout, null, React.createElement(MyOrders)) 
+        element: React.createElement(Layout, null, React.createElement(ProtectedRoute, null, React.createElement(MyOrders))) 
       }),
       React.createElement(Route, { 
         path: '/my-addresses', 
-        element: React.createElement(Layout, null, React.createElement(MyAddresses)) 
+        element: React.createElement(Layout, null, React.createElement(ProtectedRoute, null, React.createElement(MyAddresses))) 
       }),
       React.createElement(Route, { 
         path: '/profile', 
-        element: React.createElement(Layout, null, React.createElement(Profile)) 
+        element: React.createElement(Layout, null, React.createElement(ProtectedRoute, null, React.createElement(Profile))) 
       }),
       React.createElement(Route, { 
         path: '/change-password', 
-        element: React.createElement(Layout, null, React.createElement(ChangePassword)) 
+        element: React.createElement(Layout, null, React.createElement(ProtectedRoute, null, React.createElement(ChangePassword))) 
       }),
       React.createElement(Route, { 
         path: '/login', 
@@ -112,7 +118,12 @@ function App() {
       React.createElement(Route, { 
         path: '/contact', 
         element: React.createElement(Layout, null, React.createElement(ContactUs)) 
+      }),
+      React.createElement(Route, { 
+        path: '/test-jwt', 
+        element: React.createElement(Layout, null, React.createElement(ProtectedRoute, null, React.createElement(TestJWT))) 
       })
+      )
     )
   );
 }

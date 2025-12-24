@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { tokenManager, authAPI } from './authService.js';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://sandybrown-squirrel-472536.hostingersite.com/backend/api';
 
@@ -13,12 +14,28 @@ const apiClient = axios.create({
 
 // Request interceptor
 apiClient.interceptors.request.use(
-  (config) => {
+  async (config) => {
+    // Get current token
+    let token = tokenManager.getToken();
+    
+    // Check if token needs refresh
+    if (token && tokenManager.isTokenExpired(token)) {
+      try {
+        await authAPI.refreshToken();
+        token = tokenManager.getToken();
+      } catch (error) {
+        tokenManager.clearTokens();
+        // Redirect to login if refresh fails
+        window.location.href = '/login';
+        return Promise.reject(error);
+      }
+    }
+    
     // Add auth token if available
-    const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    
     return config;
   },
   (error) => {
@@ -35,7 +52,7 @@ apiClient.interceptors.response.use(
     // Handle errors globally
     if (error.response?.status === 401) {
       // Handle unauthorized access
-      localStorage.removeItem('token');
+      tokenManager.clearTokens();
       window.location.href = '/login';
     }
     return Promise.reject(error);

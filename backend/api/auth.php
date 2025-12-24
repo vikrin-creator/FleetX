@@ -18,6 +18,8 @@ try {
     require_once __DIR__ . '/../utils/otp.php';
     require_once __DIR__ . '/../utils/email-smtp.php';
     require_once __DIR__ . '/../utils/Response.php';
+    require_once __DIR__ . '/../utils/JWT.php';
+    require_once __DIR__ . '/../middleware/AuthMiddleware.php';
 } catch (Exception $e) {
     http_response_code(500);
     echo json_encode(['success' => false, 'message' => 'File loading error: ' . $e->getMessage()]);
@@ -47,6 +49,18 @@ switch ($action) {
         break;
     case 'reset_password':
         handleResetPassword();
+        break;
+    case 'refresh_token':
+        handleRefreshToken();
+        break;
+    case 'logout':
+        handleLogout();
+        break;
+    case 'verify_token':
+        handleVerifyToken();
+        break;
+    case 'profile':
+        handleProfile();
         break;
     default:
         Response::error('Invalid action', 400);
@@ -164,13 +178,34 @@ function handleLogin() {
             return;
         }
         
-        // Successful login
-        session_start();
-        $_SESSION['user_id'] = $user['id'];
-        $_SESSION['user_email'] = $user['email'];
+        // Successful login - generate JWT token
+        $jwt = new JWT(JWT_SECRET);
+        
+        $payload = [
+            'user_id' => $user['id'],
+            'email' => $user['email'],
+            'iat' => time(),
+            'exp' => time() + JWT_EXPIRE_TIME
+        ];
+        
+        $token = $jwt->encode($payload);
+        
+        // Also generate refresh token
+        $refreshPayload = [
+            'user_id' => $user['id'],
+            'email' => $user['email'],
+            'type' => 'refresh',
+            'iat' => time(),
+            'exp' => time() + JWT_REFRESH_TIME
+        ];
+        
+        $refreshToken = $jwt->encode($refreshPayload);
         
         Response::success([
             'message' => 'Login successful',
+            'token' => $token,
+            'refresh_token' => $refreshToken,
+            'expires_in' => JWT_EXPIRE_TIME,
             'user' => [
                 'id' => $user['id'],
                 'email' => $user['email'],
@@ -208,18 +243,43 @@ function handleVerifyOTP() {
             return;
         }
         
-        // Start session for the user
+        // Start session for the user and generate JWT tokens
         $db = Database::getInstance()->getConnection();
         $stmt = $db->prepare("SELECT * FROM users WHERE email = ?");
         $stmt->execute([$email]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        $jwt = new JWT(JWT_SECRET);
+        
+        $payload = [
+            'user_id' => $user['id'],
+            'email' => $user['email'],
+            'iat' => time(),
+            'exp' => time() + JWT_EXPIRE_TIME
+        ];
+        
+        $token = $jwt->encode($payload);
+        
+        // Also generate refresh token
+        $refreshPayload = [
+            'user_id' => $user['id'],
+            'email' => $user['email'],
+            'type' => 'refresh',
+            'iat' => time(),
+            'exp' => time() + JWT_REFRESH_TIME
+        ];
+        
+        $refreshToken = $jwt->encode($refreshPayload);
         
         session_start();
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['user_email'] = $user['email'];
         
         Response::success([
-            'message' => 'Email verified successfully! You can now log in.',
+            'message' => 'Email verified successfully! You are now logged in.',
+            'token' => $token,
+            'refresh_token' => $refreshToken,
+            'expires_in' => JWT_EXPIRE_TIME,
             'user' => [
                 'id' => $user['id'],
                 'email' => $user['email'],
@@ -439,6 +499,143 @@ function handleResetPassword() {
     } catch (Exception $e) {
         error_log("Reset password error: " . $e->getMessage());
         echo json_encode(['success' => false, 'message' => 'Failed to reset password']);
+    }
+}
+
+/**
+ * Handle JWT token refresh
+ */
+function handleRefreshToken() {
+    $data = json_decode(file_get_contents('php://input'), true);
+    
+    $refreshToken = $data['refresh_token'] ?? '';
+    
+    if (!$refreshToken) {
+        Response::error('Refresh token is required', 400);
+        return;
+    }
+    
+    try {
+        $jwt = new JWT(JWT_SECRET);
+        $payload = $jwt->decode($refreshToken);
+        
+        if (!$payload || $payload['type'] !== 'refresh') {
+            Response::error('Invalid refresh token', 401);
+            return;
+        }
+        
+        // Generate new access token
+        $newPayload = [
+            'user_id' => $payload['user_id'],
+            'email' => $payload['email'],
+            'iat' => time(),
+            'exp' => time() + JWT_EXPIRE_TIME
+        ];
+        
+        $newToken = $jwt->encode($newPayload);
+        
+        Response::success([
+            'message' => 'Token refreshed successfully',
+            'token' => $newToken,
+            'expires_in' => JWT_EXPIRE_TIME
+        ]);
+        
+    } catch (Exception $e) {
+        error_log("Token refresh error: " . $e->getMessage());
+        Response::error('Failed to refresh token', 500);
+    }
+}
+
+/**
+ * Handle logout (JWT - mainly for cleanup)
+ */
+function handleLogout() {
+    // For JWT, we mainly just need to clear server-side sessions if any
+    // Client will handle token removal
+    session_start();
+    session_destroy();
+    
+    Response::success([
+        'message' => 'Logged out successfully'
+    ]);
+}
+
+/**
+ * Handle token verification
+ */
+function handleVerifyToken() {
+    $authMiddleware = new AuthMiddleware();
+    
+    try {
+        $user = $authMiddleware->authenticate();
+        
+        // Get full user details from database
+        $db = Database::getInstance()->getConnection();
+        $stmt = $db->prepare("SELECT id, email, email_verified, created_at FROM users WHERE id = ?");
+        $stmt->execute([$user['user_id']]);
+        $userDetails = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if (!$userDetails) {
+            Response::error('User not found', 404);
+            return;
+        }
+        
+        Response::success([
+            'message' => 'Token is valid',
+            'user' => [
+                'id' => $userDetails['id'],
+                'email' => $userDetails['email'],
+                'email_verified' => (bool)$userDetails['email_verified'],
+                'created_at' => $userDetails['created_at']
+            ]
+        ]);
+        
+    } catch (Exception $e) {
+        error_log("Token verification error: " . $e->getMessage());
+        Response::error('Token verification failed', 401);
+    }
+}
+
+/**
+ * Handle profile fetch
+ */
+function handleProfile() {
+    $authMiddleware = new AuthMiddleware();
+    
+    try {
+        $user = $authMiddleware->authenticate();
+        
+        // Get full user profile from database
+        $db = Database::getInstance()->getConnection();
+        $stmt = $db->prepare("
+            SELECT id, email, full_name, phone, email_verified, created_at, updated_at 
+            FROM users 
+            WHERE id = ?
+        ");
+        $stmt->execute([$user['user_id']]);
+        $profile = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if (!$profile) {
+            Response::error('Profile not found', 404);
+            return;
+        }
+        
+        Response::success([
+            'message' => 'Profile retrieved successfully',
+            'profile' => [
+                'id' => $profile['id'],
+                'email' => $profile['email'],
+                'full_name' => $profile['full_name'],
+                'phone' => $profile['phone'],
+                'email_verified' => (bool)$profile['email_verified'],
+                'created_at' => $profile['created_at'],
+                'updated_at' => $profile['updated_at']
+            ]
+        ]);
+        
+    } catch (Exception $e) {
+        error_log("Profile fetch error: " . $e->getMessage());
+        Response::error('Failed to fetch profile', 500);
     }
 }
 ?>

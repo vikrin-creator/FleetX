@@ -1,0 +1,13 @@
+{
+  "name": "fleetx/backend",
+  "description": "FleetX Backend API with JWT Authentication",
+  "require": {
+    "php": "^7.4|^8.0",
+    "firebase/php-jwt": "^6.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "FleetX\\": "src/"
+    }
+  }
+}

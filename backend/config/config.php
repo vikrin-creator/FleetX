@@ -8,6 +8,11 @@ if (file_exists(__DIR__ . '/../.env')) {
     }
 }
 
+// JWT Configuration
+define('JWT_SECRET', getenv('JWT_SECRET') ?: 'your-super-secret-jwt-key-change-in-production-2024');
+define('JWT_EXPIRE_TIME', 24 * 60 * 60); // 24 hours in seconds
+define('JWT_REFRESH_TIME', 7 * 24 * 60 * 60); // 7 days in seconds
+
 // Set timezone
 date_default_timezone_set(getenv('TIMEZONE') ?: 'UTC');
 

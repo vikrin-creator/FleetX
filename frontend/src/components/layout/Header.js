@@ -1,19 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
 const Header = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [user, setUser] = useState(null);
   const [cartCount, setCartCount] = useState(0);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const { user, isAuthenticated, logout, loading } = useAuth();
 
   useEffect(() => {
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      setUser(JSON.parse(userData));
-    }
     updateCartCount();
   }, []);
 
@@ -59,10 +56,15 @@ const Header = () => {
     setCartCount(totalItems);
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('user');
-    setUser(null);
-    navigate('/');
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/');
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Navigate anyway
+      navigate('/');
+    }
   };
   
   const getLinkClass = (path) => {
@@ -146,7 +148,7 @@ const Header = () => {
           )
         ),
         // Profile Icon with Dropdown (Hidden on mobile)
-        user ? React.createElement(
+        isAuthenticated ? React.createElement(
           'div',
           { className: 'relative profile-dropdown hidden lg:block' },
           React.createElement(
@@ -395,7 +397,7 @@ const Header = () => {
           },
           'Contact'
         ),
-        user ? React.createElement(
+        isAuthenticated ? React.createElement(
           React.Fragment,
           null,
           // User Info Section
